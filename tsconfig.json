@@ -34,10 +34,7 @@
       "@adaas/a-utils/global/*": ["src/global/*"],
       "@adaas/a-utils/types/*": ["src/types/*"],
       "@adaas/a-utils/helpers/*": ["src/helpers/*"],
-      "@adaas/a-utils/decorators/*": ["src/decorators/*"],
-      "@adaas/a-utils/managers/*": ["src/managers/*"],
-      "@adaas/a-utils/providers/*": ["src/providers/*"],
-      "@adaas/a-utils/modules/*": ["src/modules/*"]
+      "@adaas/a-utils/decorators/*": ["src/decorators/*"]
     },
     "lib": [
       "dom",
