@@ -4,6 +4,14 @@ export declare class A_CommonHelper {
     static omitArrayProperties<T, S extends string>(array: Array<T>, fields: string[]): Omit<T, S>[];
     static sanitizeHTML(html: string): string;
     /**
+     * Check if a class is inherited from another class
+     *
+     * @param childClass
+     * @param parentClass
+     * @returns
+     */
+    static isInheritedFrom(childClass: any, parentClass: any): boolean;
+    /**
      *  Omit properties from an object or array with nested objects
      *
      * @param input

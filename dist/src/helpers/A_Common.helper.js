@@ -15,6 +15,24 @@ class A_CommonHelper {
         return html.replace(regex, '');
     }
     /**
+     * Check if a class is inherited from another class
+     *
+     * @param childClass
+     * @param parentClass
+     * @returns
+     */
+    static isInheritedFrom(childClass, parentClass) {
+        let current = childClass;
+        // Traverse the prototype chain
+        while (current) {
+            if (current === parentClass) {
+                return true;
+            }
+            current = Object.getPrototypeOf(current);
+        }
+        return false;
+    }
+    /**
      *  Omit properties from an object or array with nested objects
      *
      * @param input
