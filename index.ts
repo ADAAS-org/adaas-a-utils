@@ -13,7 +13,6 @@ export { A_Error } from './src/global/A_Error.class';
 export { A_ServerError } from './src/global/A_ServerError.class';
 
 export { ASEID } from './src/global/ASEID.class';
-export { A_Entity } from './src/global/A_Entity.class';
 
 export { A_ScheduleObject } from './src/global/A_ScheduleObject.class';
 
