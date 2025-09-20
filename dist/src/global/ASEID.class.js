@@ -125,5 +125,5 @@ class ASEID {
     }
 }
 exports.ASEID = ASEID;
-ASEID.regexp = new RegExp(`^[a-z|A-Z|0-9]+@[a-z|A-Z|0-9|-]+:[a-z|A-Z]+:[a-z|A-Z|0-9|-]+(@v[0-9]+|@lts)?$`);
+ASEID.regexp = new RegExp(`^[a-z|A-Z|0-9]+@[a-z|A-Z|0-9|-]+:[a-z|A-Z|0-9|-]+:[a-z|A-Z|0-9|-]+(@v[0-9]+|@lts)?$`);
 //# sourceMappingURL=ASEID.class.js.map
