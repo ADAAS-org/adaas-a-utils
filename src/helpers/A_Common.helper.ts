@@ -106,7 +106,7 @@ export class A_CommonHelper {
         return str
             .replace(/([a-z])([A-Z])/g, '$1_$2')  // Handle lowercase followed by uppercase
             .replace(/[-\s]([A-Z])/g, '_$1')      // Handle non-alphabetical followed by uppercase
-            .replace('-', '_')
+            .replace(/-/g, '_')
             .toUpperCase();
     }
 
