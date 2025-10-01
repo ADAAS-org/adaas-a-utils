@@ -5,7 +5,9 @@ const axios_1 = require("axios");
 const errors_constants_1 = require("../constants/errors.constants");
 class A_Error extends Error {
     constructor(params) {
-        super((params === null || params === void 0 ? void 0 : params.message) || 'Oops... Something went wrong');
+        super(typeof params === 'string'
+            ? params :
+            (params === null || params === void 0 ? void 0 : params.message) || 'Oops... Something went wrong');
         this.identifyErrorType(params);
     }
     get id() {
@@ -13,6 +15,13 @@ class A_Error extends Error {
     }
     identifyErrorType(error) {
         var _a, _b, _c;
+        if (typeof error === 'string') {
+            this.message = error;
+            this.code = errors_constants_1.A_CONSTANTS__ERROR_CODES.UNEXPECTED_ERROR;
+            this.description = 'If you see this error please let us know.';
+            this.link = 'https://support.adaas.org/error/' + this.id;
+            return;
+        }
         if (error.code &&
             error.description &&
             error.serverCode) {

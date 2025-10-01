@@ -5,9 +5,9 @@ export declare class A_Error extends Error {
     description: string;
     originalError?: Error | any;
     link?: string;
-    constructor(params: A_TYPES__Error | Error | AxiosError | any);
+    constructor(params: A_TYPES__Error | Error | AxiosError | string | any);
     get id(): string | undefined;
-    protected identifyErrorType(error: Error | AxiosError | A_TYPES__Error): void;
+    protected identifyErrorType(error: Error | AxiosError | A_TYPES__Error | string | any): void;
     get compilingData(): A_TYPES__Error;
     toJSON(): A_TYPES__Error;
 }

@@ -1,9 +1,10 @@
+import { A_Error } from "../global/A_Error.class";
 import { A_TYPES__DeepPartial } from "../types/A_Common.types";
 
 export class A_CommonHelper {
 
     static resolve() {
-        return new Promise<undefined>((resolve) => resolve(undefined));
+        return new Promise<void>((resolve) => resolve());
     }
 
     static omitArrayProperties<T, S extends string>(array: Array<T>, fields: string[]): Omit<T, S>[] {
@@ -115,8 +116,20 @@ export class A_CommonHelper {
     }
 
 
+    static toPascalCase(str: string): string {
+        const camelCase = this.toCamelCase(str);
+        return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+    }
 
-    static isObject(item: any): boolean {
+    static toKebabCase(str: string): string {
+        return str
+            .replace(/([a-z])([A-Z])/g, '$1-$2')  // Handle lowercase followed by uppercase
+            .replace(/[_\s]([A-Z])/g, '-$1')      // Handle non-alphabetical followed by uppercase
+            .replace(/_/g, '-')
+            .toLowerCase();
+    }
+
+    static isObject(item: unknown): item is Record<string, any> {
         return item !== null && typeof item === 'object' && !Array.isArray(item);
     }
 
@@ -247,6 +260,6 @@ export class A_CommonHelper {
         }
 
         // For any other cases
-        throw new Error('Unable to clone the object. Unsupported type.');
+        throw new A_Error('Unable to clone the object. Unsupported type.');
     }
 }

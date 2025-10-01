@@ -13,11 +13,16 @@ export class A_Error extends Error {
 
 
     constructor(
-        params: A_TYPES__Error | Error | AxiosError | any
+        params: A_TYPES__Error | Error | AxiosError | string | any
     ) {
-        super(params?.message || 'Oops... Something went wrong');
+        super(
+            typeof params === 'string'
+                ? params :
+                params?.message || 'Oops... Something went wrong'
+        );
+
         this.identifyErrorType(params);
-        
+
     }
 
 
@@ -26,7 +31,15 @@ export class A_Error extends Error {
     }
 
 
-    protected identifyErrorType(error: Error | AxiosError | A_TYPES__Error) {
+    protected identifyErrorType(error: Error | AxiosError | A_TYPES__Error | string | any) {
+        if (typeof error === 'string') {
+            this.message = error;
+            this.code = A_CONSTANTS__ERROR_CODES.UNEXPECTED_ERROR;
+            this.description = 'If you see this error please let us know.';
+            this.link = 'https://support.adaas.org/error/' + this.id;
+            return;
+        }
+
 
         if ((error as A_TYPES__ServerError).code &&
             (error as A_TYPES__ServerError).description &&

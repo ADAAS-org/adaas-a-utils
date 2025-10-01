@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.A_CommonHelper = void 0;
+const A_Error_class_1 = require("../global/A_Error.class");
 class A_CommonHelper {
     static resolve() {
-        return new Promise((resolve) => resolve(undefined));
+        return new Promise((resolve) => resolve());
     }
     static omitArrayProperties(array, fields) {
         return array;
@@ -87,6 +88,17 @@ class A_CommonHelper {
     }
     static toCamelCase(str) {
         return str.toLowerCase().replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
+    }
+    static toPascalCase(str) {
+        const camelCase = this.toCamelCase(str);
+        return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+    }
+    static toKebabCase(str) {
+        return str
+            .replace(/([a-z])([A-Z])/g, '$1-$2') // Handle lowercase followed by uppercase
+            .replace(/[_\s]([A-Z])/g, '-$1') // Handle non-alphabetical followed by uppercase
+            .replace(/_/g, '-')
+            .toLowerCase();
     }
     static isObject(item) {
         return item !== null && typeof item === 'object' && !Array.isArray(item);
@@ -195,7 +207,7 @@ class A_CommonHelper {
             return clone;
         }
         // For any other cases
-        throw new Error('Unable to clone the object. Unsupported type.');
+        throw new A_Error_class_1.A_Error('Unable to clone the object. Unsupported type.');
     }
 }
 exports.A_CommonHelper = A_CommonHelper;
