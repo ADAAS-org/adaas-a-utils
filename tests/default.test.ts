@@ -1,4 +1,5 @@
 import { A_CommonHelper } from '@adaas/a-utils/helpers/A_Common.helper';
+import { A_IdentityHelper } from '@adaas/a-utils/helpers/A_ID.helper';
 import { A_ScheduleHelper } from '@adaas/a-utils/helpers/A_Schedule.helper';
 import { A_TYPES__DeepPartial } from '@adaas/a-utils/types/A_Common.types';
 import { config } from 'dotenv';
@@ -147,8 +148,6 @@ describe('CommonHelper Tests', () => {
 
         const merged = A_CommonHelper.deepCloneAndMerge(t2, t);
 
-        console.log('merged: ', merged)
-
         expect(merged.a).toBe('a');
         expect(merged.b).toBe('bb');
         expect(merged.c.d).toBe('ddd');
@@ -156,5 +155,19 @@ describe('CommonHelper Tests', () => {
         expect((merged as any).e).toBe('foo');
         expect((merged as any).some.d).toBe('dd');
         expect(merged.f('names')).toBe('names');
+    });
+    it('should generate and then parse Unique time based IDs', async () => {
+        const id = A_IdentityHelper.generateTimeId();
+        const parts = A_IdentityHelper.parseTimeId(id);
+
+        expect(id).toBeDefined();
+        expect(parts.timestamp).toBeInstanceOf(Date);
+        expect(parts.random).toHaveLength(6);
+
+        // Check that the timestamp is recent (within the last minute)
+        const now = Date.now();
+        const timestamp = parts.timestamp.getTime();
+        expect(timestamp).toBeLessThanOrEqual(now);
+        expect(timestamp).toBeGreaterThan(now - 60000); // within the last minute
     });
 });

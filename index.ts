@@ -5,6 +5,7 @@
 
 // --- Helpers ---
 export { A_CommonHelper } from './src/helpers/A_Common.helper';
+export { A_IdentityHelper } from './src/helpers/A_ID.helper';
 export { A_ScheduleHelper } from './src/helpers/A_Schedule.helper';
 
 

@@ -1,10 +1,12 @@
 "use strict";
 // ====================== EXPORTS ======================
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.A_CONSTANTS__ERROR_CODES = exports.A_Polyfills = exports.A_ScheduleObject = exports.ASEID = exports.A_ServerError = exports.A_Error = exports.A_ScheduleHelper = exports.A_CommonHelper = void 0;
+exports.A_CONSTANTS__ERROR_CODES = exports.A_Polyfills = exports.A_ScheduleObject = exports.ASEID = exports.A_ServerError = exports.A_Error = exports.A_ScheduleHelper = exports.A_IdentityHelper = exports.A_CommonHelper = void 0;
 // --- Helpers ---
 var A_Common_helper_1 = require("./src/helpers/A_Common.helper");
 Object.defineProperty(exports, "A_CommonHelper", { enumerable: true, get: function () { return A_Common_helper_1.A_CommonHelper; } });
+var A_ID_helper_1 = require("./src/helpers/A_ID.helper");
+Object.defineProperty(exports, "A_IdentityHelper", { enumerable: true, get: function () { return A_ID_helper_1.A_IdentityHelper; } });
 var A_Schedule_helper_1 = require("./src/helpers/A_Schedule.helper");
 Object.defineProperty(exports, "A_ScheduleHelper", { enumerable: true, get: function () { return A_Schedule_helper_1.A_ScheduleHelper; } });
 // --- Global ---
