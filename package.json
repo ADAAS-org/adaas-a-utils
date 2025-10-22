@@ -26,7 +26,7 @@
   "scripts": {
     "test": "jest ",
     "start": "nodemon ./tests/log.ts",
-    "publish": "npm run build && git add . && git commit -m \"new version created :: $(cat package.json | grep version | head -1  | awk -F: '{ print $2 }'  | sed 's/[\",]//g')\" && npm version patch && npm publish --access public",
+    "publish": "npm run test && npm run build && git add . && git commit -m \"new version created :: $(cat package.json | grep version | head -1  | awk -F: '{ print $2 }'  | sed 's/[\",]//g')\" && npm version patch && npm publish --access public",
     "preversion": "echo test",
     "version": "echo git add .",
     "postversion": "git push --no-verify && git push --tags --no-verify && echo \"\n======Version Pushed Successfully=====\n\" ",
