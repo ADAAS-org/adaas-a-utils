@@ -26,8 +26,8 @@ export { A_Polyfill } from './src/lib/A-Polyfill/A-Polyfill.component';
 export { A_PolyfillClass } from './src/lib/A-Polyfill/A-Polyfills.class';
 // export * from './src/lib/A-Polyfill/A-Polyfill.types';
 
-
-
+export { A_Logger } from './src/lib/A-Logger/A-Logger.component';
+// export * from './src/lib/A-Logger/A-Logger.types';
 
 
 export { A_Schedule } from './src/lib/A-Schedule/A-Schedule.component'

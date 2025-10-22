@@ -15,6 +15,7 @@ export * from './src/lib/A-Config/A-Config.constants';
 export { A_Memory } from './src/lib/A-Memory/A-Memory.context';
 export { A_Polyfill } from './src/lib/A-Polyfill/A-Polyfill.component';
 export { A_PolyfillClass } from './src/lib/A-Polyfill/A-Polyfills.class';
+export { A_Logger } from './src/lib/A-Logger/A-Logger.component';
 export { A_Schedule } from './src/lib/A-Schedule/A-Schedule.component';
 export * from './src/lib/A-Schedule/A-Schedule.types';
 export { A_ScheduleObject } from './src/lib/A-Schedule/A-ScheduleObject.class';

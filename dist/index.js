@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.A_Deferred = exports.A_ScheduleObject = exports.A_Schedule = exports.A_PolyfillClass = exports.A_Polyfill = exports.A_Memory = exports.FileConfigReader = exports.ENVConfigReader = exports.ConfigReader = exports.A_ConfigError = exports.A_Config = exports.A_ConfigLoader = exports.A_CommandError = exports.A_Command = exports.A_ChannelError = exports.A_Channel = void 0;
+exports.A_Deferred = exports.A_ScheduleObject = exports.A_Schedule = exports.A_Logger = exports.A_PolyfillClass = exports.A_Polyfill = exports.A_Memory = exports.FileConfigReader = exports.ENVConfigReader = exports.ConfigReader = exports.A_ConfigError = exports.A_Config = exports.A_ConfigLoader = exports.A_CommandError = exports.A_Command = exports.A_ChannelError = exports.A_Channel = void 0;
 var A_Channel_component_1 = require("./src/lib/A-Channel/A-Channel.component");
 Object.defineProperty(exports, "A_Channel", { enumerable: true, get: function () { return A_Channel_component_1.A_Channel; } });
 var A_Channel_error_1 = require("./src/lib/A-Channel/A-Channel.error");
@@ -47,6 +47,9 @@ Object.defineProperty(exports, "A_Polyfill", { enumerable: true, get: function (
 var A_Polyfills_class_1 = require("./src/lib/A-Polyfill/A-Polyfills.class");
 Object.defineProperty(exports, "A_PolyfillClass", { enumerable: true, get: function () { return A_Polyfills_class_1.A_PolyfillClass; } });
 // export * from './src/lib/A-Polyfill/A-Polyfill.types';
+var A_Logger_component_1 = require("./src/lib/A-Logger/A-Logger.component");
+Object.defineProperty(exports, "A_Logger", { enumerable: true, get: function () { return A_Logger_component_1.A_Logger; } });
+// export * from './src/lib/A-Logger/A-Logger.types';
 var A_Schedule_component_1 = require("./src/lib/A-Schedule/A-Schedule.component");
 Object.defineProperty(exports, "A_Schedule", { enumerable: true, get: function () { return A_Schedule_component_1.A_Schedule; } });
 __exportStar(require("./src/lib/A-Schedule/A-Schedule.types"), exports);
