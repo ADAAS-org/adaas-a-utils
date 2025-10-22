@@ -24,14 +24,14 @@
     "ext": "ts, js"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest ",
     "start": "nodemon ./tests/log.ts",
     "publish": "npm run build && git add . && git commit -m \"new version created :: $(cat package.json | grep version | head -1  | awk -F: '{ print $2 }'  | sed 's/[\",]//g')\" && npm version patch && npm publish --access public",
     "preversion": "echo test",
     "version": "echo git add .",
     "postversion": "git push --no-verify && git push --tags --no-verify && echo \"\n======Version Pushed Successfully=====\n\" ",
     "echo-version": "echo $npm_package_version",
-    "build": "tsc --declaration --project tsconfig.json && tscpaths -p tsconfig.json -s ./ -o ./dist && rm -r ./dist/tests"
+    "build": "rm -rf ./dist && tsc --declaration --project tsconfig.build.json && tscpaths -p tsconfig.build.json -s ./ -o ./dist"
   },
   "repository": {
     "type": "git",
@@ -49,8 +49,8 @@
   },
   "homepage": "https://github.com/ADAAS-org/adaas-adf-auth#readme",
   "dependencies": {
-    "@types/node": "^20.10.0",
-    "axios": "^1.6.2"
+    "@adaas/a-concept": "^0.1.15",
+    "@types/node": "^20.10.0"
   },
   "devDependencies": {
     "@types/chai": "^4.3.14",

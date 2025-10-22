@@ -31,10 +31,10 @@
     ],
     "paths": {
       "@adaas/a-utils/constants/*": ["src/constants/*"],
-      "@adaas/a-utils/global/*": ["src/global/*"],
+      "@adaas/a-utils/lib/*": ["src/lib/*"],
       "@adaas/a-utils/types/*": ["src/types/*"],
       "@adaas/a-utils/helpers/*": ["src/helpers/*"],
-      "@adaas/a-utils/decorators/*": ["src/decorators/*"]
+      "@adaas/a-utils/utils/*": ["src/utils/*"]
     },
     "lib": [
       "dom",
