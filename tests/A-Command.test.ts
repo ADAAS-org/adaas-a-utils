@@ -53,6 +53,7 @@ describe('A-Command tests', () => {
         expect(deserializedCommand.startedAt?.toISOString()).toBe(command.startedAt?.toISOString());
         expect(deserializedCommand.duration).toBe(command.duration);
     });
+    
     it('Should allow to execute a command with custom logic', async () => {
 
         // 1) create a scope 
