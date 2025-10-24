@@ -25,9 +25,20 @@ const A_Polyfill_component_1 = require("../A-Polyfill/A-Polyfill.component");
 const A_Config_error_1 = require("./A-Config.error");
 const FileConfigReader_component_1 = require("./components/FileConfigReader.component");
 const ENVConfigReader_component_1 = require("./components/ENVConfigReader.component");
+const A_Config_constants_1 = require("./A-Config.constants");
 class A_ConfigLoader extends a_concept_1.A_Container {
     prepare(polyfill) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!this.scope.has(A_Config_context_1.A_Config)) {
+                const newConfig = new A_Config_context_1.A_Config({
+                    variables: [
+                        ...a_concept_1.A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
+                        ...A_Config_constants_1.A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
+                    ],
+                    defaults: {}
+                });
+                this.scope.register(newConfig);
+            }
             const fs = yield polyfill.fs();
             try {
                 switch (true) {
@@ -55,21 +66,12 @@ class A_ConfigLoader extends a_concept_1.A_Container {
             }
         });
     }
-    readVariables(config) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.reader.inject(config);
-        });
-    }
 }
 exports.A_ConfigLoader = A_ConfigLoader;
 __decorate([
-    a_concept_1.A_Concept.Load(),
+    a_concept_1.A_Concept.Load({
+        before: [/.*/]
+    }),
     __param(0, (0, a_concept_1.A_Inject)(A_Polyfill_component_1.A_Polyfill))
 ], A_ConfigLoader.prototype, "prepare", null);
-__decorate([
-    a_concept_1.A_Concept.Load({
-        after: ['A_ConfigLoader.prepare']
-    }),
-    __param(0, (0, a_concept_1.A_Inject)(A_Config_context_1.A_Config))
-], A_ConfigLoader.prototype, "readVariables", null);
 //# sourceMappingURL=A-Config.container.js.map

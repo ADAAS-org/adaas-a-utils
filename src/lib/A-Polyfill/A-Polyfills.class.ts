@@ -1,3 +1,4 @@
+import { IcryptoInterface, Ifspolyfill } from "./A-Polyfill.types";
 
 
 

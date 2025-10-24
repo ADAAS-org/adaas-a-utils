@@ -9,12 +9,12 @@ export declare class A_Polyfill extends A_Component {
      *
      * @returns
      */
-    fs(): Promise<Ifspolyfill>;
+    fs(): Promise<import("./A-Polyfill.types").Ifspolyfill>;
     /**
      * Allows to use the 'crypto' polyfill methods regardless of the environment
      * This method loads the 'crypto' polyfill and returns its instance
      *
      * @returns
      */
-    crypto(): Promise<IcryptoInterface>;
+    crypto(): Promise<import("./A-Polyfill.types").IcryptoInterface>;
 }

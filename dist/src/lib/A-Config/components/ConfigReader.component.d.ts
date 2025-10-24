@@ -1,14 +1,14 @@
-import { A_Component, A_Scope } from "@adaas/a-concept";
+import { A_Component, A_Container, A_Feature } from "@adaas/a-concept";
 import { A_Config } from "../A-Config.context";
 import { A_Polyfill } from "../../A-Polyfill/A-Polyfill.component";
 /**
  * Config Reader
  */
 export declare class ConfigReader extends A_Component {
-    protected scope: A_Scope;
     protected polyfill: A_Polyfill;
-    constructor(scope: A_Scope, polyfill: A_Polyfill);
-    inject(config: A_Config): Promise<void>;
+    constructor(polyfill: A_Polyfill);
+    attachContext(container: A_Container, feature: A_Feature): Promise<void>;
+    initialize(config: A_Config): Promise<void>;
     /**
      * Get the configuration property by Name
      * @param property

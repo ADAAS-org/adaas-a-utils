@@ -1,10 +1,11 @@
-import { A_Concept, A_Container, A_Context, A_Inject, A_ScopeError } from "@adaas/a-concept";
+import { A_Caller, A_Concept, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_Container, A_Context, A_Inject, A_Scope, A_ScopeError } from "@adaas/a-concept";
 import { ConfigReader } from "./components/ConfigReader.component";
 import { A_Config } from "./A-Config.context";
 import { A_Polyfill } from "../A-Polyfill/A-Polyfill.component";
 import { A_ConfigError } from "./A-Config.error";
 import { FileConfigReader } from "./components/FileConfigReader.component";
 import { ENVConfigReader } from "./components/ENVConfigReader.component";
+import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "./A-Config.constants";
 
 
 export class A_ConfigLoader extends A_Container {
@@ -12,10 +13,25 @@ export class A_ConfigLoader extends A_Container {
     private reader!: ConfigReader
 
 
-    @A_Concept.Load()
+    @A_Concept.Load({
+        before: [/.*/]
+    })
     async prepare(
-        @A_Inject(A_Polyfill) polyfill: A_Polyfill,
+        @A_Inject(A_Polyfill) polyfill: A_Polyfill
     ) {
+        if (!this.scope.has(A_Config)) {
+            const newConfig = new A_Config({
+                variables: [
+                    ...A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
+                    ...A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
+                ] as const,
+                defaults: {}
+            });
+
+            this.scope.register(newConfig);
+        }
+
+
         const fs = await polyfill.fs();
 
         try {
@@ -48,16 +64,5 @@ export class A_ConfigLoader extends A_Container {
                 })
             }
         }
-
-    }
-
-
-    @A_Concept.Load({
-        after: ['A_ConfigLoader.prepare']
-    })
-    async readVariables(
-        @A_Inject(A_Config) config: A_Config,
-    ) {
-        await this.reader.inject(config);
     }
 }

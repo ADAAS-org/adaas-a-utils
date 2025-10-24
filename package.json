@@ -26,6 +26,7 @@
   "scripts": {
     "test": "jest ",
     "start": "nodemon ./tests/log.ts",
+    "examples:config": "nodemon ./examples/config.ts",
     "publish": "npm run test && npm run build && git add . && git commit -m \"new version created :: $(cat package.json | grep version | head -1  | awk -F: '{ print $2 }'  | sed 's/[\",]//g')\" && npm version patch && npm publish --access public",
     "preversion": "echo test",
     "version": "echo git add .",
@@ -49,7 +50,7 @@
   },
   "homepage": "https://github.com/ADAAS-org/adaas-adf-auth#readme",
   "dependencies": {
-    "@adaas/a-concept": "^0.1.17"
+    "@adaas/a-concept": "^0.1.22"
   },
   "devDependencies": {
     "@types/chai": "^4.3.14",

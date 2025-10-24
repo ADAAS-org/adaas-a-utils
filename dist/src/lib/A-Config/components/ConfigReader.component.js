@@ -27,12 +27,28 @@ const A_Polyfill_component_1 = require("../../A-Polyfill/A-Polyfill.component");
  * Config Reader
  */
 let ConfigReader = class ConfigReader extends a_concept_1.A_Component {
-    constructor(scope, polyfill) {
+    constructor(polyfill) {
         super();
-        this.scope = scope;
         this.polyfill = polyfill;
     }
-    inject(config) {
+    attachContext(container, feature) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!container.scope.has(A_Config_context_1.A_Config)) {
+                const newConfig = new A_Config_context_1.A_Config({
+                    variables: [
+                        ...a_concept_1.A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
+                        ...A_Config_constants_1.A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
+                    ],
+                    defaults: {}
+                });
+                container.scope.register(newConfig);
+            }
+            const config = container.scope.resolve(A_Config_context_1.A_Config);
+            const rootDir = yield this.getProjectRoot();
+            config.set('A_CONCEPT_ROOT_FOLDER', rootDir);
+        });
+    }
+    initialize(config) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.read([
                 ...config.CONFIG_PROPERTIES,
@@ -40,8 +56,6 @@ let ConfigReader = class ConfigReader extends a_concept_1.A_Component {
                 ...A_Config_constants_1.A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
             ]);
             config.set(data);
-            const rootDir = yield this.getProjectRoot();
-            config.set('A_CONCEPT_ROOT_FOLDER', rootDir);
         });
     }
     /**
@@ -76,10 +90,14 @@ let ConfigReader = class ConfigReader extends a_concept_1.A_Component {
 exports.ConfigReader = ConfigReader;
 __decorate([
     a_concept_1.A_Concept.Load(),
+    __param(0, (0, a_concept_1.A_Inject)(a_concept_1.A_Container)),
+    __param(1, (0, a_concept_1.A_Inject)(a_concept_1.A_Feature))
+], ConfigReader.prototype, "attachContext", null);
+__decorate([
+    a_concept_1.A_Concept.Load(),
     __param(0, (0, a_concept_1.A_Inject)(A_Config_context_1.A_Config))
-], ConfigReader.prototype, "inject", null);
+], ConfigReader.prototype, "initialize", null);
 exports.ConfigReader = ConfigReader = __decorate([
-    __param(0, (0, a_concept_1.A_Inject)(a_concept_1.A_Scope)),
-    __param(1, (0, a_concept_1.A_Inject)(A_Polyfill_component_1.A_Polyfill))
+    __param(0, (0, a_concept_1.A_Inject)(A_Polyfill_component_1.A_Polyfill))
 ], ConfigReader);
 //# sourceMappingURL=ConfigReader.component.js.map

@@ -1,3 +1,4 @@
+import { IcryptoInterface, Ifspolyfill } from "./A-Polyfill.types";
 export declare class A_PolyfillClass {
     private _fs;
     private _crypto;

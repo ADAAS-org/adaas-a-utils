@@ -9,6 +9,7 @@ import { A_Polyfill } from '@adaas/a-utils/lib/A-Polyfill/A-Polyfill.component';
 import { A_ConfigLoader } from '@adaas/a-utils/lib/A-Config/A-Config.container';
 import { ENVConfigReader } from '@adaas/a-utils/lib/A-Config/components/ENVConfigReader.component';
 import { FileConfigReader } from '@adaas/a-utils/lib/A-Config/components/FileConfigReader.component';
+import { A_TYPES__ComponentMetaKey } from '@adaas/a-concept/dist/src/global/A-Component/A-Component.constants';
 
 jest.retryTimes(0);
 
@@ -138,8 +139,6 @@ describe('A-Config tests', () => {
         })
 
         await concept.load();
-
-
 
         expect(config.get('TEST_VAR1')).toBe('env1');
         expect(config.get('TEST_VAR1')).toBe('env1');
