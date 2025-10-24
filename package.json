@@ -50,7 +50,7 @@
   },
   "homepage": "https://github.com/ADAAS-org/adaas-adf-auth#readme",
   "dependencies": {
-    "@adaas/a-concept": "^0.1.22"
+    "@adaas/a-concept": "^0.1.23"
   },
   "devDependencies": {
     "@types/chai": "^4.3.14",
