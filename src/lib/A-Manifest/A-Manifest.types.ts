@@ -58,5 +58,5 @@ export interface A_UTILS_TYPES__ManifestRule {
 export interface A_UTILS_TYPES__ManifestQuery {
     component: A_TYPES__Component_Constructor;
     method: string;
-    target: A_TYPES__Component_Constructor;
+    target: A_UTILS_TYPES__Manifest_AllowedComponents;
 }

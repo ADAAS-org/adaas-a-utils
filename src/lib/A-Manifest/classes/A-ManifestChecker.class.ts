@@ -1,5 +1,6 @@
 import { A_TYPES__Component_Constructor } from "@adaas/a-concept";
 import { A_Manifest } from "../A-Manifest.context";
+import { A_UTILS_TYPES__Manifest_AllowedComponents } from "../A-Manifest.types";
 
 /**
  * Fluent API for checking manifest permissions
@@ -12,7 +13,7 @@ export class A_ManifestChecker {
         private checkExclusion: boolean = false
     ) {}
 
-    for(target: A_TYPES__Component_Constructor): boolean {
+    for(target: A_UTILS_TYPES__Manifest_AllowedComponents): boolean {
         const result = this.manifest.internal_checkAccess({
             component: this.component,
             method: this.method,
