@@ -14,7 +14,7 @@ export class A_ConfigLoader extends A_Container {
 
 
     @A_Concept.Load({
-        before: [/.*/]
+        before: /.*/
     })
     async prepare(
         @A_Inject(A_Polyfill) polyfill: A_Polyfill

@@ -70,7 +70,7 @@ class A_ConfigLoader extends a_concept_1.A_Container {
 exports.A_ConfigLoader = A_ConfigLoader;
 __decorate([
     a_concept_1.A_Concept.Load({
-        before: [/.*/]
+        before: /.*/
     }),
     __param(0, (0, a_concept_1.A_Inject)(A_Polyfill_component_1.A_Polyfill))
 ], A_ConfigLoader.prototype, "prepare", null);
