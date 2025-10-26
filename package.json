@@ -32,7 +32,7 @@
     "version": "echo git add .",
     "postversion": "git push --no-verify && git push --tags --no-verify && echo \"\n======Version Pushed Successfully=====\n\" ",
     "echo-version": "echo $npm_package_version",
-    "build": "rm -rf ./dist && tsc --declaration --project tsconfig.build.json && tscpaths -p tsconfig.build.json -s ./ -o ./dist"
+    "build": "tsup --config tsup.config.ts"
   },
   "repository": {
     "type": "git",
@@ -65,7 +65,9 @@
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "tscpaths": "^0.0.9"
+    "tscpaths": "^0.0.9",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
   },
   "directories": {
     "doc": "docs",

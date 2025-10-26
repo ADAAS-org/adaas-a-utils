@@ -9,7 +9,7 @@ import { A_Polyfill } from '@adaas/a-utils/lib/A-Polyfill/A-Polyfill.component';
 import { A_ConfigLoader } from '@adaas/a-utils/lib/A-Config/A-Config.container';
 import { ENVConfigReader } from '@adaas/a-utils/lib/A-Config/components/ENVConfigReader.component';
 import { FileConfigReader } from '@adaas/a-utils/lib/A-Config/components/FileConfigReader.component';
-import { A_TYPES__ComponentMetaKey } from '@adaas/a-concept/dist/src/global/A-Component/A-Component.constants';
+import { A_Logger } from '@adaas/a-utils/lib/A-Logger/A-Logger.component';
 
 jest.retryTimes(0);
 
@@ -51,7 +51,7 @@ describe('A-Config tests', () => {
         const configLoader = new A_ConfigLoader({
             name: 'test-config-loader',
             fragments: [config],
-            components: [A_Polyfill, FileConfigReader, ENVConfigReader]
+            components: [A_Logger, A_Polyfill, FileConfigReader, ENVConfigReader]
         })
 
         const concept = new A_Concept({
@@ -81,7 +81,7 @@ describe('A-Config tests', () => {
         const configLoader = new A_ConfigLoader({
             name: 'test-config-loader',
             fragments: [config],
-            components: [A_Polyfill, ENVConfigReader]
+            components: [A_Logger, A_Polyfill, ENVConfigReader]
         })
 
         const concept = new A_Concept({
@@ -130,7 +130,7 @@ describe('A-Config tests', () => {
         const configLoader = new A_ConfigLoader({
             name: 'test-config-loader',
             fragments: [config],
-            components: [A_Polyfill, FileConfigReader]
+            components: [A_Logger,A_Polyfill, FileConfigReader]
         })
 
         const concept = new A_Concept({
@@ -163,7 +163,7 @@ describe('A-Config tests', () => {
         const configLoader = new A_ConfigLoader({
             name: 'test-config-loader',
             fragments: [config],
-            components: [A_Polyfill, FileConfigReader]
+            components: [A_Logger,A_Polyfill, FileConfigReader]
         })
 
         const concept = new A_Concept({

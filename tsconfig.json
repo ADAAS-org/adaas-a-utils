@@ -49,7 +49,7 @@
     "tests/**/*", 
     "examples/**/*", 
     "examples/*", 
-    "index.ts"  
+    "src/index.ts"  
   ],
   "exclude": [
     "node_modules/**/*",

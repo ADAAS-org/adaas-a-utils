@@ -5,11 +5,16 @@ import { A_Config } from "../A-Config/A-Config.context";
 
 export class A_Logger extends A_Component {
 
+    protected config?: A_Config<any>
+
     constructor(
         @A_Inject(A_Scope) protected scope: A_Scope,
-        @A_Inject(A_Config) protected config: A_Config
     ) {
         super();
+
+        this.config = this.scope.has(A_Config)
+            ? this.scope.resolve<A_Config<any>>(A_Config)
+            : undefined;
     }
 
     readonly colors = {
@@ -74,9 +79,11 @@ export class A_Logger extends A_Component {
     }
 
     protected get allowedToLog() {
-        return this.config.get('CONFIG_VERBOSE') !== undefined
+        return this.config
+            ? this.config.get('CONFIG_VERBOSE') !== undefined
             && this.config.get('CONFIG_VERBOSE') !== 'false'
             && this.config.get('CONFIG_VERBOSE') !== false
+            : true;
     }
 
 
@@ -111,7 +118,7 @@ export class A_Logger extends A_Component {
     }
 
     error(...args) {
-        if (this.config.get('CONFIG_IGNORE_ERRORS'))
+        if (this.config && this.config.get('CONFIG_IGNORE_ERRORS'))
             return;
 
         return console.log(...this.compile('red', ...args));
