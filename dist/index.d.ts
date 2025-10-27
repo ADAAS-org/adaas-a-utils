@@ -33,7 +33,11 @@ declare enum A_TYPES__CommandMetaKey {
     ABSTRACTIONS = "a-command-abstractions"
 }
 declare enum A_CONSTANTS__A_Command_Status {
+    CREATED = "CREATED",
+    INITIALIZATION = "INITIALIZATION",
     INITIALIZED = "INITIALIZED",
+    COMPILATION = "COMPILATION",
+    COMPILED = "COMPILED",
     IN_PROGRESS = "IN_PROGRESS",
     COMPLETED = "COMPLETED",
     FAILED = "FAILED"
@@ -58,11 +62,11 @@ type A_TYPES__Command_Constructor<T = A_Command> = new (...args: any[]) => T;
 /**
  * Command initialization type
  */
-type A_TYPES__Command_Init = any;
+type A_TYPES__Command_Init = Record<string, any>;
 /**
  * Command serialized type
  */
-type A_TYPES__Command_Serialized<ResultType extends Record<string, any> = Record<string, any>> = {
+type A_TYPES__Command_Serialized<ParamsType extends Record<string, any> = Record<string, any>, ResultType extends Record<string, any> = Record<string, any>> = {
     /**
      * Unique code of the command
      */
@@ -71,6 +75,10 @@ type A_TYPES__Command_Serialized<ResultType extends Record<string, any> = Record
      * Current status of the command
      */
     status: A_CONSTANTS__A_Command_Status;
+    /**
+     * Parameters used to invoke the command
+     */
+    params: ParamsType;
     /**
      * The time when the command was created
      */
@@ -121,7 +129,7 @@ type A_TYPES__CommandMeta = {
     }>;
 };
 
-declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string = A_CONSTANTS__A_Command_Event> extends A_Entity<InvokeType, A_TYPES__Command_Serialized<ResultType>> {
+declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string | A_CONSTANTS__A_Command_Event = A_CONSTANTS__A_Command_Event> extends A_Entity<InvokeType, A_TYPES__Command_Serialized<InvokeType, ResultType>> {
     /**
      * Command Identifier that corresponds to the class name
      */
@@ -195,7 +203,7 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
     /**
      * Command invocation parameters
      */
-    params: InvokeType | A_TYPES__Command_Serialized<ResultType> | string);
+    params: InvokeType | A_TYPES__Command_Serialized<InvokeType, ResultType> | string);
     init(): Promise<void>;
     compile(): Promise<void>;
     /**
@@ -243,13 +251,13 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
      *
      * @param serialized
      */
-    fromJSON(serialized: A_TYPES__Command_Serialized<ResultType>): void;
+    fromJSON(serialized: A_TYPES__Command_Serialized<InvokeType, ResultType>): void;
     /**
      * Converts the Command instance to a plain object
      *
      * @returns
      */
-    toJSON(): A_TYPES__Command_Serialized<ResultType>;
+    toJSON(): A_TYPES__Command_Serialized<InvokeType, ResultType>;
 }
 
 declare class A_CommandError extends A_Error {
@@ -768,6 +776,17 @@ declare class A_Memory<_MemoryType extends Record<string, any> = Record<string, 
      * @param error
      */
     error(error: A_Error): Promise<void>;
+    /**
+     * Retrieves a value from the context memory
+     *
+     * @param key
+     * @returns
+     */
+    get<K extends keyof _MemoryType>(
+    /**
+     * Key to retrieve the value for
+     */
+    key: K): _MemoryType[K] | undefined;
     /**
      * Saves a value in the context memory
      *

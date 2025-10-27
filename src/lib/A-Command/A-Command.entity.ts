@@ -14,8 +14,8 @@ import { A_Memory } from "../A-Memory/A-Memory.context";
 export class A_Command<
     InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init,
     ResultType extends Record<string, any> = Record<string, any>,
-    LifecycleEvents extends string = A_CONSTANTS__A_Command_Event
-> extends A_Entity<InvokeType, A_TYPES__Command_Serialized<ResultType>> {
+    LifecycleEvents extends string | A_CONSTANTS__A_Command_Event = A_CONSTANTS__A_Command_Event
+> extends A_Entity<InvokeType, A_TYPES__Command_Serialized<InvokeType, ResultType>> {
 
     // ====================================================================
     // ================== Static A-Command Information ====================
@@ -136,7 +136,7 @@ export class A_Command<
         /**
          * Command invocation parameters
          */
-        params: InvokeType | A_TYPES__Command_Serialized<ResultType> | string
+        params: InvokeType | A_TYPES__Command_Serialized<InvokeType, ResultType> | string
     ) {
         super(params as any)
     }
@@ -148,21 +148,32 @@ export class A_Command<
 
     // should create a new Task in DB  with basic records
     async init(): Promise<void> {
-        this._status = A_CONSTANTS__A_Command_Status.IN_PROGRESS;
+        //  first check statuis if it passed then - skip
+        if (this._status !== A_CONSTANTS__A_Command_Status.CREATED) {
+            return;
+        }
+
+        this._status = A_CONSTANTS__A_Command_Status.INITIALIZATION;
         this._startTime = new Date();
         if (!this.scope.isInheritedFrom(A_Context.scope(this))) {
             this.scope.inherit(A_Context.scope(this));
         }
 
-
         this.emit('init');
-        return await this.call('init', this.scope);
+        await this.call('init', this.scope);
+        this._status = A_CONSTANTS__A_Command_Status.INITIALIZED;
     }
 
     // Should compile everything before execution
     async compile() {
+        if (this._status !== A_CONSTANTS__A_Command_Status.INITIALIZED) {
+            return;
+        }
+
+        this._status = A_CONSTANTS__A_Command_Status.COMPILATION;
         this.emit('compile');
-        return await this.call('compile', this.scope);
+        await this.call('compile', this.scope);
+        this._status = A_CONSTANTS__A_Command_Status.COMPILED;
     }
 
     /**
@@ -172,8 +183,11 @@ export class A_Command<
         try {
             await this.init();
             await this.compile();
-            this.emit('execute');
-            await this.call('execute', this.scope);
+            
+            if (this._status === A_CONSTANTS__A_Command_Status.COMPILED) {
+                this.emit('execute');
+                await this.call('execute', this.scope);
+            }
             await this.complete();
 
         } catch (error) {
@@ -265,7 +279,7 @@ export class A_Command<
 
         this._params = newEntity;
 
-        this._status = A_CONSTANTS__A_Command_Status.INITIALIZED;
+        this._status = A_CONSTANTS__A_Command_Status.CREATED;
     }
 
 
@@ -277,7 +291,7 @@ export class A_Command<
      * 
      * @param serialized 
      */
-    fromJSON(serialized: A_TYPES__Command_Serialized<ResultType>): void {
+    fromJSON(serialized: A_TYPES__Command_Serialized<InvokeType, ResultType>): void {
         super.fromJSON(serialized);
 
         this._executionScope = new A_Scope();
@@ -303,7 +317,10 @@ export class A_Command<
             });
         }
 
-        this._status = serialized.status || A_CONSTANTS__A_Command_Status.INITIALIZED;
+        this._params = serialized.params
+
+        this._status = serialized.status || A_CONSTANTS__A_Command_Status.CREATED;
+
     }
 
 
@@ -312,11 +329,12 @@ export class A_Command<
      * 
      * @returns 
      */
-    toJSON(): A_TYPES__Command_Serialized<ResultType> {
+    toJSON(): A_TYPES__Command_Serialized<InvokeType, ResultType> {
         return {
             ...super.toJSON(),
             code: this.code,
             status: this._status,
+            params: this._params,
             startedAt: this._startTime ? this._startTime.toISOString() : undefined,
             endedAt: this._endTime ? this._endTime.toISOString() : undefined,
             duration: this.duration,

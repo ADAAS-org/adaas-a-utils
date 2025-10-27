@@ -57,6 +57,21 @@ export class A_Memory<
     }
 
     /**
+     * Retrieves a value from the context memory
+     * 
+     * @param key 
+     * @returns 
+     */
+    get<K extends keyof _MemoryType>(
+        /**
+         * Key to retrieve the value for
+         */
+        key: K
+    ): _MemoryType[K] | undefined {
+        return this._memory.get(key);
+    }
+
+    /**
      * Saves a value in the context memory
      * 
      * @param key 

@@ -59,45 +59,73 @@ const channel = new A_Channel();
 
 ### A-Command
 
-A powerful command execution system that provides structured command patterns with lifecycle management, status tracking, and serialization capabilities.
+A powerful command execution system that provides structured command patterns with lifecycle management, event handling, status tracking, and serialization capabilities.
 
-**Basic Usage:**
+> 📚 **[Complete A-Command Documentation](./src/lib/A-Command/README.md)** - Comprehensive guide with examples, API reference, and advanced usage patterns.
+
+**Quick Start:**
 ```typescript
 import { A_Command } from '@adaas/a-utils';
+import { A_Context } from '@adaas/a-concept';
 
-// Create a command
-const command = new A_Command({});
+// Create and execute a simple command
+const command = new A_Command({ action: 'greet', name: 'World' });
+A_Context.root.register(command);
 
-// Execute the command
 await command.execute();
 
 console.log(command.status); // 'COMPLETED'
 console.log(command.duration); // Execution time in ms
 ```
 
-**Advanced Usage:**
+**Advanced Example:**
 ```typescript
-// Command with custom logic
-class CustomCommand extends A_Command {
-    async execute() {
-        // Your custom command logic here
-        return await super.execute();
+// Typed command with custom logic
+interface UserCreateParams {
+    name: string;
+    email: string;
+}
+
+interface UserCreateResult {
+    userId: string;
+    createdAt: string;
+}
+
+class CreateUserCommand extends A_Command<UserCreateParams, UserCreateResult> {}
+
+// Custom execution logic using components
+class UserProcessor extends A_Component {
+    @A_Feature.Extend({ scope: [CreateUserCommand] })
+    async execute(@A_Inject(A_Memory) memory: A_Memory<UserCreateResult>) {
+        // Your business logic here
+        await memory.set('userId', 'user-123');
+        await memory.set('createdAt', new Date().toISOString());
     }
 }
 
-// Serialization
-const command = new A_Command({});
-await command.execute();
+// Execute with event handling
+const command = new CreateUserCommand({
+    name: 'John Doe',
+    email: 'john@example.com'
+});
 
-const serialized = command.toJSON();
-const deserializedCommand = new A_Command(serialized);
+command.on('complete', (cmd) => {
+    console.log('User created:', cmd.result);
+});
+
+A_Context.root.register(UserProcessor);
+A_Context.root.register(command);
+await command.execute();
 ```
 
-**Features:**
-- Command execution with lifecycle management
-- Status tracking (INITIALIZED, PROCESSING, COMPLETED, FAILED)
-- Built-in timing and duration tracking
-- JSON serialization/deserialization
+**Key Features:**
+- ✅ **Complete Lifecycle Management** - Automatic progression through init → compile → execute → complete/fail
+- ✅ **Event-Driven Architecture** - Subscribe to lifecycle events and custom events  
+- ✅ **State Persistence** - Full serialization/deserialization support
+- ✅ **Type Safety** - Full TypeScript support with generic types
+- ✅ **Error Handling** - Comprehensive error capture and management
+- ✅ **Execution Tracking** - Built-in timing and duration tracking
+- ✅ **Component Integration** - Extensible through A-Component architecture
 - Scope integration with dependency injection
 - Memory management integration
 
@@ -284,13 +312,15 @@ const manifest = new A_Manifest([
 
 ### A-Memory
 
-A type-safe memory management system for storing intermediate values and tracking errors during complex operations.
+A type-safe memory management system for storing intermediate values and tracking errors during complex operations. Fully integrated with A-Command for state management.
+
+> 💡 **Note:** A-Memory is automatically used by A-Command for result and error storage. See [A-Command Documentation](./src/lib/A-Command/README.md) for integration examples.
 
 **Basic Usage:**
 ```typescript
 import { A_Memory } from '@adaas/a-utils';
 
-// Create memory instance
+// Create typed memory instance
 const memory = new A_Memory<{
     userId: string;
     userData: any;
@@ -299,16 +329,19 @@ const memory = new A_Memory<{
     userId: '12345'
 });
 
-// Store values
-memory.set('userData', { name: 'John', email: 'john@example.com' });
-memory.set('processedData', processUserData(memory.get('userData')));
+// Store and retrieve values
+await memory.set('userData', { name: 'John', email: 'john@example.com' });
+await memory.set('processedData', processUserData(memory.get('userData')));
+
+// Access values with type safety
+const userId = memory.get('userId'); // string | undefined
+const userData = memory.get('userData'); // any | undefined
 
 // Check prerequisites
 const hasRequired = await memory.verifyPrerequisites(['userId', 'userData']);
 console.log(hasRequired); // true
 
-// Access values
-const userId = memory.get('userId');
+// Serialize all data
 const allData = memory.toJSON();
 ```
 
@@ -318,18 +351,40 @@ import { A_Error } from '@adaas/a-concept';
 
 const memory = new A_Memory();
 
-// Errors are automatically tracked
+// Add errors during processing
 try {
     // Some operation that might fail
-    throw new A_Error('Something went wrong');
+    throw new Error('Something went wrong');
 } catch (error) {
-    memory.addError(error);
+    await memory.error(new A_Error({ 
+        title: 'Operation Failed',
+        message: error.message 
+    }));
 }
 
 // Check for errors
 if (memory.Errors) {
-    console.log('Errors occurred:', memory.Errors);
+    console.log('Errors occurred:', Array.from(memory.Errors));
 }
+```
+
+**Integration with A-Command:**
+```typescript
+// A-Memory is automatically used by A-Command
+class DataProcessor extends A_Component {
+    @A_Feature.Extend({ scope: [MyCommand] })
+    async execute(@A_Inject(A_Memory) memory: A_Memory<ResultType>) {
+        // Store intermediate results
+        await memory.set('step1', 'completed');
+        await memory.set('step2', { data: 'processed' });
+        
+        // Access stored values
+        const step1Result = memory.get('step1');
+        
+        // Results automatically become command.result
+    }
+}
+```
 ```
 
 **Features:**

@@ -90,7 +90,11 @@ var A_TYPES__CommandMetaKey = /* @__PURE__ */ ((A_TYPES__CommandMetaKey2) => {
   return A_TYPES__CommandMetaKey2;
 })(A_TYPES__CommandMetaKey || {});
 var A_CONSTANTS__A_Command_Status = /* @__PURE__ */ ((A_CONSTANTS__A_Command_Status2) => {
+  A_CONSTANTS__A_Command_Status2["CREATED"] = "CREATED";
+  A_CONSTANTS__A_Command_Status2["INITIALIZATION"] = "INITIALIZATION";
   A_CONSTANTS__A_Command_Status2["INITIALIZED"] = "INITIALIZED";
+  A_CONSTANTS__A_Command_Status2["COMPILATION"] = "COMPILATION";
+  A_CONSTANTS__A_Command_Status2["COMPILED"] = "COMPILED";
   A_CONSTANTS__A_Command_Status2["IN_PROGRESS"] = "IN_PROGRESS";
   A_CONSTANTS__A_Command_Status2["COMPLETED"] = "COMPLETED";
   A_CONSTANTS__A_Command_Status2["FAILED"] = "FAILED";
@@ -134,6 +138,15 @@ var A_Memory = class extends A_Fragment {
    */
   async error(error) {
     this._errors.add(error);
+  }
+  /**
+   * Retrieves a value from the context memory
+   * 
+   * @param key 
+   * @returns 
+   */
+  get(key) {
+    return this._memory.get(key);
   }
   /**
    * Saves a value in the context memory
@@ -273,18 +286,27 @@ var A_Command = class extends A_Entity {
   // --------------------------------------------------------------------------
   // should create a new Task in DB  with basic records
   async init() {
-    this._status = "IN_PROGRESS" /* IN_PROGRESS */;
+    if (this._status !== "CREATED" /* CREATED */) {
+      return;
+    }
+    this._status = "INITIALIZATION" /* INITIALIZATION */;
     this._startTime = /* @__PURE__ */ new Date();
     if (!this.scope.isInheritedFrom(A_Context.scope(this))) {
       this.scope.inherit(A_Context.scope(this));
     }
     this.emit("init");
-    return await this.call("init", this.scope);
+    await this.call("init", this.scope);
+    this._status = "INITIALIZED" /* INITIALIZED */;
   }
   // Should compile everything before execution
   async compile() {
+    if (this._status !== "INITIALIZED" /* INITIALIZED */) {
+      return;
+    }
+    this._status = "COMPILATION" /* COMPILATION */;
     this.emit("compile");
-    return await this.call("compile", this.scope);
+    await this.call("compile", this.scope);
+    this._status = "COMPILED" /* COMPILED */;
   }
   /**
    * Executes the command logic.
@@ -293,8 +315,10 @@ var A_Command = class extends A_Entity {
     try {
       await this.init();
       await this.compile();
-      this.emit("execute");
-      await this.call("execute", this.scope);
+      if (this._status === "COMPILED" /* COMPILED */) {
+        this.emit("execute");
+        await this.call("execute", this.scope);
+      }
       await this.complete();
     } catch (error) {
       await this.fail();
@@ -369,7 +393,7 @@ var A_Command = class extends A_Entity {
     this._executionScope = new A_Scope();
     this._executionScope.register(new A_Memory());
     this._params = newEntity;
-    this._status = "INITIALIZED" /* INITIALIZED */;
+    this._status = "CREATED" /* CREATED */;
   }
   /**
    * Allows to convert serialized data to Command instance
@@ -395,7 +419,8 @@ var A_Command = class extends A_Entity {
         memory.error(new A_Error(err));
       });
     }
-    this._status = serialized.status || "INITIALIZED" /* INITIALIZED */;
+    this._params = serialized.params;
+    this._status = serialized.status || "CREATED" /* CREATED */;
   }
   /**
    * Converts the Command instance to a plain object
@@ -407,6 +432,7 @@ var A_Command = class extends A_Entity {
       ...super.toJSON(),
       code: this.code,
       status: this._status,
+      params: this._params,
       startedAt: this._startTime ? this._startTime.toISOString() : void 0,
       endedAt: this._endTime ? this._endTime.toISOString() : void 0,
       duration: this.duration,

@@ -15,11 +15,12 @@ export type A_TYPES__Command_Constructor<T = A_Command> = new (...args: any[]) =
 /**
  * Command initialization type
  */
-export type A_TYPES__Command_Init = any;
+export type A_TYPES__Command_Init = Record<string, any>;
 /**
  * Command serialized type
  */
 export type A_TYPES__Command_Serialized<
+    ParamsType extends Record<string, any> = Record<string, any>,
     ResultType extends Record<string, any> = Record<string, any>
 > = {
     /**
@@ -30,6 +31,10 @@ export type A_TYPES__Command_Serialized<
      * Current status of the command
      */
     status: A_CONSTANTS__A_Command_Status;
+    /**
+     * Parameters used to invoke the command
+     */
+    params: ParamsType;
     // --------------------------------------------------
     /**
      * The time when the command was created
