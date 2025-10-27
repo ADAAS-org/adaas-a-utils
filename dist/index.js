@@ -188,6 +188,9 @@ var A_Memory = class extends aConcept.A_Fragment {
     return obj;
   }
 };
+var A_CommandError = class extends aConcept.A_Error {
+};
+A_CommandError.CommandScopeBindingError = "A-Command Scope Binding Error";
 
 // src/lib/A-Command/A-Command.entity.ts
 var A_Command = class extends aConcept.A_Entity {
@@ -293,9 +296,7 @@ var A_Command = class extends aConcept.A_Entity {
     }
     this._status = "INITIALIZATION" /* INITIALIZATION */;
     this._startTime = /* @__PURE__ */ new Date();
-    if (!this.scope.isInheritedFrom(aConcept.A_Context.scope(this))) {
-      this.scope.inherit(aConcept.A_Context.scope(this));
-    }
+    this.checkScopeInheritance();
     this.emit("init");
     await this.call("init", this.scope);
     this._status = "INITIALIZED" /* INITIALIZED */;
@@ -305,22 +306,34 @@ var A_Command = class extends aConcept.A_Entity {
     if (this._status !== "INITIALIZED" /* INITIALIZED */) {
       return;
     }
+    this.checkScopeInheritance();
     this._status = "COMPILATION" /* COMPILATION */;
     this.emit("compile");
     await this.call("compile", this.scope);
     this._status = "COMPILED" /* COMPILED */;
   }
   /**
+   * Processes the command execution
+   * 
+   * @returns 
+   */
+  async process() {
+    if (this._status !== "COMPILED" /* COMPILED */)
+      return;
+    this._status = "IN_PROGRESS" /* IN_PROGRESS */;
+    this.checkScopeInheritance();
+    this.emit("execute");
+    await this.call("execute", this.scope);
+  }
+  /**
    * Executes the command logic.
    */
   async execute() {
+    this.checkScopeInheritance();
     try {
       await this.init();
       await this.compile();
-      if (this._status === "COMPILED" /* COMPILED */) {
-        this.emit("execute");
-        await this.call("execute", this.scope);
-      }
+      await this.process();
       await this.complete();
     } catch (error) {
       await this.fail();
@@ -330,6 +343,7 @@ var A_Command = class extends aConcept.A_Entity {
    * Marks the command as completed
    */
   async complete() {
+    this.checkScopeInheritance();
     this._status = "COMPLETED" /* COMPLETED */;
     this._endTime = /* @__PURE__ */ new Date();
     this._result = this.scope.resolve(A_Memory).toJSON();
@@ -340,6 +354,7 @@ var A_Command = class extends aConcept.A_Entity {
    * Marks the command as failed
    */
   async fail() {
+    this.checkScopeInheritance();
     this._status = "FAILED" /* FAILED */;
     this._endTime = /* @__PURE__ */ new Date();
     this._errors = this.scope.resolve(A_Memory).Errors;
@@ -442,8 +457,21 @@ var A_Command = class extends aConcept.A_Entity {
       errors: this.errors ? Array.from(this.errors).map((err) => err.toJSON()) : void 0
     };
   }
-};
-var A_CommandError = class extends aConcept.A_Error {
+  checkScopeInheritance() {
+    let attachedScope;
+    try {
+      attachedScope = aConcept.A_Context.scope(this);
+    } catch (error) {
+      throw new A_CommandError({
+        title: A_CommandError.CommandScopeBindingError,
+        description: `Command ${this.code} is not bound to any context scope. Ensure the command is properly registered within a context before execution.`,
+        originalError: error
+      });
+    }
+    if (!this.scope.isInheritedFrom(aConcept.A_Context.scope(this))) {
+      this.scope.inherit(aConcept.A_Context.scope(this));
+    }
+  }
 };
 
 // src/lib/A-Config/A-Config.constants.ts

@@ -207,6 +207,12 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
     init(): Promise<void>;
     compile(): Promise<void>;
     /**
+     * Processes the command execution
+     *
+     * @returns
+     */
+    process(): Promise<void>;
+    /**
      * Executes the command logic.
      */
     execute(): Promise<any>;
@@ -258,9 +264,11 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
      * @returns
      */
     toJSON(): A_TYPES__Command_Serialized<InvokeType, ResultType>;
+    protected checkScopeInheritance(): void;
 }
 
 declare class A_CommandError extends A_Error {
+    static readonly CommandScopeBindingError = "A-Command Scope Binding Error";
 }
 
 interface Ifspolyfill {
