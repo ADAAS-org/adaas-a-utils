@@ -1,4 +1,4 @@
-import { A_Feature, A_Inject, A_Scope, A_Concept, A_Container, A_Error, A_Component, A_Fragment, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_CommonHelper, A_FormatterHelper, A_Context, A_Entity, A_ScopeError, A_TypeGuards } from '@adaas/a-concept';
+import { A_Feature, A_Inject, A_Scope, A_Concept, A_Container, A_Error, A_TypeGuards, A_Component, A_Fragment, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_CommonHelper, A_FormatterHelper, A_Context, A_IdentityHelper, A_Entity, A_ScopeError } from '@adaas/a-concept';
 
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -11,27 +11,149 @@ var __decorateClass = (decorators, target, key, kind) => {
   return result;
 };
 var __decorateParam = (index, decorator) => (target, key) => decorator(target, key, index);
-var A_ChannelError = class extends A_Error {
+var A_ChannelRequestContext = class extends A_Fragment {
+  constructor(params = {}) {
+    super();
+    this._errors = /* @__PURE__ */ new Set();
+    this._status = "PENDING" /* PENDING */;
+    this._params = params;
+  }
+  /**
+   * Returns the status of the request
+   */
+  get status() {
+    return this._status;
+  }
+  /**
+   * Returns the parameters of the request
+   */
+  get failed() {
+    return this._errors.size > 0;
+  }
+  /**
+   * Returns the Params of the Request
+   */
+  get params() {
+    return this._params;
+  }
+  /**
+   * Returns the Result of the Request
+   */
+  get data() {
+    return this._result;
+  }
+  get errors() {
+    return this._errors.size > 0 ? this._errors : void 0;
+  }
+  // ==========================================================
+  // ==================== Mutations ===========================
+  // ==========================================================
+  /**
+   * Adds an error to the context
+   * 
+   * @param error 
+   */
+  fail(error) {
+    this._status = "FAILED" /* FAILED */;
+    this._errors.add(error);
+  }
+  /**
+   * Sets the result of the request
+   * 
+   * @param result 
+   */
+  succeed(result) {
+    this._status = "SUCCESS" /* SUCCESS */;
+    this._result = result;
+  }
+  /**
+   * Serializes the context to a JSON object
+   * 
+   * @returns 
+   */
+  toJSON() {
+    return {
+      params: this._params,
+      result: this._result,
+      status: this._status,
+      errors: this.errors ? Array.from(this._errors).map((err) => err.toString()) : void 0
+    };
+  }
 };
+
+// src/lib/A-Channel/A-Channel.error.ts
+var A_ChannelError = class extends A_Error {
+  /**
+   * Channel Error allows to keep track of errors within a channel if something goes wrong
+   * 
+   * 
+   * @param originalError 
+   * @param context 
+   */
+  constructor(originalError, context) {
+    if (A_TypeGuards.isString(context))
+      super(originalError, context);
+    else
+      super(originalError);
+    if (context instanceof A_ChannelRequestContext)
+      this._context = context;
+  }
+  /***
+   * Returns Context of the error
+   */
+  get context() {
+    return this._context;
+  }
+};
+// ==========================================================
+// ==================== Error Types =========================
+// ==========================================================
 A_ChannelError.MethodNotImplemented = "A-Channel Method Not Implemented";
 
 // src/lib/A-Channel/A-Channel.component.ts
 var A_Channel = class extends A_Component {
+  /**
+   * Creates a new A_Channel instance.
+   * 
+   * The channel must be registered with A_Context before use:
+   * ```typescript
+   * const channel = new A_Channel();
+   * A_Context.root.register(channel);
+   * ```
+   */
   constructor() {
-    super(...arguments);
+    super();
     /**
-     * Indicates whether the channel is processing requests
+     * Indicates whether the channel is currently processing requests.
+     * This flag is managed automatically during request/send operations.
+     * 
+     * @readonly
      */
     this._processing = false;
+    /**
+     * Internal cache storage for channel-specific data.
+     * Can be used by custom implementations for caching responses,
+     * connection pools, or other channel-specific state.
+     * 
+     * @protected
+     */
+    this._cache = /* @__PURE__ */ new Map();
   }
   /**
-    * Indicates whether the channel is processing requests
-    */
+   * Indicates whether the channel is currently processing requests.
+   * 
+   * @returns {boolean} True if channel is processing, false otherwise
+   */
   get processing() {
     return this._processing;
   }
   /**
-   * Indicates whether the channel is connected
+   * Promise that resolves when the channel is fully initialized.
+   * 
+   * Automatically calls the onConnect lifecycle hook if not already called.
+   * This ensures the channel is ready for communication operations.
+   * 
+   * @returns {Promise<void>} Promise that resolves when initialization is complete
    */
   get initialize() {
     if (!this._initialized) {
@@ -39,48 +161,228 @@ var A_Channel = class extends A_Component {
     }
     return this._initialized;
   }
+  async onConnect(...args) {
+  }
+  async onDisconnect(...args) {
+  }
+  async onBeforeRequest(...args) {
+  }
+  async onRequest(...args) {
+  }
+  async onAfterRequest(...args) {
+  }
+  async onError(...args) {
+  }
+  async onSend(...args) {
+  }
+  // ==========================================================
+  // ================= Public API Methods ===================
+  // ==========================================================
   /**
-   * Initializes the channel before use
+   * Initializes the channel by calling the onConnect lifecycle hook.
+   * 
+   * This method is called automatically when accessing the `initialize` property.
+   * You can also call it manually if needed.
+   * 
+   * @returns {Promise<void>} Promise that resolves when connection is established
    */
   async connect() {
-    throw new A_ChannelError(
-      A_ChannelError.MethodNotImplemented,
-      `The connect method is not implemented in ${this.constructor.name} channel. This method is required to initialize the channel before use. So please implement it in the derived class.`
-    );
+    await this.call("onConnect" /* onConnect */);
   }
   /**
-   * Allows to send a request through the channel
-   *
-   * @param req - The request parameters
-   * @returns The response from the channel
+   * Disconnects the channel by calling the onDisconnect lifecycle hook.
+   * 
+   * Use this method to properly cleanup resources when the channel is no longer needed.
+   * 
+   * @returns {Promise<void>} Promise that resolves when cleanup is complete
+   */
+  async disconnect() {
+    await this.call("onDisconnect" /* onDisconnect */);
+  }
+  /**
+   * Sends a request and waits for a response (Request/Response pattern).
+   * 
+   * This method follows the complete request lifecycle:
+   * 1. Ensures channel is initialized
+   * 2. Creates request scope and context
+   * 3. Calls onBeforeRequest hook
+   * 4. Calls onRequest hook (main processing)
+   * 5. Calls onAfterRequest hook
+   * 6. Returns the response context
+   * 
+   * If any step fails, the onError hook is called and the error is captured
+   * in the returned context.
+   * 
+   * @template _ParamsType The type of request parameters
+   * @template _ResultType The type of response data
+   * @param params The request parameters
+   * @returns {Promise<A_ChannelRequestContext<_ParamsType, _ResultType>>} Request context with response
+   * 
+   * @example
+   * ```typescript
+   * // Basic usage
+   * const response = await channel.request({ action: 'getData', id: 123 });
+   * 
+   * // Typed usage
+   * interface UserRequest { userId: string; }
+   * interface UserResponse { name: string; email: string; }
+   * 
+   * const userResponse = await channel.request<UserRequest, UserResponse>({
+   *     userId: 'user-123'
+   * });
+   * 
+   * if (!userResponse.failed) {
+   *     console.log('User:', userResponse.data.name);
+   * }
+   * ```
    */
   async request(params) {
-    throw new A_ChannelError(
-      A_ChannelError.MethodNotImplemented,
-      `The request method is not implemented in ${this.constructor.name} channel.`
-    );
+    await this.initialize;
+    this._processing = true;
+    const requestScope = new A_Scope({
+      name: `a-channel@scope:request:${A_IdentityHelper.generateTimeId()}`
+    });
+    const context = new A_ChannelRequestContext(params);
+    try {
+      requestScope.inherit(A_Context.scope(this));
+      requestScope.register(context);
+      await this.call("onBeforeRequest" /* onBeforeRequest */, requestScope);
+      await this.call("onRequest" /* onRequest */, requestScope);
+      await this.call("onAfterRequest" /* onAfterRequest */, requestScope);
+      this._processing = false;
+      return context;
+    } catch (error) {
+      this._processing = false;
+      const channelError = new A_ChannelError(error);
+      context.fail(channelError);
+      await this.call("onError" /* onError */, requestScope);
+      return context;
+    }
   }
   /**
-   * Uses for Fire-and-Forget messaging through the channel
+   * Sends a fire-and-forget message (Send pattern).
    * 
-   * @param message - can be of any type depending on the channel implementation
+   * This method is used for one-way communication where no response is expected:
+   * - Event broadcasting
+   * - Notification sending
+   * - Message queuing
+   * - Logging operations
+   * 
+   * The method follows this lifecycle:
+   * 1. Ensures channel is initialized
+   * 2. Creates send scope and context
+   * 3. Calls onSend hook
+   * 4. Completes without returning data
+   * 
+   * If the operation fails, the onError hook is called but no error is thrown
+   * to the caller (fire-and-forget semantics).
+   * 
+   * @template _ParamsType The type of message parameters
+   * @param message The message to send
+   * @returns {Promise<void>} Promise that resolves when send is complete
+   * 
+   * @example
+   * ```typescript
+   * // Send notification
+   * await channel.send({
+   *     type: 'user.login',
+   *     userId: 'user-123',
+   *     timestamp: new Date().toISOString()
+   * });
+   * 
+   * // Send to message queue
+   * await channel.send({
+   *     queue: 'email-queue',
+   *     payload: {
+   *         to: 'user@example.com',
+   *         subject: 'Welcome!',
+   *         body: 'Welcome to our service!'
+   *     }
+   * });
+   * ```
    */
   async send(message) {
-    throw new A_ChannelError(
-      A_ChannelError.MethodNotImplemented,
-      `The send method is not implemented in ${this.constructor.name} channel.`
-    );
+    await this.initialize;
+    this._processing = true;
+    const requestScope = new A_Scope({
+      name: `a-channel@scope:send:${A_IdentityHelper.generateTimeId()}`
+    });
+    const context = new A_ChannelRequestContext(message);
+    try {
+      requestScope.inherit(A_Context.scope(this));
+      requestScope.register(context);
+      await this.call("onSend" /* onSend */, requestScope);
+      this._processing = false;
+    } catch (error) {
+      this._processing = false;
+      const channelError = new A_ChannelError(error);
+      context.fail(channelError);
+      await this.call("onError" /* onError */, requestScope);
+    }
+  }
+  /**
+   * @deprecated This method is deprecated and will be removed in future versions.
+   * Use request() or send() methods instead depending on your communication pattern.
+   * 
+   * For request/response pattern: Use request()
+   * For fire-and-forget pattern: Use send()
+   * For consumer patterns: Implement custom consumer logic using request() in a loop
+   */
+  async consume() {
+    await this.initialize;
+    this._processing = true;
+    const requestScope = new A_Scope({ name: `a-channel@scope:consume:${A_IdentityHelper.generateTimeId()}` });
+    const context = new A_ChannelRequestContext();
+    try {
+      requestScope.inherit(A_Context.scope(this));
+      requestScope.register(context);
+      await this.call("onConsume" /* onConsume */, requestScope);
+      this._processing = false;
+      return context;
+    } catch (error) {
+      this._processing = false;
+      const channelError = new A_ChannelError(error);
+      context.fail(channelError);
+      await this.call("onError" /* onError */, requestScope);
+      return context;
+    }
   }
 };
 __decorateClass([
-  A_Feature.Define()
-], A_Channel.prototype, "connect", 1);
+  A_Feature.Extend({
+    name: "onConnect" /* onConnect */
+  })
+], A_Channel.prototype, "onConnect", 1);
 __decorateClass([
-  A_Feature.Define()
-], A_Channel.prototype, "request", 1);
+  A_Feature.Extend({
+    name: "onDisconnect" /* onDisconnect */
+  })
+], A_Channel.prototype, "onDisconnect", 1);
 __decorateClass([
-  A_Feature.Define()
-], A_Channel.prototype, "send", 1);
+  A_Feature.Extend({
+    name: "onBeforeRequest" /* onBeforeRequest */
+  })
+], A_Channel.prototype, "onBeforeRequest", 1);
+__decorateClass([
+  A_Feature.Extend({
+    name: "onRequest" /* onRequest */
+  })
+], A_Channel.prototype, "onRequest", 1);
+__decorateClass([
+  A_Feature.Extend({
+    name: "onAfterRequest" /* onAfterRequest */
+  })
+], A_Channel.prototype, "onAfterRequest", 1);
+__decorateClass([
+  A_Feature.Extend({
+    name: "onError" /* onError */
+  })
+], A_Channel.prototype, "onError", 1);
+__decorateClass([
+  A_Feature.Extend({
+    name: "onSend" /* onSend */
+  })
+], A_Channel.prototype, "onSend", 1);
 
 // src/lib/A-Command/A-Command.constants.ts
 var A_TYPES__CommandMetaKey = /* @__PURE__ */ ((A_TYPES__CommandMetaKey2) => {
