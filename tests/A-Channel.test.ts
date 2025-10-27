@@ -2,7 +2,7 @@ import './jest.setup';
 import { A_Context, A_Component, A_Feature, A_Inject } from '@adaas/a-concept';
 import { A_Channel } from '@adaas/a-utils/lib/A-Channel/A-Channel.component';
 import { A_ChannelFeatures } from '@adaas/a-utils/lib/A-Channel/A-Channel.constants';
-import { A_ChannelRequestContext } from '@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context';
+import { A_ChannelRequest } from '@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context';
 import { A_ChannelError } from '@adaas/a-utils/lib/A-Channel/A-Channel.error';
 
 jest.retryTimes(0);
@@ -97,7 +97,7 @@ describe('A-Channel tests', () => {
             const params = { action: 'test', data: 'hello' };
             const context = await channel.request(params);
 
-            expect(context).toBeInstanceOf(A_ChannelRequestContext);
+            expect(context).toBeInstanceOf(A_ChannelRequest);
             expect(context.params).toEqual(params);
             expect(channel.processing).toBe(false); // Should reset after processing
         });
@@ -110,7 +110,7 @@ describe('A-Channel tests', () => {
             class RequestProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [TestChannel] })
                 async [A_ChannelFeatures.onBeforeRequest](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     processingOrder.push('before');
                     expect(context.params.action).toBe('test');
@@ -118,7 +118,7 @@ describe('A-Channel tests', () => {
 
                 @A_Feature.Extend({ scope: [TestChannel] })
                 async [A_ChannelFeatures.onRequest](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     processingOrder.push('during');
                     // Simulate processing and setting result
@@ -127,7 +127,7 @@ describe('A-Channel tests', () => {
 
                 @A_Feature.Extend({ scope: [TestChannel] })
                 async [A_ChannelFeatures.onAfterRequest](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     processingOrder.push('after');
                     expect(context.data).toBeDefined();
@@ -159,7 +159,7 @@ describe('A-Channel tests', () => {
 
                 @A_Feature.Extend({ scope: [ErrorChannel] })
                 async [A_ChannelFeatures.onError](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     errorCalls.push('error-handled');
                     expect(context.failed).toBe(true);
@@ -196,7 +196,7 @@ describe('A-Channel tests', () => {
             class TypedProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [TypedChannel] })
                 async [A_ChannelFeatures.onRequest](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<TestParams, TestResult>
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest<TestParams, TestResult>
                 ) {
                     const { userId, action } = context.params;
                     (context as any)._result = {
@@ -243,7 +243,7 @@ describe('A-Channel tests', () => {
             class SendProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [SendChannel] })
                 async [A_ChannelFeatures.onSend](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     sentMessages.push(context.params);
                 }
@@ -278,7 +278,7 @@ describe('A-Channel tests', () => {
 
                 @A_Feature.Extend({ scope: [ErrorSendChannel] })
                 async [A_ChannelFeatures.onError](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     errorCalls.push('send-error-handled');
                     expect(context.failed).toBe(true);
@@ -316,7 +316,7 @@ describe('A-Channel tests', () => {
             class MultiErrorProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [MultiErrorChannel] })
                 async [A_ChannelFeatures.onRequest](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     const errorType = context.params.errorType;
                     switch (errorType) {
@@ -333,7 +333,7 @@ describe('A-Channel tests', () => {
 
                 @A_Feature.Extend({ scope: [MultiErrorChannel] })
                 async [A_ChannelFeatures.onError](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     errorTypes.push(context.params.errorType);
                 }
@@ -405,7 +405,7 @@ describe('A-Channel tests', () => {
             class HttpProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [HttpChannel] })
                 async [A_ChannelFeatures.onRequest](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     httpCalls.push(`HTTP: ${context.params.method} ${context.params.url}`);
                 }
@@ -414,7 +414,7 @@ describe('A-Channel tests', () => {
             class WebSocketProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [WebSocketChannel] })
                 async [A_ChannelFeatures.onSend](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     wsCalls.push(`WS: ${context.params.message}`);
                 }
@@ -446,7 +446,7 @@ describe('A-Channel tests', () => {
             class ConcurrentProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [ConcurrentChannel] })
                 async [A_ChannelFeatures.onRequest](
-                    @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     const delay = context.params.delay || 0;
                     await new Promise(resolve => setTimeout(resolve, delay));

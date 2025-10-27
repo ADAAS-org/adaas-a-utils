@@ -1,6 +1,58 @@
 import { A_Fragment, A_Error, A_Component, A_TYPES__Error_Serialized, A_TYPES__Entity_Serialized, A_Meta, A_TYPES__FeatureExtendDecoratorMeta, A_TYPES__FeatureDefineDecoratorMeta, A_Entity, A_Scope, A_TYPES__ConceptENVVariables, A_TYPES__Fragment_Constructor, A_Container, A_Feature, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from '@adaas/a-concept';
 import { A_TYPES__Container_Constructor } from '@adaas/a-concept/dist/src/global/A-Container/A-Container.types';
 
+declare enum A_ChannelFeatures {
+    /**
+     * Allows to extend timeout logic and behavior
+     */
+    onTimeout = "onTimeout",
+    /**
+     * Allows to extend retry logic and behavior
+     */
+    onRetry = "onRetry",
+    /**
+     * Allows to extend circuit breaker logic and behavior
+     */
+    onCircuitBreakerOpen = "onCircuitBreakerOpen",
+    /**
+     * Allows to extend cache logic and behavior
+     */
+    onCache = "onCache",
+    /**
+     * Allows to extend connection logic and behavior
+     */
+    onConnect = "onConnect",
+    /**
+     * Allows to extend disconnection logic and behavior
+     */
+    onDisconnect = "onDisconnect",
+    /**
+     * Allows to extend request preparation logic and behavior
+     */
+    onBeforeRequest = "onBeforeRequest",
+    /**
+     * Allows to extend request sending logic and behavior
+     */
+    onRequest = "onRequest",
+    /**
+     * Allows to extend request post-processing logic and behavior
+     */
+    onAfterRequest = "onAfterRequest",
+    /**
+     * Allows to extend error handling logic and behavior
+     *
+     * [!] The same approach uses for ALL errors within the channel
+     */
+    onError = "onError",
+    /**
+     * Allows to extend send logic and behavior
+     */
+    onSend = "onSend",
+    /**
+     * Allows to extend consume logic and behavior
+     */
+    onConsume = "onConsume"
+}
 declare enum A_ChannelRequestStatuses {
     /**
      * Request is pending
@@ -23,7 +75,7 @@ type A_ChannelRequestContext_Serialized<_ParamsType extends Record<string, any> 
     errors?: string[];
 };
 
-declare class A_ChannelRequestContext<_ParamsType extends Record<string, any> = Record<string, any>, _ResultType extends Record<string, any> = Record<string, any>> extends A_Fragment {
+declare class A_ChannelRequest<_ParamsType extends Record<string, any> = Record<string, any>, _ResultType extends Record<string, any> = Record<string, any>> extends A_Fragment {
     protected _params: _ParamsType;
     protected _result?: _ResultType;
     protected _errors: Set<Error>;
@@ -100,7 +152,7 @@ declare class A_ChannelRequestContext<_ParamsType extends Record<string, any> = 
  * class HttpProcessor extends A_Component {
  *     @A_Feature.Extend({ scope: [HttpChannel] })
  *     async [A_ChannelFeatures.onRequest](
- *         @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+ *         @A_Inject(A_ChannelRequest) context: A_ChannelRequest
  *     ) {
  *         const response = await fetch(context.params.url);
  *         (context as any)._result = await response.json();
@@ -215,7 +267,7 @@ declare class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [HttpChannel] })
      * async [A_ChannelFeatures.onBeforeRequest](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     // Validate required parameters
      *     if (!context.params.url) {
@@ -240,7 +292,7 @@ declare class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [HttpChannel] })
      * async [A_ChannelFeatures.onRequest](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     const response = await fetch(context.params.url);
      *     (context as any)._result = await response.json();
@@ -262,7 +314,7 @@ declare class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [HttpChannel] })
      * async [A_ChannelFeatures.onAfterRequest](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     console.log(`Request completed in ${Date.now() - context.startTime}ms`);
      *     await this.cacheResponse(context.params, context.data);
@@ -284,7 +336,7 @@ declare class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [HttpChannel] })
      * async [A_ChannelFeatures.onError](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     console.error('Request failed:', context.params, context.failed);
      *     await this.logError(context);
@@ -306,7 +358,7 @@ declare class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [EventChannel] })
      * async [A_ChannelFeatures.onSend](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     const { eventType, payload } = context.params;
      *     await this.publishEvent(eventType, payload);
@@ -348,7 +400,7 @@ declare class A_Channel extends A_Component {
      * @template _ParamsType The type of request parameters
      * @template _ResultType The type of response data
      * @param params The request parameters
-     * @returns {Promise<A_ChannelRequestContext<_ParamsType, _ResultType>>} Request context with response
+     * @returns {Promise<A_ChannelRequest<_ParamsType, _ResultType>>} Request context with response
      *
      * @example
      * ```typescript
@@ -368,7 +420,7 @@ declare class A_Channel extends A_Component {
      * }
      * ```
      */
-    request<_ParamsType extends Record<string, any> = Record<string, any>, _ResultType extends Record<string, any> = Record<string, any>>(params: _ParamsType): Promise<A_ChannelRequestContext<_ParamsType, _ResultType>>;
+    request<_ParamsType extends Record<string, any> = Record<string, any>, _ResultType extends Record<string, any> = Record<string, any>>(params: _ParamsType): Promise<A_ChannelRequest<_ParamsType, _ResultType>>;
     /**
      * Sends a fire-and-forget message (Send pattern).
      *
@@ -420,12 +472,12 @@ declare class A_Channel extends A_Component {
      * For fire-and-forget pattern: Use send()
      * For consumer patterns: Implement custom consumer logic using request() in a loop
      */
-    consume<T extends Record<string, any> = Record<string, any>>(): Promise<A_ChannelRequestContext<any, T>>;
+    consume<T extends Record<string, any> = Record<string, any>>(): Promise<A_ChannelRequest<any, T>>;
 }
 
 declare class A_ChannelError extends A_Error {
     static readonly MethodNotImplemented = "A-Channel Method Not Implemented";
-    protected _context?: A_ChannelRequestContext;
+    protected _context?: A_ChannelRequest;
     /**
      * Channel Error allows to keep track of errors within a channel if something goes wrong
      *
@@ -433,11 +485,11 @@ declare class A_ChannelError extends A_Error {
      * @param originalError
      * @param context
      */
-    constructor(originalError: string | A_Error | Error | any, context?: A_ChannelRequestContext | string);
+    constructor(originalError: string | A_Error | Error | any, context?: A_ChannelRequest | string);
     /***
      * Returns Context of the error
      */
-    get context(): A_ChannelRequestContext | undefined;
+    get context(): A_ChannelRequest | undefined;
 }
 
 declare enum A_TYPES__CommandMetaKey {
@@ -1351,4 +1403,4 @@ declare class A_Deferred<T> {
     reject(reason?: any): void;
 }
 
-export { A_CONSTANTS_A_Command_Features, type A_CONSTANTS__A_Command_Event, A_CONSTANTS__A_Command_Status, A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_Command, A_CommandError, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_Logger, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_Polyfill, A_Schedule, A_ScheduleObject, type A_TYPES__CommandMeta, A_TYPES__CommandMetaKey, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+export { A_CONSTANTS_A_Command_Features, type A_CONSTANTS__A_Command_Event, A_CONSTANTS__A_Command_Status, A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, type A_ChannelRequestContext_Serialized, A_ChannelRequestStatuses, A_Command, A_CommandError, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_Logger, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_Polyfill, A_Schedule, A_ScheduleObject, type A_TYPES__CommandMeta, A_TYPES__CommandMetaKey, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };

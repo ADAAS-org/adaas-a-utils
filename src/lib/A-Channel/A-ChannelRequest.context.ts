@@ -3,7 +3,7 @@ import { A_ChannelRequestStatuses } from "./A-Channel.constants";
 import { A_ChannelRequestContext_Serialized } from "./A-Channel.types";
 
 
-export class A_ChannelRequestContext<
+export class A_ChannelRequest<
     _ParamsType extends Record<string, any> = Record<string, any>,
     _ResultType extends Record<string, any> = Record<string, any>,
 > extends A_Fragment {

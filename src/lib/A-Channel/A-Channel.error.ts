@@ -1,5 +1,5 @@
 import { A_Error, A_TypeGuards } from "@adaas/a-concept";
-import { A_ChannelRequestContext } from "./A-ChannelRequest.context";
+import { A_ChannelRequest } from "./A-ChannelRequest.context";
 
 
 export class A_ChannelError extends A_Error {
@@ -15,7 +15,7 @@ export class A_ChannelError extends A_Error {
     // ==================== Properties ==========================
     // ==========================================================
 
-    protected _context?: A_ChannelRequestContext
+    protected _context?: A_ChannelRequest
 
 
     /**
@@ -27,21 +27,21 @@ export class A_ChannelError extends A_Error {
      */
     constructor(
         originalError: string | A_Error | Error | any,
-        context?: A_ChannelRequestContext | string
+        context?: A_ChannelRequest | string
     ) {
         if (A_TypeGuards.isString(context))
             super(originalError, context);
         else
             super(originalError);
 
-        if (context instanceof A_ChannelRequestContext)
+        if (context instanceof A_ChannelRequest)
             this._context = context
     }
 
     /***
      * Returns Context of the error
      */
-    get context(): A_ChannelRequestContext | undefined {
+    get context(): A_ChannelRequest | undefined {
         return this._context
     }
 

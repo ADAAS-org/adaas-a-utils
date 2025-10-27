@@ -13,7 +13,32 @@ var __decorateClass = (decorators, target, key, kind) => {
   return result;
 };
 var __decorateParam = (index, decorator) => (target, key) => decorator(target, key, index);
-var A_ChannelRequestContext = class extends aConcept.A_Fragment {
+
+// src/lib/A-Channel/A-Channel.constants.ts
+var A_ChannelFeatures = /* @__PURE__ */ ((A_ChannelFeatures2) => {
+  A_ChannelFeatures2["onTimeout"] = "onTimeout";
+  A_ChannelFeatures2["onRetry"] = "onRetry";
+  A_ChannelFeatures2["onCircuitBreakerOpen"] = "onCircuitBreakerOpen";
+  A_ChannelFeatures2["onCache"] = "onCache";
+  A_ChannelFeatures2["onConnect"] = "onConnect";
+  A_ChannelFeatures2["onDisconnect"] = "onDisconnect";
+  A_ChannelFeatures2["onBeforeRequest"] = "onBeforeRequest";
+  A_ChannelFeatures2["onRequest"] = "onRequest";
+  A_ChannelFeatures2["onAfterRequest"] = "onAfterRequest";
+  A_ChannelFeatures2["onError"] = "onError";
+  A_ChannelFeatures2["onSend"] = "onSend";
+  A_ChannelFeatures2["onConsume"] = "onConsume";
+  return A_ChannelFeatures2;
+})(A_ChannelFeatures || {});
+var A_ChannelRequestStatuses = /* @__PURE__ */ ((A_ChannelRequestStatuses2) => {
+  A_ChannelRequestStatuses2["PENDING"] = "PENDING";
+  A_ChannelRequestStatuses2["SUCCESS"] = "SUCCESS";
+  A_ChannelRequestStatuses2["FAILED"] = "FAILED";
+  return A_ChannelRequestStatuses2;
+})(A_ChannelRequestStatuses || {});
+
+// src/lib/A-Channel/A-ChannelRequest.context.ts
+var A_ChannelRequest = class extends aConcept.A_Fragment {
   constructor(params = {}) {
     super();
     this._errors = /* @__PURE__ */ new Set();
@@ -97,7 +122,7 @@ var A_ChannelError = class extends aConcept.A_Error {
       super(originalError, context);
     else
       super(originalError);
-    if (context instanceof A_ChannelRequestContext)
+    if (context instanceof A_ChannelRequest)
       this._context = context;
   }
   /***
@@ -111,6 +136,178 @@ var A_ChannelError = class extends aConcept.A_Error {
 // ==================== Error Types =========================
 // ==========================================================
 A_ChannelError.MethodNotImplemented = "A-Channel Method Not Implemented";
+
+// src/lib/A-Config/A-Config.constants.ts
+var A_CONSTANTS__CONFIG_ENV_VARIABLES = {};
+var A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY = [];
+
+// src/lib/A-Config/A-Config.context.ts
+var A_Config = class extends aConcept.A_Fragment {
+  constructor(config) {
+    super({
+      name: "A_Config"
+    });
+    this.VARIABLES = /* @__PURE__ */ new Map();
+    this.DEFAULT_ALLOWED_TO_READ_PROPERTIES = [
+      ...aConcept.A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
+      ...A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
+    ];
+    this.config = aConcept.A_CommonHelper.deepCloneAndMerge(config, {
+      strict: false,
+      defaults: {},
+      variables: aConcept.A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY
+    });
+    this.CONFIG_PROPERTIES = this.config.variables ? this.config.variables : [];
+    this.config.variables.forEach((variable) => {
+      this.VARIABLES.set(
+        aConcept.A_FormatterHelper.toUpperSnakeCase(variable),
+        this.config.defaults[variable]
+      );
+    });
+  }
+  /** 
+   * This method is used to get the configuration property by name
+   * 
+   * @param property 
+   * @returns 
+   */
+  get(property) {
+    if (this.CONFIG_PROPERTIES.includes(property) || this.DEFAULT_ALLOWED_TO_READ_PROPERTIES.includes(property) || !this.config.strict)
+      return this.VARIABLES.get(aConcept.A_FormatterHelper.toUpperSnakeCase(property));
+    throw new Error("Property not exists or not allowed to read");
+  }
+  set(property, value) {
+    const array = Array.isArray(property) ? property : typeof property === "string" ? [{ property, value }] : Object.keys(property).map((key) => ({
+      property: key,
+      value: property[key]
+    }));
+    for (const { property: property2, value: value2 } of array) {
+      let targetValue = value2 ? value2 : this.config?.defaults ? this.config.defaults[property2] : void 0;
+      this.VARIABLES.set(aConcept.A_FormatterHelper.toUpperSnakeCase(property2), targetValue);
+    }
+  }
+};
+
+// src/lib/A-Logger/A-Logger.component.ts
+exports.A_Logger = class A_Logger extends aConcept.A_Component {
+  constructor(scope) {
+    super();
+    this.scope = scope;
+    this.colors = {
+      green: "32",
+      blue: "34",
+      red: "31",
+      yellow: "33",
+      gray: "90",
+      magenta: "35",
+      cyan: "36",
+      white: "37",
+      pink: "95"
+    };
+    this.config = this.scope.has(A_Config) ? this.scope.resolve(A_Config) : void 0;
+  }
+  get scopeLength() {
+    return this.scope.name.length;
+  }
+  compile(color, ...args) {
+    return [
+      `\x1B[${this.colors[color]}m[${this.scope.name}] |${this.getTime()}|`,
+      args.length > 1 ? `
+${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "",
+      ...args.map((arg, i) => {
+        switch (true) {
+          case arg instanceof aConcept.A_Error:
+            return this.compile_A_Error(arg);
+          case arg instanceof Error:
+            return this.compile_Error(arg);
+          case typeof arg === "object":
+            return JSON.stringify(arg, null, 2).replace(/\n/g, `
+${" ".repeat(this.scopeLength + 3)}| `);
+          default:
+            return String(
+              (i > 0 || args.length > 1 ? "\n" : "") + arg
+            ).replace(/\n/g, `
+${" ".repeat(this.scopeLength + 3)}| `);
+        }
+      }),
+      args.length > 1 ? `
+${" ".repeat(this.scopeLength + 3)}|-------------------------------\x1B[0m` : "\x1B[0m"
+    ];
+  }
+  get allowedToLog() {
+    return this.config ? this.config.get("CONFIG_VERBOSE") !== void 0 && this.config.get("CONFIG_VERBOSE") !== "false" && this.config.get("CONFIG_VERBOSE") !== false : true;
+  }
+  log(param1, ...args) {
+    if (!this.allowedToLog)
+      return;
+    if (typeof param1 === "string" && this.colors[param1]) {
+      console.log(...this.compile(param1, ...args));
+      return;
+    } else {
+      console.log(...this.compile("blue", param1, ...args));
+    }
+  }
+  warning(...args) {
+    if (!this.allowedToLog)
+      return;
+    console.log(...this.compile("yellow", ...args));
+  }
+  error(...args) {
+    if (this.config && this.config.get("CONFIG_IGNORE_ERRORS"))
+      return;
+    return console.log(...this.compile("red", ...args));
+  }
+  log_A_Error(error) {
+    const time = this.getTime();
+    console.log(`\x1B[31m[${this.scope.name}] |${time}| ERROR ${error.code}
+${" ".repeat(this.scopeLength + 3)}| ${error.message}
+${" ".repeat(this.scopeLength + 3)}| ${error.description} 
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+${" ".repeat(this.scopeLength + 3)}| ${error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+\x1B[0m` + (error.originalError ? `\x1B[31m${" ".repeat(this.scopeLength + 3)}| Wrapped From  ${error.originalError.message}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+${" ".repeat(this.scopeLength + 3)}| ${error.originalError.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+\x1B[0m` : "") + (error.link ? `\x1B[31m${" ".repeat(this.scopeLength + 3)}| Read in docs: ${error.link}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+\x1B[0m` : ""));
+  }
+  compile_A_Error(error) {
+    this.getTime();
+    return `
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+${" ".repeat(this.scopeLength + 3)}|  Error:  | ${error.code}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+${" ".repeat(this.scopeLength + 3)}|${" ".repeat(10)}| ${error.message}
+${" ".repeat(this.scopeLength + 3)}|${" ".repeat(10)}| ${error.description} 
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+${" ".repeat(this.scopeLength + 3)}| ${error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------` + (error.originalError ? `${" ".repeat(this.scopeLength + 3)}| Wrapped From  ${error.originalError.message}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------
+${" ".repeat(this.scopeLength + 3)}| ${error.originalError.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "") + (error.link ? `${" ".repeat(this.scopeLength + 3)}| Read in docs: ${error.link}
+${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "");
+  }
+  compile_Error(error) {
+    return JSON.stringify({
+      name: error.name,
+      message: error.message,
+      stack: error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n")
+    }, null, 2).replace(/\n/g, `
+${" ".repeat(this.scopeLength + 3)}| `).replace(/\\n/g, "\n");
+  }
+  getTime() {
+    const now = /* @__PURE__ */ new Date();
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const milliseconds = String(now.getMilliseconds()).padStart(4, "0");
+    return `${minutes}:${seconds}:${milliseconds}`;
+  }
+};
+exports.A_Logger = __decorateClass([
+  __decorateParam(0, aConcept.A_Inject(aConcept.A_Scope))
+], exports.A_Logger);
 
 // src/lib/A-Channel/A-Channel.component.ts
 var A_Channel = class extends aConcept.A_Component {
@@ -218,7 +415,7 @@ var A_Channel = class extends aConcept.A_Component {
    * @template _ParamsType The type of request parameters
    * @template _ResultType The type of response data
    * @param params The request parameters
-   * @returns {Promise<A_ChannelRequestContext<_ParamsType, _ResultType>>} Request context with response
+   * @returns {Promise<A_ChannelRequest<_ParamsType, _ResultType>>} Request context with response
    * 
    * @example
    * ```typescript
@@ -244,7 +441,7 @@ var A_Channel = class extends aConcept.A_Component {
     const requestScope = new aConcept.A_Scope({
       name: `a-channel@scope:request:${aConcept.A_IdentityHelper.generateTimeId()}`
     });
-    const context = new A_ChannelRequestContext(params);
+    const context = new A_ChannelRequest(params);
     try {
       requestScope.inherit(aConcept.A_Context.scope(this));
       requestScope.register(context);
@@ -309,7 +506,7 @@ var A_Channel = class extends aConcept.A_Component {
     const requestScope = new aConcept.A_Scope({
       name: `a-channel@scope:send:${aConcept.A_IdentityHelper.generateTimeId()}`
     });
-    const context = new A_ChannelRequestContext(message);
+    const context = new A_ChannelRequest(message);
     try {
       requestScope.inherit(aConcept.A_Context.scope(this));
       requestScope.register(context);
@@ -334,7 +531,7 @@ var A_Channel = class extends aConcept.A_Component {
     await this.initialize;
     this._processing = true;
     const requestScope = new aConcept.A_Scope({ name: `a-channel@scope:consume:${aConcept.A_IdentityHelper.generateTimeId()}` });
-    const context = new A_ChannelRequestContext();
+    const context = new A_ChannelRequest();
     try {
       requestScope.inherit(aConcept.A_Context.scope(this));
       requestScope.register(context);
@@ -385,6 +582,37 @@ __decorateClass([
     name: "onSend" /* onSend */
   })
 ], A_Channel.prototype, "onSend", 1);
+var HttpChannel = class extends A_Channel {
+};
+var PollyspotChannel = class extends HttpChannel {
+  constructor() {
+    super();
+    this.baseUrl = "https://pollyspot.example.com";
+  }
+};
+var GlobalErrorhandler = class extends aConcept.A_Component {
+  async handleError(context, logger, config) {
+  }
+  async anotherError(context, logger, config) {
+  }
+};
+__decorateClass([
+  aConcept.A_Feature.Extend({
+    name: "onError" /* onError */,
+    scope: [PollyspotChannel]
+  }),
+  __decorateParam(0, aConcept.A_Inject(A_ChannelRequest)),
+  __decorateParam(1, aConcept.A_Inject(exports.A_Logger)),
+  __decorateParam(2, aConcept.A_Inject(A_Config))
+], GlobalErrorhandler.prototype, "handleError", 1);
+__decorateClass([
+  aConcept.A_Feature.Extend({
+    name: "onError" /* onError */
+  }),
+  __decorateParam(0, aConcept.A_Inject(A_ChannelRequest)),
+  __decorateParam(1, aConcept.A_Inject(exports.A_Logger)),
+  __decorateParam(2, aConcept.A_Inject(A_Config))
+], GlobalErrorhandler.prototype, "anotherError", 1);
 
 // src/lib/A-Command/A-Command.constants.ts
 var A_TYPES__CommandMetaKey = /* @__PURE__ */ ((A_TYPES__CommandMetaKey2) => {
@@ -775,176 +1003,6 @@ var A_Command = class extends aConcept.A_Entity {
     }
   }
 };
-
-// src/lib/A-Config/A-Config.constants.ts
-var A_CONSTANTS__CONFIG_ENV_VARIABLES = {};
-var A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY = [];
-
-// src/lib/A-Config/A-Config.context.ts
-var A_Config = class extends aConcept.A_Fragment {
-  constructor(config) {
-    super({
-      name: "A_Config"
-    });
-    this.VARIABLES = /* @__PURE__ */ new Map();
-    this.DEFAULT_ALLOWED_TO_READ_PROPERTIES = [
-      ...aConcept.A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
-      ...A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
-    ];
-    this.config = aConcept.A_CommonHelper.deepCloneAndMerge(config, {
-      strict: false,
-      defaults: {},
-      variables: aConcept.A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY
-    });
-    this.CONFIG_PROPERTIES = this.config.variables ? this.config.variables : [];
-    this.config.variables.forEach((variable) => {
-      this.VARIABLES.set(
-        aConcept.A_FormatterHelper.toUpperSnakeCase(variable),
-        this.config.defaults[variable]
-      );
-    });
-  }
-  /** 
-   * This method is used to get the configuration property by name
-   * 
-   * @param property 
-   * @returns 
-   */
-  get(property) {
-    if (this.CONFIG_PROPERTIES.includes(property) || this.DEFAULT_ALLOWED_TO_READ_PROPERTIES.includes(property) || !this.config.strict)
-      return this.VARIABLES.get(aConcept.A_FormatterHelper.toUpperSnakeCase(property));
-    throw new Error("Property not exists or not allowed to read");
-  }
-  set(property, value) {
-    const array = Array.isArray(property) ? property : typeof property === "string" ? [{ property, value }] : Object.keys(property).map((key) => ({
-      property: key,
-      value: property[key]
-    }));
-    for (const { property: property2, value: value2 } of array) {
-      let targetValue = value2 ? value2 : this.config?.defaults ? this.config.defaults[property2] : void 0;
-      this.VARIABLES.set(aConcept.A_FormatterHelper.toUpperSnakeCase(property2), targetValue);
-    }
-  }
-};
-exports.A_Logger = class A_Logger extends aConcept.A_Component {
-  constructor(scope) {
-    super();
-    this.scope = scope;
-    this.colors = {
-      green: "32",
-      blue: "34",
-      red: "31",
-      yellow: "33",
-      gray: "90",
-      magenta: "35",
-      cyan: "36",
-      white: "37",
-      pink: "95"
-    };
-    this.config = this.scope.has(A_Config) ? this.scope.resolve(A_Config) : void 0;
-  }
-  get scopeLength() {
-    return this.scope.name.length;
-  }
-  compile(color, ...args) {
-    return [
-      `\x1B[${this.colors[color]}m[${this.scope.name}] |${this.getTime()}|`,
-      args.length > 1 ? `
-${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "",
-      ...args.map((arg, i) => {
-        switch (true) {
-          case arg instanceof aConcept.A_Error:
-            return this.compile_A_Error(arg);
-          case arg instanceof Error:
-            return this.compile_Error(arg);
-          case typeof arg === "object":
-            return JSON.stringify(arg, null, 2).replace(/\n/g, `
-${" ".repeat(this.scopeLength + 3)}| `);
-          default:
-            return String(
-              (i > 0 || args.length > 1 ? "\n" : "") + arg
-            ).replace(/\n/g, `
-${" ".repeat(this.scopeLength + 3)}| `);
-        }
-      }),
-      args.length > 1 ? `
-${" ".repeat(this.scopeLength + 3)}|-------------------------------\x1B[0m` : "\x1B[0m"
-    ];
-  }
-  get allowedToLog() {
-    return this.config ? this.config.get("CONFIG_VERBOSE") !== void 0 && this.config.get("CONFIG_VERBOSE") !== "false" && this.config.get("CONFIG_VERBOSE") !== false : true;
-  }
-  log(param1, ...args) {
-    if (!this.allowedToLog)
-      return;
-    if (typeof param1 === "string" && this.colors[param1]) {
-      console.log(...this.compile(param1, ...args));
-      return;
-    } else {
-      console.log(...this.compile("blue", param1, ...args));
-    }
-  }
-  warning(...args) {
-    if (!this.allowedToLog)
-      return;
-    console.log(...this.compile("yellow", ...args));
-  }
-  error(...args) {
-    if (this.config && this.config.get("CONFIG_IGNORE_ERRORS"))
-      return;
-    return console.log(...this.compile("red", ...args));
-  }
-  log_A_Error(error) {
-    const time = this.getTime();
-    console.log(`\x1B[31m[${this.scope.name}] |${time}| ERROR ${error.code}
-${" ".repeat(this.scopeLength + 3)}| ${error.message}
-${" ".repeat(this.scopeLength + 3)}| ${error.description} 
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}| ${error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-\x1B[0m` + (error.originalError ? `\x1B[31m${" ".repeat(this.scopeLength + 3)}| Wrapped From  ${error.originalError.message}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}| ${error.originalError.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-\x1B[0m` : "") + (error.link ? `\x1B[31m${" ".repeat(this.scopeLength + 3)}| Read in docs: ${error.link}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-\x1B[0m` : ""));
-  }
-  compile_A_Error(error) {
-    this.getTime();
-    return `
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}|  Error:  | ${error.code}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}|${" ".repeat(10)}| ${error.message}
-${" ".repeat(this.scopeLength + 3)}|${" ".repeat(10)}| ${error.description} 
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}| ${error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------` + (error.originalError ? `${" ".repeat(this.scopeLength + 3)}| Wrapped From  ${error.originalError.message}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}| ${error.originalError.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "") + (error.link ? `${" ".repeat(this.scopeLength + 3)}| Read in docs: ${error.link}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "");
-  }
-  compile_Error(error) {
-    return JSON.stringify({
-      name: error.name,
-      message: error.message,
-      stack: error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n")
-    }, null, 2).replace(/\n/g, `
-${" ".repeat(this.scopeLength + 3)}| `).replace(/\\n/g, "\n");
-  }
-  getTime() {
-    const now = /* @__PURE__ */ new Date();
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const milliseconds = String(now.getMilliseconds()).padStart(4, "0");
-    return `${minutes}:${seconds}:${milliseconds}`;
-  }
-};
-exports.A_Logger = __decorateClass([
-  __decorateParam(0, aConcept.A_Inject(aConcept.A_Scope))
-], exports.A_Logger);
 var A_FSPolyfillClass = class {
   constructor(logger) {
     this.logger = logger;
@@ -2097,6 +2155,9 @@ exports.A_CONSTANTS__CONFIG_ENV_VARIABLES = A_CONSTANTS__CONFIG_ENV_VARIABLES;
 exports.A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY = A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY;
 exports.A_Channel = A_Channel;
 exports.A_ChannelError = A_ChannelError;
+exports.A_ChannelFeatures = A_ChannelFeatures;
+exports.A_ChannelRequest = A_ChannelRequest;
+exports.A_ChannelRequestStatuses = A_ChannelRequestStatuses;
 exports.A_Command = A_Command;
 exports.A_CommandError = A_CommandError;
 exports.A_Config = A_Config;

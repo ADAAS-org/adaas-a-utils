@@ -1,7 +1,9 @@
 import { A_Component, A_Context, A_Error, A_Feature, A_IdentityHelper, A_Inject, A_Scope, A_TYPES__InjectableConstructors, A_TYPES__InjectableTargets } from "@adaas/a-concept";
 import { A_ChannelError } from "./A-Channel.error";
 import { A_ChannelFeatures } from "./A-Channel.constants";
-import { A_ChannelRequestContext } from "./A-ChannelRequest.context";
+import { A_ChannelRequest } from "./A-ChannelRequest.context";
+import { A_Logger } from "../A-Logger/A-Logger.component";
+import { A_Config } from "../A-Config/A-Config.context";
 
 /**
  * A-Channel - A powerful, extensible communication channel component
@@ -37,7 +39,7 @@ import { A_ChannelRequestContext } from "./A-ChannelRequest.context";
  * class HttpProcessor extends A_Component {
  *     @A_Feature.Extend({ scope: [HttpChannel] })
  *     async [A_ChannelFeatures.onRequest](
- *         @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+ *         @A_Inject(A_ChannelRequest) context: A_ChannelRequest
  *     ) {
  *         const response = await fetch(context.params.url);
  *         (context as any)._result = await response.json();
@@ -186,7 +188,7 @@ export class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [HttpChannel] })
      * async [A_ChannelFeatures.onBeforeRequest](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     // Validate required parameters
      *     if (!context.params.url) {
@@ -218,7 +220,7 @@ export class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [HttpChannel] })
      * async [A_ChannelFeatures.onRequest](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     const response = await fetch(context.params.url);
      *     (context as any)._result = await response.json();
@@ -247,7 +249,7 @@ export class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [HttpChannel] })
      * async [A_ChannelFeatures.onAfterRequest](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     console.log(`Request completed in ${Date.now() - context.startTime}ms`);
      *     await this.cacheResponse(context.params, context.data);
@@ -276,7 +278,7 @@ export class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [HttpChannel] })
      * async [A_ChannelFeatures.onError](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     console.error('Request failed:', context.params, context.failed);
      *     await this.logError(context);
@@ -305,7 +307,7 @@ export class A_Channel extends A_Component {
      * ```typescript
      * @A_Feature.Extend({ scope: [EventChannel] })
      * async [A_ChannelFeatures.onSend](
-     *     @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+     *     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
      * ) {
      *     const { eventType, payload } = context.params;
      *     await this.publishEvent(eventType, payload);
@@ -364,7 +366,7 @@ export class A_Channel extends A_Component {
      * @template _ParamsType The type of request parameters
      * @template _ResultType The type of response data
      * @param params The request parameters
-     * @returns {Promise<A_ChannelRequestContext<_ParamsType, _ResultType>>} Request context with response
+     * @returns {Promise<A_ChannelRequest<_ParamsType, _ResultType>>} Request context with response
      * 
      * @example
      * ```typescript
@@ -387,7 +389,7 @@ export class A_Channel extends A_Component {
     async request<
         _ParamsType extends Record<string, any> = Record<string, any>,
         _ResultType extends Record<string, any> = Record<string, any>,
-    >(params: _ParamsType): Promise<A_ChannelRequestContext<_ParamsType, _ResultType>> {
+    >(params: _ParamsType): Promise<A_ChannelRequest<_ParamsType, _ResultType>> {
         // Ensure channel is initialized before processing
         await this.initialize;
 
@@ -395,12 +397,12 @@ export class A_Channel extends A_Component {
         this._processing = true;
 
         // Create isolated scope for this request
-        const requestScope = new A_Scope({ 
-            name: `a-channel@scope:request:${A_IdentityHelper.generateTimeId()}` 
+        const requestScope = new A_Scope({
+            name: `a-channel@scope:request:${A_IdentityHelper.generateTimeId()}`
         });
 
         // Create request context
-        const context = new A_ChannelRequestContext<_ParamsType, _ResultType>(params);
+        const context = new A_ChannelRequest<_ParamsType, _ResultType>(params);
 
         try {
             // Set up dependency injection scope
@@ -481,12 +483,12 @@ export class A_Channel extends A_Component {
         this._processing = true;
 
         // Create isolated scope for this send operation
-        const requestScope = new A_Scope({ 
-            name: `a-channel@scope:send:${A_IdentityHelper.generateTimeId()}` 
+        const requestScope = new A_Scope({
+            name: `a-channel@scope:send:${A_IdentityHelper.generateTimeId()}`
         });
 
         // Create request context for the message
-        const context = new A_ChannelRequestContext<_ParamsType>(message);
+        const context = new A_ChannelRequest<_ParamsType>(message);
 
         try {
             // Set up dependency injection scope
@@ -521,14 +523,14 @@ export class A_Channel extends A_Component {
      * For fire-and-forget pattern: Use send()
      * For consumer patterns: Implement custom consumer logic using request() in a loop
      */
-    async consume<T extends Record<string, any> = Record<string, any>>(): Promise<A_ChannelRequestContext<any, T>> {
+    async consume<T extends Record<string, any> = Record<string, any>>(): Promise<A_ChannelRequest<any, T>> {
         await this.initialize;
 
         this._processing = true;
 
         const requestScope = new A_Scope({ name: `a-channel@scope:consume:${A_IdentityHelper.generateTimeId()}` });
 
-        const context = new A_ChannelRequestContext<any, T>();
+        const context = new A_ChannelRequest<any, T>();
 
         try {
             requestScope.inherit(A_Context.scope(this));
@@ -555,4 +557,69 @@ export class A_Channel extends A_Component {
         }
     }
 
+}
+
+
+
+
+class HttpChannel extends A_Channel {
+
+    protected baseUrl!: string
+}
+
+
+class SSOChannel extends HttpChannel {
+    constructor() {
+        super();
+
+        this.baseUrl = 'https://sso.example.com';
+    }
+}
+
+
+class PrstChannel extends HttpChannel {
+
+    constructor() {
+        super();
+
+        this.baseUrl = 'https://prst.example.com';
+    }
+}
+
+
+class PollyspotChannel extends HttpChannel {
+
+    constructor() {
+        super();
+
+        this.baseUrl = 'https://pollyspot.example.com';
+    }
+}
+
+
+class GlobalErrorhandler extends A_Component {
+
+    @A_Feature.Extend({
+        name: A_ChannelFeatures.onError,
+        scope: [PollyspotChannel]
+    })
+    async handleError(
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<any, any>,
+        @A_Inject(A_Logger) logger: A_Logger,
+        @A_Inject(A_Config) config: A_Config
+    ) {
+        // Handle the error
+    }
+
+    @A_Feature.Extend({
+        name: A_ChannelFeatures.onError,
+    })
+    async anotherError(
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<any, any>,
+        @A_Inject(A_Logger) logger: A_Logger,
+        @A_Inject(A_Config) config: A_Config
+    ) {
+        // Handle the error
+
+    }
 }

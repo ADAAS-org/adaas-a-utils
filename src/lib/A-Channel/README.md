@@ -91,7 +91,7 @@ console.log('Message sent successfully');
 ```typescript
 import { A_Component, A_Feature, A_Inject } from '@adaas/a-concept';
 import { A_ChannelFeatures } from '@adaas/a-utils/lib/A-Channel/A-Channel.constants';
-import { A_ChannelRequestContext } from '@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context';
+import { A_ChannelRequest } from '@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context';
 
 // Define typed interfaces
 interface UserRequest {
@@ -121,7 +121,7 @@ class UserProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [UserManagementChannel] })
     async [A_ChannelFeatures.onBeforeRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<UserRequest>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<UserRequest>
     ) {
         // Validate request
         const { action, userId } = context.params;
@@ -133,7 +133,7 @@ class UserProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [UserManagementChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<UserRequest, UserResponse>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<UserRequest, UserResponse>
     ) {
         const { action, userId, userData } = context.params;
         
@@ -162,7 +162,7 @@ class UserProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [UserManagementChannel] })
     async [A_ChannelFeatures.onAfterRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<UserRequest, UserResponse>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<UserRequest, UserResponse>
     ) {
         // Log successful completion
         console.log(`Request completed: ${context.data?.message}`);
@@ -170,7 +170,7 @@ class UserProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [UserManagementChannel] })
     async [A_ChannelFeatures.onError](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<UserRequest>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<UserRequest>
     ) {
         console.error(`Request failed for action: ${context.params.action}`);
         // Log error, send alerts, etc.
@@ -238,7 +238,7 @@ class RequestLifecycleProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [LifecycleChannel] })
     async [A_ChannelFeatures.onBeforeRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         console.log('2. Pre-processing request...');
         // Validate input, authenticate, rate limiting
@@ -246,7 +246,7 @@ class RequestLifecycleProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [LifecycleChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         console.log('3. Processing request...');
         // Main business logic
@@ -254,7 +254,7 @@ class RequestLifecycleProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [LifecycleChannel] })
     async [A_ChannelFeatures.onAfterRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         console.log('4. Post-processing request...');
         // Logging, analytics, cleanup
@@ -262,7 +262,7 @@ class RequestLifecycleProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [LifecycleChannel] })
     async [A_ChannelFeatures.onError](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         console.log('5. Handling error...');
         // Error logging, alerts, recovery
@@ -281,7 +281,7 @@ class APIProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [APIChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const { endpoint, method, body } = context.params;
         
@@ -341,7 +341,7 @@ class EventBroadcaster extends A_Component {
     
     @A_Feature.Extend({ scope: [EventChannel] })
     async [A_ChannelFeatures.onSend](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const { eventType, payload, recipients } = context.params;
         
@@ -378,7 +378,7 @@ class MessageQueue extends A_Component {
     
     @A_Feature.Extend({ scope: [QueueChannel] })
     async [A_ChannelFeatures.onSend](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const message = {
             id: Date.now(),
@@ -436,7 +436,7 @@ class ErrorHandler extends A_Component {
     
     @A_Feature.Extend({ scope: [RobustChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const { operation } = context.params;
         
@@ -457,7 +457,7 @@ class ErrorHandler extends A_Component {
     
     @A_Feature.Extend({ scope: [RobustChannel] })
     async [A_ChannelFeatures.onError](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         console.log('Error details:', {
             operation: context.params.operation,
@@ -517,7 +517,7 @@ class DatabaseProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [DatabaseChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<DatabaseQuery, DatabaseResult>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<DatabaseQuery, DatabaseResult>
     ) {
         const { table, operation, where, data } = context.params;
         
@@ -602,14 +602,14 @@ class MetricsCollector extends A_Component {
     
     @A_Feature.Extend({ scope: [AdvancedChannel] })
     async [A_ChannelFeatures.onBeforeRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         (context as any)._startTime = Date.now();
     }
     
     @A_Feature.Extend({ scope: [AdvancedChannel] })
     async [A_ChannelFeatures.onAfterRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const channel = A_Context.scope(this).resolve(AdvancedChannel);
         const duration = Date.now() - (context as any)._startTime;
@@ -620,7 +620,7 @@ class MetricsCollector extends A_Component {
     
     @A_Feature.Extend({ scope: [AdvancedChannel] })
     async [A_ChannelFeatures.onError](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const channel = A_Context.scope(this).resolve(AdvancedChannel);
         channel['metrics'].errors++;
@@ -632,7 +632,7 @@ class CacheLayer extends A_Component {
     
     @A_Feature.Extend({ scope: [AdvancedChannel] })
     async [A_ChannelFeatures.onBeforeRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const cacheKey = JSON.stringify(context.params);
         
@@ -645,7 +645,7 @@ class CacheLayer extends A_Component {
     
     @A_Feature.Extend({ scope: [AdvancedChannel] })
     async [A_ChannelFeatures.onAfterRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         if (!(context as any)._cached && context.data) {
             const cacheKey = JSON.stringify(context.params);
@@ -685,7 +685,7 @@ console.log('Metrics:', advancedChannel.getMetrics());
 - `async disconnect(): Promise<void>` - Cleanup and disconnect the channel
 
 ##### Communication
-- `async request<T, R>(params: T): Promise<A_ChannelRequestContext<T, R>>` - Send request and wait for response
+- `async request<T, R>(params: T): Promise<A_ChannelRequest<T, R>>` - Send request and wait for response
 - `async send<T>(message: T): Promise<void>` - Send fire-and-forget message
 
 #### Lifecycle Hooks (Extensible via A_Feature)
@@ -697,7 +697,7 @@ console.log('Metrics:', advancedChannel.getMetrics());
 - `onSend` - Called to process send operation
 - `onError` - Called when any operation fails
 
-### A_ChannelRequestContext Class
+### A_ChannelRequest Class
 
 #### Properties
 - `params: T` - Request parameters
@@ -750,7 +750,7 @@ class HttpChannel extends A_Channel {
 class HttpProcessor extends A_Component {
     @A_Feature.Extend({ scope: [HttpChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const { method, url, body, headers } = context.params;
         
@@ -818,7 +818,7 @@ class WebSocketProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [WebSocketChannel] })
     async [A_ChannelFeatures.onSend](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const channel = A_Context.scope(this).resolve(WebSocketChannel);
         const message = JSON.stringify(context.params);

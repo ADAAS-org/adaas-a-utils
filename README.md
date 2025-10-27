@@ -2,13 +2,36 @@
 
 # A-Utils SDK 
 
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Jest](https://img.shields.io/badge/Jest-323330?style=for-the-badge&logo=Jest&logoColor=white)
+![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)
+
+![License](https://img.shields.io/badge/license-ISC-blue.svg)
+![Version](https://img.shields.io/npm/v/@adaas/a-utils)
+![Downloads](https://img.shields.io/npm/dm/@adaas/a-utils)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+
 This package is a set of common utilities that can be used across projects related or not related to ADAAS Ecosystem. 
 In this package it is possible to find useful features to work with structures, objects, types, commands, configuration management, logging, scheduling, and more.  
 
 
 | LTS | Latest | npm               |
 |---------------|----------|---------------------------|
-| v0.1.7      |   v0.1.7    |     [@adaas/a-utils](https://npm.com)    |
+| v0.1.14      |   v0.1.14    |     [@adaas/a-utils](https://www.npmjs.com/package/@adaas/a-utils)    |
+
+
+## ✨ Key Features
+
+🚀 **Communication Channels** - Structured messaging with lifecycle management  
+⚡ **Command Pattern** - Event-driven command execution with serialization  
+🔧 **Configuration Management** - Multi-source config with type safety  
+📝 **Smart Logging** - Scope-aware logging with color support  
+🛡️ **Access Control** - Regex-based permission management  
+💾 **Memory Management** - Type-safe intermediate value storage  
+📅 **Task Scheduling** - Promise-based scheduling with cancellation  
+🔌 **Polyfills** - Cross-environment compatibility  
+🏗️ **Component Architecture** - Extensible dependency injection system
 
 
 <!-- TABLE OF CONTENTS -->
@@ -16,6 +39,7 @@ In this package it is possible to find useful features to work with structures, 
 
 - [About the Project](#overview)
 - [Installation](#installation)
+- [Key Features](#-key-features)
 - [Components](#components)
   - [A-Channel](#a-channel)
   - [A-Command](#a-command)
@@ -69,7 +93,7 @@ class HttpChannel extends A_Channel {}
 class HttpProcessor extends A_Component {
     @A_Feature.Extend({ scope: [HttpChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const response = await fetch(context.params.url);
         (context as any)._result = await response.json();

@@ -7,7 +7,7 @@
 
 import { A_Channel } from '../src/lib/A-Channel/A-Channel.component';
 import { A_ChannelFeatures } from '../src/lib/A-Channel/A-Channel.constants';
-import { A_ChannelRequestContext } from '../src/lib/A-Channel/A-ChannelRequest.context';
+import { A_ChannelRequest } from '../src/lib/A-Channel/A-ChannelRequest.context';
 import { A_Component, A_Context, A_Feature, A_Inject } from '@adaas/a-concept';
 
 // Example 1: Basic Channel Usage
@@ -57,7 +57,7 @@ class HttpProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [HttpChannel] })
     async [A_ChannelFeatures.onBeforeRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<HttpRequest>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<HttpRequest>
     ) {
         const { method, url } = context.params;
         console.log(`Preparing ${method} request to ${url}`);
@@ -70,7 +70,7 @@ class HttpProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [HttpChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<HttpRequest, HttpResponse>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<HttpRequest, HttpResponse>
     ) {
         const { method, url, headers, body } = context.params;
         
@@ -99,7 +99,7 @@ class HttpProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [HttpChannel] })
     async [A_ChannelFeatures.onAfterRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<HttpRequest, HttpResponse>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<HttpRequest, HttpResponse>
     ) {
         const response = context.data;
         console.log(`Request completed with status: ${response?.status}`);
@@ -107,7 +107,7 @@ class HttpProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [HttpChannel] })
     async [A_ChannelFeatures.onError](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<HttpRequest>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<HttpRequest>
     ) {
         console.error(`HTTP request failed for ${context.params.method} ${context.params.url}`);
     }
@@ -159,7 +159,7 @@ class EventBroadcaster extends A_Component {
     
     @A_Feature.Extend({ scope: [EventChannel] })
     async [A_ChannelFeatures.onSend](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<EventMessage>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<EventMessage>
     ) {
         const { eventType, payload, recipients, priority = 'normal' } = context.params;
         
@@ -177,7 +177,7 @@ class EventBroadcaster extends A_Component {
     
     @A_Feature.Extend({ scope: [EventChannel] })
     async [A_ChannelFeatures.onError](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<EventMessage>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<EventMessage>
     ) {
         console.error(`Failed to broadcast event: ${context.params.eventType}`);
     }
@@ -269,7 +269,7 @@ class DatabaseProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [DatabaseChannel] })
     async [A_ChannelFeatures.onBeforeRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<DatabaseQuery>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<DatabaseQuery>
     ) {
         const channel = A_Context.scope(this).resolve(DatabaseChannel);
         const { operation, table } = context.params;
@@ -292,7 +292,7 @@ class DatabaseProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [DatabaseChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<DatabaseQuery, DatabaseResult>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<DatabaseQuery, DatabaseResult>
     ) {
         const { operation, table, where, data, limit } = context.params;
         const startTime = Date.now();
@@ -343,7 +343,7 @@ class DatabaseProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [DatabaseChannel] })
     async [A_ChannelFeatures.onAfterRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<DatabaseQuery, DatabaseResult>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<DatabaseQuery, DatabaseResult>
     ) {
         // Release connection
         const connection = (context as any)._connection;
@@ -358,7 +358,7 @@ class DatabaseProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [DatabaseChannel] })
     async [A_ChannelFeatures.onError](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext<DatabaseQuery>
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<DatabaseQuery>
     ) {
         // Release connection on error
         const connection = (context as any)._connection;
@@ -421,7 +421,7 @@ class RobustProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [RobustChannel] })
     async [A_ChannelFeatures.onRequest](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const { operation, shouldFail } = context.params;
         
@@ -439,7 +439,7 @@ class RobustProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [RobustChannel] })
     async [A_ChannelFeatures.onError](
-        @A_Inject(A_ChannelRequestContext) context: A_ChannelRequestContext
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest
     ) {
         const requestId = JSON.stringify(context.params);
         const currentRetries = this.retryCount.get(requestId) || 0;

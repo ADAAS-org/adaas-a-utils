@@ -36,19 +36,37 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ADAAS-org/adaas-adf-auth.git"
+    "url": "git+https://github.com/ADAAS-org/adaas-a-utils.git"
   },
   "keywords": [
     "sdk",
+    "utilities",
+    "typescript",
+    "nodejs",
+    "command-pattern",
+    "channel",
+    "configuration",
+    "logging",
+    "scheduling",
+    "memory-management",
+    "dependency-injection",
+    "component-architecture",
+    "adaas",
+    "ecosystem",
     "ai",
-    "rag"
+    "rag",
+    "manifest",
+    "polyfill",
+    "async",
+    "lifecycle",
+    "error-handling"
   ],
   "author": "adaas.org",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ADAAS-org/adaas-adf-auth/issues"
+    "url": "https://github.com/ADAAS-org/adaas-a-utils/issues"
   },
-  "homepage": "https://github.com/ADAAS-org/adaas-adf-auth#readme",
+  "homepage": "https://github.com/ADAAS-org/adaas-a-utils#readme",
   "dependencies": {
     "@adaas/a-concept": "^0.1.24"
   },
