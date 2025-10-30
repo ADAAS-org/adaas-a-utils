@@ -1,6 +1,6 @@
 {
   "name": "@adaas/a-utils",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "A-Utils is a set of utilities that are used across the ADAAS ecosystem. This package is designed to be a collection of utilities that are used across the ADAAS ecosystem.",
   "license": "Apache-2.0",
   "main": "./dist/index.cjs",
@@ -78,7 +78,6 @@
     "echo-version": "echo $npm_package_version",
     "build": "tsup --config tsup.config.ts"
   },
-
   "dependencies": {
     "@adaas/a-concept": "^0.1.28"
   },
