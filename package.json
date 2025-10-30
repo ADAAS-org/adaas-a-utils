@@ -2,9 +2,52 @@
   "name": "@adaas/a-utils",
   "version": "0.1.16",
   "description": "A-Utils is a set of utilities that are used across the ADAAS ecosystem. This package is designed to be a collection of utilities that are used across the ADAAS ecosystem.",
-  "main": "./dist/index.js",
+  "license": "Apache-2.0",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "author": {
+    "name": "ADAAS YAZILIM LİMİTED ŞİRKETİ",
+    "email": "contact-us@adaas.org"
+  },
+  "homepage": "https://github.com/ADAAS-org/adaas-a-utils#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ADAAS-org/adaas-a-utils.git"
+  },
+  "keywords": [
+    "sdk",
+    "utilities",
+    "typescript",
+    "nodejs",
+    "command-pattern",
+    "channel",
+    "configuration",
+    "logging",
+    "scheduling",
+    "memory-management",
+    "dependency-injection",
+    "component-architecture",
+    "adaas",
+    "ecosystem",
+    "ai",
+    "rag",
+    "manifest",
+    "polyfill",
+    "async",
+    "lifecycle",
+    "error-handling"
+  ],
+  "bugs": {
+    "url": "https://github.com/ADAAS-org/adaas-a-utils/issues"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
   "nodemonConfig": {
     "ignore": [
       "**/*.test.ts",
@@ -35,39 +78,7 @@
     "echo-version": "echo $npm_package_version",
     "build": "tsup --config tsup.config.ts"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ADAAS-org/adaas-a-utils.git"
-  },
-  "keywords": [
-    "sdk",
-    "utilities",
-    "typescript",
-    "nodejs",
-    "command-pattern",
-    "channel",
-    "configuration",
-    "logging",
-    "scheduling",
-    "memory-management",
-    "dependency-injection",
-    "component-architecture",
-    "adaas",
-    "ecosystem",
-    "ai",
-    "rag",
-    "manifest",
-    "polyfill",
-    "async",
-    "lifecycle",
-    "error-handling"
-  ],
-  "author": "adaas.org",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ADAAS-org/adaas-a-utils/issues"
-  },
-  "homepage": "https://github.com/ADAAS-org/adaas-a-utils#readme",
+
   "dependencies": {
     "@adaas/a-concept": "^0.1.28"
   },

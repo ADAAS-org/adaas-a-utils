@@ -4,10 +4,9 @@
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
-![Jest](https://img.shields.io/badge/Jest-323330?style=for-the-badge&logo=Jest&logoColor=white)
 ![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)
 
-![License](https://img.shields.io/badge/license-ISC-blue.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Version](https://img.shields.io/npm/v/@adaas/a-utils)
 ![Downloads](https://img.shields.io/npm/dm/@adaas/a-utils)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
@@ -602,3 +601,10 @@ Additional environment variables may be required by specific components like A-C
 - [Report Issues](https://github.com/ADAAS-org/adaas-a-utils/issues)
 - [Become Future Creator](https://sso.adaas.org)
 ---
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
+
+© 2025 ADAAS YAZILIM LİMİTED ŞİRKETİ All rights reserved.  
+All original code and concepts are the intellectual property of ADAAS YAZILIM LİMİTED ŞİRKETİ
