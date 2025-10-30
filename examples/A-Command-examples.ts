@@ -6,14 +6,14 @@
  */
 
 import { A_Command } from '../src/lib/A-Command/A-Command.entity';
-import { A_CONSTANTS_A_Command_Features } from '../src/lib/A-Command/A-Command.constants';
+import { A_CommandFeatures } from '../src/lib/A-Command/A-Command.constants';
 import { A_Memory } from '../src/lib/A-Memory/A-Memory.context';
-import { A_Component, A_Context, A_Feature, A_Inject, A_Error } from '@adaas/a-concept';
+import { A_Component, A_Context, A_Feature, A_Inject, A_Error, A_Dependency } from '@adaas/a-concept';
 
 // Example 1: Basic Command Usage
 async function basicCommandExample() {
     console.log('\n=== Basic Command Example ===');
-    
+
     const command = new A_Command({
         action: 'greet',
         name: 'World'
@@ -22,8 +22,8 @@ async function basicCommandExample() {
     A_Context.root.register(command);
 
     // Add event listeners
-    command.on('init', () => console.log('Command initializing...'));
-    command.on('complete', () => console.log('Command completed!'));
+    command.on(A_CommandFeatures.onInit, () => console.log('Command initializing...'));
+    command.on(A_CommandFeatures.onComplete, () => console.log('Command completed!'));
 
     await command.execute();
 
@@ -45,38 +45,38 @@ interface UserCreateResult {
     profileCreated: boolean;
 }
 
-class CreateUserCommand extends A_Command<UserCreateParams, UserCreateResult> {}
+class CreateUserCommand extends A_Command<UserCreateParams, UserCreateResult> { }
 
 class UserCreationService extends A_Component {
-    
+
     @A_Feature.Extend({ scope: [CreateUserCommand] })
-    async [A_CONSTANTS_A_Command_Features.EXECUTE](
+    async [A_CommandFeatures.onExecute](
         @A_Inject(A_Memory) memory: A_Memory<UserCreateResult>
     ) {
-        const command = A_Context.scope(this).resolve(CreateUserCommand);
+        const command = A_Context.scope(this).resolve(CreateUserCommand)!;
         const { name, email, role } = command.params;
-        
+
         console.log(`Creating user: ${name} (${email}) with role: ${role}`);
-        
+
         // Simulate user creation
         const userId = `user_${Date.now()}`;
         const createdAt = new Date().toISOString();
-        
+
         // Store results in memory
         await memory.set('userId', userId);
         await memory.set('createdAt', createdAt);
         await memory.set('profileCreated', true);
-        
+
         console.log(`User created with ID: ${userId}`);
     }
 }
 
 async function typedCommandExample() {
     console.log('\n=== Typed Command with Custom Logic Example ===');
-    
+
     A_Context.reset();
     A_Context.root.register(UserCreationService);
-    
+
     const command = new CreateUserCommand({
         name: 'John Doe',
         email: 'john@example.com',
@@ -92,10 +92,10 @@ async function typedCommandExample() {
 // Example 3: Command Serialization and Persistence
 async function serializationExample() {
     console.log('\n=== Command Serialization Example ===');
-    
+
     A_Context.reset();
     A_Context.root.register(UserCreationService);
-    
+
     // Create and execute original command
     const originalCommand = new CreateUserCommand({
         name: 'Jane Smith',
@@ -116,7 +116,7 @@ async function serializationExample() {
 
     // Restore command from serialized data
     const restoredCommand = new CreateUserCommand(parsedData);
-    
+
     console.log('Command restored from serialization:');
     console.log(`- Status: ${restoredCommand.status}`);
     console.log(`- Duration: ${restoredCommand.duration}ms`);
@@ -125,16 +125,16 @@ async function serializationExample() {
 }
 
 // Example 4: Error Handling
-class FailingCommand extends A_Command<{ shouldFail: boolean }, { success: boolean }> {}
+class FailingCommand extends A_Command<{ shouldFail: boolean }, { success: boolean }> { }
 
 class FailingService extends A_Component {
-    
+
     @A_Feature.Extend({ scope: [FailingCommand] })
-    async [A_CONSTANTS_A_Command_Features.EXECUTE](
+    async [A_CommandFeatures.onExecute](
         @A_Inject(A_Memory) memory: A_Memory<{ success: boolean }>
     ) {
-        const command = A_Context.scope(this).resolve(FailingCommand);
-        
+        const command = A_Context.scope(this).resolve(FailingCommand)!;
+
         if (command.params.shouldFail) {
             // Add error to memory
             await memory.error(new A_Error({
@@ -142,33 +142,33 @@ class FailingService extends A_Component {
                 message: 'This command was designed to fail',
                 code: 'INTENTIONAL_FAIL'
             }));
-            
+
             throw new Error('Command failed as requested');
         }
-        
+
         await memory.set('success', true);
     }
 }
 
 async function errorHandlingExample() {
     console.log('\n=== Error Handling Example ===');
-    
+
     A_Context.reset();
     A_Context.root.register(FailingService);
-    
+
     // Test successful command
     const successCommand = new FailingCommand({ shouldFail: false });
     A_Context.root.register(successCommand);
     await successCommand.execute();
-    
+
     console.log(`Success command - Status: ${successCommand.status}`);
     console.log(`Success command - Result:`, successCommand.result);
-    
+
     // Test failing command
     const failCommand = new FailingCommand({ shouldFail: true });
     A_Context.root.register(failCommand);
     await failCommand.execute();
-    
+
     console.log(`Fail command - Status: ${failCommand.status}`);
     console.log(`Fail command - Is Failed: ${failCommand.isFailed}`);
     console.log(`Fail command - Errors:`, Array.from(failCommand.errors?.values() || []));
@@ -181,30 +181,32 @@ class FileProcessCommand extends A_Command<
     { filePath: string; operation: string },
     { outputPath: string; size: number },
     FileProcessEvents
-> {}
+> { }
 
 class FileProcessor extends A_Component {
-    
+
     @A_Feature.Extend({ scope: [FileProcessCommand] })
-    async [A_CONSTANTS_A_Command_Features.EXECUTE](
-        @A_Inject(A_Memory) memory: A_Memory<{ outputPath: string; size: number }>
+    async [A_CommandFeatures.onExecute](
+        @A_Inject(A_Memory) memory: A_Memory<{ outputPath: string; size: number }>,
+
+        @A_Dependency.Required()
+        @A_Inject(FileProcessCommand) command: FileProcessCommand
     ) {
-        const command = A_Context.scope(this).resolve(FileProcessCommand);
         const { filePath, operation } = command.params;
-        
+
         // Emit custom events during processing
         command.emit('validation-started');
         console.log(`Validating file: ${filePath}`);
         await new Promise(resolve => setTimeout(resolve, 100));
-        
+
         command.emit('processing');
         console.log(`Processing file with operation: ${operation}`);
         await new Promise(resolve => setTimeout(resolve, 200));
-        
+
         command.emit('cleanup');
         console.log('Cleaning up temporary files');
         await new Promise(resolve => setTimeout(resolve, 50));
-        
+
         await memory.set('outputPath', `processed_${filePath}`);
         await memory.set('size', 1024);
     }
@@ -212,10 +214,10 @@ class FileProcessor extends A_Component {
 
 async function customEventsExample() {
     console.log('\n=== Custom Events Example ===');
-    
+
     A_Context.reset();
     A_Context.root.register(FileProcessor);
-    
+
     const command = new FileProcessCommand({
         filePath: 'document.pdf',
         operation: 'compress'
@@ -225,9 +227,9 @@ async function customEventsExample() {
     command.on('validation-started', () => console.log('📋 Validation phase started'));
     command.on('processing', () => console.log('⚙️  Processing phase started'));
     command.on('cleanup', () => console.log('🧹 Cleanup phase started'));
-    
+
     // Subscribe to lifecycle events
-    command.on('complete', () => console.log('✅ File processing completed'));
+    command.on('onComplete', () => console.log('✅ File processing completed'));
 
     A_Context.root.register(command);
     await command.execute();
@@ -238,14 +240,14 @@ async function customEventsExample() {
 // Run all examples
 async function runAllExamples() {
     console.log('🚀 Running A-Command Examples\n');
-    
+
     try {
         await basicCommandExample();
         await typedCommandExample();
         await serializationExample();
         await errorHandlingExample();
         await customEventsExample();
-        
+
         console.log('\n✅ All examples completed successfully!');
     } catch (error) {
         console.error('\n❌ Example failed:', error);

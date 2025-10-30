@@ -26,7 +26,7 @@ import { A_Polyfill } from "@adaas/a-utils/lib/A-Polyfill/A-Polyfill.component";
     await concept.start();
 
 
-    const config = service1.scope.resolve<A_Config<['ADAAS_SSO_LOCATION']>>(A_Config);
+    const config = service1.scope.resolve<A_Config<['ADAAS_SSO_LOCATION']>>(A_Config)!;
 
     console.log('config: ', config.get('ADAAS_SSO_LOCATION'))
 

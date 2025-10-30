@@ -1,5 +1,4 @@
-import { A_Fragment, A_Error, A_Component, A_TYPES__Error_Serialized, A_TYPES__Entity_Serialized, A_Meta, A_TYPES__FeatureExtendDecoratorMeta, A_TYPES__FeatureDefineDecoratorMeta, A_Entity, A_Scope, A_TYPES__ConceptENVVariables, A_TYPES__Fragment_Constructor, A_Container, A_Feature, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from '@adaas/a-concept';
-import { A_TYPES__Container_Constructor } from '@adaas/a-concept/dist/src/global/A-Container/A-Container.types';
+import { A_Fragment, A_Error, A_Component, A_TYPES__Error_Serialized, A_TYPES__Entity_Serialized, A_Entity, A_Scope, A_TYPES__ConceptENVVariables, A_TYPES__Fragment_Constructor, A_Container, A_Feature, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor, A_TYPES__Container_Constructor } from '@adaas/a-concept';
 
 declare enum A_ChannelFeatures {
     /**
@@ -492,32 +491,69 @@ declare class A_ChannelError extends A_Error {
     get context(): A_ChannelRequest | undefined;
 }
 
-declare enum A_TYPES__CommandMetaKey {
-    EXTENSIONS = "a-command-extensions",
-    FEATURES = "a-command-features",
-    ABSTRACTIONS = "a-command-abstractions"
-}
+/**
+ * A-Command Statuses
+ */
 declare enum A_CONSTANTS__A_Command_Status {
+    /**
+     * Command has been created but not yet initialized
+     */
     CREATED = "CREATED",
+    /**
+     * Command is initializing
+     */
     INITIALIZATION = "INITIALIZATION",
+    /**
+     * Command has been initialized
+     */
     INITIALIZED = "INITIALIZED",
+    /**
+     * Command is compiling
+     */
     COMPILATION = "COMPILATION",
+    /**
+     * Command is compiled
+     */
     COMPILED = "COMPILED",
+    /**
+     * Command is executing
+     */
     IN_PROGRESS = "IN_PROGRESS",
+    /**
+     * Command has completed successfully
+     */
     COMPLETED = "COMPLETED",
+    /**
+     * Command has failed
+     */
     FAILED = "FAILED"
 }
 /**
  * A-Command Lifecycle Features
  */
-declare enum A_CONSTANTS_A_Command_Features {
-    INIT = "init",
-    COMPLIED = "complied",
-    EXECUTE = "execute",
-    COMPLETE = "complete",
-    FAIL = "fail"
+declare enum A_CommandFeatures {
+    /**
+     * Allows to extend initialization logic and behavior
+     */
+    onInit = "onInit",
+    /**
+     * Allows to extend compilation logic and behavior
+     */
+    onCompile = "onCompile",
+    /**
+     * Allows to extend execution logic and behavior
+     */
+    onExecute = "onExecute",
+    /**
+     * Allows to extend completion logic and behavior
+     */
+    onComplete = "onComplete",
+    /**
+     *
+     */
+    onFail = "onFail"
 }
-type A_CONSTANTS__A_Command_Event = 'init' | 'compile' | 'execute' | 'complete' | 'fail';
+type A_CONSTANTS__A_Command_Event = keyof typeof A_CommandFeatures;
 
 /**
  * Command constructor type
@@ -569,30 +605,6 @@ type A_TYPES__Command_Serialized<ParamsType extends Record<string, any> = Record
  * Command listener type
  */
 type A_TYPES__Command_Listener<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string = A_CONSTANTS__A_Command_Event> = (command?: A_Command<InvokeType, ResultType, LifecycleEvents>) => void;
-/**
- * Command meta type
- */
-type A_TYPES__CommandMeta = {
-    [A_TYPES__CommandMetaKey.EXTENSIONS]: A_Meta<{
-        /**
-         * Where Key the regexp for what to apply the extension
-         * A set of container names or a wildcard, or a regexp
-         *
-         *
-         * Where value is the extension instructions
-         */
-        [Key: string]: A_TYPES__FeatureExtendDecoratorMeta[];
-    }>;
-    case: any;
-    [A_TYPES__CommandMetaKey.FEATURES]: A_Meta<{
-        /**
-         * Where Key is the name of the feature
-         *
-         * Where value is the list of features
-         */
-        [Key: string]: A_TYPES__FeatureDefineDecoratorMeta;
-    }>;
-};
 
 declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string | A_CONSTANTS__A_Command_Event = A_CONSTANTS__A_Command_Event> extends A_Entity<InvokeType, A_TYPES__Command_Serialized<InvokeType, ResultType>> {
     /**
@@ -841,31 +853,231 @@ declare class A_Config<T extends Array<string | A_TYPES__ConceptENVVariables[num
     set(property: T[number] | A_TYPES__ConceptENVVariables[number], value: any): any;
 }
 
+declare const A_LoggerEnvVariables: {
+    /**
+     * Sets the log level for the logger
+     *
+     * @example 'debug', 'info', 'warn', 'error'
+     */
+    readonly A_LOGGER_LEVEL: "A_LOGGER_LEVEL";
+    /**
+     * Sets the default scope length for log messages
+     *
+     * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
+     */
+    readonly A_LOGGER_DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH";
+};
+type A_LoggerEnvVariablesType = (typeof A_LoggerEnvVariables)[keyof typeof A_LoggerEnvVariables][];
+
+/**
+ * A_Logger - Advanced Logging Component with Scope-based Output Formatting
+ *
+ * This component provides comprehensive logging capabilities with:
+ * - Color-coded console output for different log levels
+ * - Scope-based message formatting with consistent alignment
+ * - Support for multiple data types (objects, errors, strings)
+ * - Configurable log levels for filtering output
+ * - Special handling for A_Error and native Error objects
+ * - Timestamp inclusion for better debugging
+ *
+ * Key Features:
+ * - **Scope Integration**: Uses A_Scope for consistent message prefixing
+ * - **Color Support**: Terminal color codes for visual distinction
+ * - **Object Formatting**: Pretty-prints JSON objects with proper indentation
+ * - **Error Handling**: Special formatting for A_Error and Error objects
+ * - **Log Level Filtering**: Configurable filtering based on severity
+ * - **Multi-line Support**: Proper alignment for multi-line messages
+ *
+ * @example
+ * ```typescript
+ * // Basic usage with dependency injection
+ * class MyService {
+ *   constructor(@A_Inject(A_Logger) private logger: A_Logger) {}
+ *
+ *   doSomething() {
+ *     this.logger.log('Processing started');
+ *     this.logger.log('blue', 'Custom color message');
+ *     this.logger.warning('Something might be wrong');
+ *     this.logger.error(new Error('Something failed'));
+ *   }
+ * }
+ *
+ * // Advanced usage with objects
+ * logger.log('green', 'User data:', { id: 1, name: 'John' });
+ * logger.error(new A_Error('VALIDATION_FAILED', 'Invalid input data'));
+ * ```
+ */
 declare class A_Logger extends A_Component {
     protected scope: A_Scope;
-    protected config?: A_Config<any>;
-    constructor(scope: A_Scope);
-    readonly colors: {
-        readonly green: "32";
-        readonly blue: "34";
-        readonly red: "31";
-        readonly yellow: "33";
-        readonly gray: "90";
-        readonly magenta: "35";
-        readonly cyan: "36";
-        readonly white: "37";
-        readonly pink: "95";
-    };
+    protected config?: A_Config<A_LoggerEnvVariablesType> | undefined;
+    /**
+     * Terminal color codes for different log levels and custom styling
+     * These codes work with ANSI escape sequences for colored terminal output
+     */
+    readonly COLORS: any;
+    /**
+     * Standard scope length for consistent formatting
+     * This ensures all log messages align properly regardless of scope name length
+     */
+    private readonly STANDARD_SCOPE_LENGTH;
+    /**
+     * Initialize A_Logger with dependency injection
+     *
+     * @param scope - The current scope context for message prefixing
+     * @param config - Optional configuration for log level filtering
+     */
+    constructor(scope: A_Scope, config?: A_Config<A_LoggerEnvVariablesType> | undefined);
+    /**
+     * Get the formatted scope length for consistent message alignment
+     * Uses a standard length to ensure all messages align properly regardless of scope name
+     *
+     * @returns The scope length to use for padding calculations
+     */
     get scopeLength(): number;
-    compile(color: keyof typeof this.colors, ...args: any[]): Array<string>;
-    protected get allowedToLog(): boolean;
-    log(color: keyof typeof this.colors, ...args: any[]): any;
-    log(...args: any[]): any;
+    /**
+     * Get the formatted scope name with proper padding
+     * Ensures consistent width for all scope names in log output
+     *
+     * @returns Padded scope name for consistent formatting
+     */
+    get formattedScope(): string;
+    /**
+     * Compile log arguments into formatted console output with colors and proper alignment
+     *
+     * This method handles the core formatting logic for all log messages:
+     * - Applies terminal color codes for visual distinction
+     * - Formats scope names with consistent padding
+     * - Handles different data types appropriately
+     * - Maintains proper indentation for multi-line content
+     *
+     * @param color - The color key to apply to the message
+     * @param args - Variable arguments to format and display
+     * @returns Array of formatted strings ready for console output
+     */
+    compile(color: keyof typeof this.COLORS, ...args: any[]): Array<string>;
+    /**
+     * Format an object for display with proper JSON indentation
+     *
+     * @param obj - The object to format
+     * @param shouldAddNewline - Whether to add a newline prefix
+     * @param scopePadding - The padding string for consistent alignment
+     * @returns Formatted object string
+     */
+    private formatObject;
+    /**
+     * Format a string for display with proper indentation
+     *
+     * @param str - The string to format
+     * @param shouldAddNewline - Whether to add a newline prefix
+     * @param scopePadding - The padding string for consistent alignment
+     * @returns Formatted string
+     */
+    private formatString;
+    /**
+     * Determine if a log message should be output based on configured log level
+     *
+     * Log level hierarchy:
+     * - debug: Shows all messages
+     * - info: Shows info, warning, and error messages
+     * - warn: Shows warning and error messages only
+     * - error: Shows error messages only
+     * - all: Shows all messages (alias for debug)
+     *
+     * @param logMethod - The type of log method being called
+     * @returns True if the message should be logged, false otherwise
+     */
+    protected shouldLog(logMethod: 'log' | 'warning' | 'error'): boolean;
+    /**
+     * General purpose logging method with optional color specification
+     *
+     * Supports two usage patterns:
+     * 1. log(message, ...args) - Uses default blue color
+     * 2. log(color, message, ...args) - Uses specified color
+     *
+     * @param color - Optional color key or the first message argument
+     * @param args - Additional arguments to log
+     *
+     * @example
+     * ```typescript
+     * logger.log('Hello World');
+     * logger.log('green', 'Success message');
+     * logger.log('Processing user:', { id: 1, name: 'John' });
+     * ```
+     */
+    log(color: keyof typeof this.COLORS, ...args: any[]): void;
+    log(...args: any[]): void;
+    /**
+     * Log warning messages with yellow color coding
+     *
+     * Use for non-critical issues that should be brought to attention
+     * but don't prevent normal operation
+     *
+     * @param args - Arguments to log as warnings
+     *
+     * @example
+     * ```typescript
+     * logger.warning('Deprecated method used');
+     * logger.warning('Rate limit approaching:', { current: 95, limit: 100 });
+     * ```
+     */
     warning(...args: any[]): void;
+    /**
+     * Log error messages with red color coding
+     *
+     * Use for critical issues, exceptions, and failures that need immediate attention
+     *
+     * @param args - Arguments to log as errors
+     * @returns void (for compatibility with console.log)
+     *
+     * @example
+     * ```typescript
+     * logger.error('Database connection failed');
+     * logger.error(new Error('Validation failed'));
+     * logger.error('Critical error:', error, { context: 'user-registration' });
+     * ```
+     */
     error(...args: any[]): void;
+    /**
+     * Legacy method for A_Error logging (kept for backward compatibility)
+     *
+     * @deprecated Use error() method instead which handles A_Error automatically
+     * @param error - The A_Error instance to log
+     */
     protected log_A_Error(error: A_Error): void;
+    /**
+     * Format A_Error instances for inline display within compiled messages
+     *
+     * Provides detailed formatting for A_Error objects including:
+     * - Error code and message
+     * - Description and stack trace
+     * - Original error information (if wrapped)
+     * - Documentation links (if available)
+     *
+     * @param error - The A_Error instance to format
+     * @returns Formatted string ready for display
+     */
     protected compile_A_Error(error: A_Error): string;
+    /**
+     * Format standard Error instances for inline display within compiled messages
+     *
+     * Converts standard JavaScript Error objects into a readable JSON format
+     * with proper indentation and stack trace formatting
+     *
+     * @param error - The Error instance to format
+     * @returns Formatted string ready for display
+     */
     protected compile_Error(error: Error): string;
+    /**
+     * Generate timestamp string for log messages
+     *
+     * Format: MM:SS:mmm (minutes:seconds:milliseconds)
+     * This provides sufficient precision for debugging while remaining readable
+     *
+     * @returns Formatted timestamp string
+     *
+     * @example
+     * Returns: "15:42:137" for 3:42:15 PM and 137 milliseconds
+     */
     protected getTime(): string;
 }
 
@@ -1064,7 +1276,7 @@ declare class A_ConfigError extends A_Error {
 declare class ConfigReader extends A_Component {
     protected polyfill: A_Polyfill;
     constructor(polyfill: A_Polyfill);
-    attachContext(container: A_Container, feature: A_Feature): Promise<void>;
+    attachContext(container: A_Container, feature: A_Feature, config?: A_Config): Promise<void>;
     initialize(config: A_Config): Promise<void>;
     /**
      * Get the configuration property by Name
@@ -1242,7 +1454,7 @@ declare class A_Memory<_MemoryType extends Record<string, any> = Record<string, 
      * @param requiredKeys
      * @returns
      */
-    verifyPrerequisites(requiredKeys: Array<keyof _MemoryType>): Promise<boolean>;
+    prerequisites(requiredKeys: Array<keyof _MemoryType>): Promise<boolean>;
     /**
      * Adds an error to the context
      *
@@ -1403,4 +1615,4 @@ declare class A_Deferred<T> {
     reject(reason?: any): void;
 }
 
-export { A_CONSTANTS_A_Command_Features, type A_CONSTANTS__A_Command_Event, A_CONSTANTS__A_Command_Status, A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, type A_ChannelRequestContext_Serialized, A_ChannelRequestStatuses, A_Command, A_CommandError, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_Logger, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_Polyfill, A_Schedule, A_ScheduleObject, type A_TYPES__CommandMeta, A_TYPES__CommandMetaKey, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+export { type A_CONSTANTS__A_Command_Event, A_CONSTANTS__A_Command_Status, A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, type A_ChannelRequestContext_Serialized, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandFeatures, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_Logger, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_Polyfill, A_Schedule, A_ScheduleObject, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };

@@ -104,18 +104,18 @@ describe('A-Memory tests', () => {
         }>();
         
         // No values set initially
-        expect(await memory.verifyPrerequisites(['required1', 'required2'])).toBe(false);
+        expect(await memory.prerequisites(['required1', 'required2'])).toBe(false);
         
         // Set one required value
         await memory.set('required1', 'value1');
-        expect(await memory.verifyPrerequisites(['required1', 'required2'])).toBe(false);
+        expect(await memory.prerequisites(['required1', 'required2'])).toBe(false);
         
         // Set both required values
         await memory.set('required2', 42);
-        expect(await memory.verifyPrerequisites(['required1', 'required2'])).toBe(true);
-        
+        expect(await memory.prerequisites(['required1', 'required2'])).toBe(true);
+
         // Test with empty requirements
-        expect(await memory.verifyPrerequisites([])).toBe(true);
+        expect(await memory.prerequisites([])).toBe(true);
     });
 
     it('Should serialize to JSON correctly', async () => {

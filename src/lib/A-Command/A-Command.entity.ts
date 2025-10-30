@@ -4,10 +4,11 @@ import {
     A_TYPES__Command_Serialized
 } from "./A-Command.types";
 import {
+    A_CommandFeatures,
     A_CONSTANTS__A_Command_Event,
     A_CONSTANTS__A_Command_Status
 } from "./A-Command.constants";
-import { A_Context, A_Entity, A_Error, A_Scope } from "@adaas/a-concept";
+import { A_Component, A_Context, A_Entity, A_Error, A_Feature, A_Scope } from "@adaas/a-concept";
 import { A_Memory } from "../A-Memory/A-Memory.context";
 import { A_CommandError } from "./A-Command.error";
 
@@ -157,10 +158,9 @@ export class A_Command<
         this._status = A_CONSTANTS__A_Command_Status.INITIALIZATION;
         this._startTime = new Date();
 
-        this.checkScopeInheritance();
 
-        this.emit('init');
-        await this.call('init', this.scope);
+        this.emit(A_CommandFeatures.onInit);
+        await this.call(A_CommandFeatures.onInit, this.scope);
         this._status = A_CONSTANTS__A_Command_Status.INITIALIZED;
     }
 
@@ -173,8 +173,8 @@ export class A_Command<
         this.checkScopeInheritance();
 
         this._status = A_CONSTANTS__A_Command_Status.COMPILATION;
-        this.emit('compile');
-        await this.call('compile', this.scope);
+        this.emit(A_CommandFeatures.onCompile);
+        await this.call(A_CommandFeatures.onCompile, this.scope);
         this._status = A_CONSTANTS__A_Command_Status.COMPILED;
     }
 
@@ -191,9 +191,9 @@ export class A_Command<
 
         this.checkScopeInheritance();
 
-        this.emit('execute');
+        this.emit(A_CommandFeatures.onExecute);
 
-        await this.call('execute', this.scope);
+        await this.call(A_CommandFeatures.onExecute, this.scope);
     }
 
     /**
@@ -204,13 +204,19 @@ export class A_Command<
 
         try {
             await this.init();
+
             await this.compile();
+
             await this.process();
+
             await this.complete();
+
 
         } catch (error) {
             await this.fail();
         }
+
+        this._executionScope.destroy();
     }
 
     /**
@@ -221,10 +227,11 @@ export class A_Command<
 
         this._status = A_CONSTANTS__A_Command_Status.COMPLETED;
         this._endTime = new Date();
-        this._result = this.scope.resolve(A_Memory).toJSON() as ResultType;
+        this._result = this.scope.resolve(A_Memory)!.toJSON() as ResultType;
 
-        this.emit('complete');
-        return await this.call('complete', this.scope);
+        this.emit(A_CommandFeatures.onComplete);
+        await this.call(A_CommandFeatures.onComplete, this.scope);
+
     }
 
 
@@ -236,10 +243,10 @@ export class A_Command<
 
         this._status = A_CONSTANTS__A_Command_Status.FAILED;
         this._endTime = new Date();
-        this._errors = this.scope.resolve(A_Memory).Errors;
+        this._errors = this.scope.resolve(A_Memory)!.Errors;
 
-        this.emit('fail');
-        return await this.call('fail', this.scope);
+        this.emit(A_CommandFeatures.onFail);
+        await this.call(A_CommandFeatures.onFail, this.scope);
     }
 
 
@@ -382,5 +389,4 @@ export class A_Command<
             this.scope.inherit(A_Context.scope(this));
         }
     }
-
 }

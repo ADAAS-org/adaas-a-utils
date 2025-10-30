@@ -254,7 +254,7 @@ class DatabaseProcessor extends A_Component {
     
     @A_Feature.Extend({ scope: [DatabaseChannel] })
     async [A_ChannelFeatures.onConnect]() {
-        const channel = A_Context.scope(this).resolve(DatabaseChannel);
+        const channel = A_Context.scope(this).resolve(DatabaseChannel)!;
         
         // Initialize connection pool
         for (let i = 0; i < 5; i++) {
@@ -271,7 +271,7 @@ class DatabaseProcessor extends A_Component {
     async [A_ChannelFeatures.onBeforeRequest](
         @A_Inject(A_ChannelRequest) context: A_ChannelRequest<DatabaseQuery>
     ) {
-        const channel = A_Context.scope(this).resolve(DatabaseChannel);
+        const channel = A_Context.scope(this).resolve(DatabaseChannel)!;
         const { operation, table } = context.params;
         
         console.log(`Executing ${operation} on table ${table}`);

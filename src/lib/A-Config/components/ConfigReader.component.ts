@@ -18,9 +18,10 @@ export class ConfigReader extends A_Component {
     async attachContext(
         @A_Inject(A_Container) container: A_Container,
         @A_Inject(A_Feature) feature: A_Feature,
+        @A_Inject(A_Config) config?: A_Config,
     ) {
-        if (!container.scope.has(A_Config)) {
-            const newConfig = new A_Config({
+        if (!config) {
+            config= new A_Config({
                 variables: [
                     ...A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
                     ...A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
@@ -28,11 +29,8 @@ export class ConfigReader extends A_Component {
                 defaults: {}
             });
 
-            container.scope.register(newConfig);
+            container.scope.register(config);
         }
-
-
-        const config = container.scope.resolve<A_Config>(A_Config);
 
         const rootDir = await this.getProjectRoot();
 

@@ -41,7 +41,7 @@ export class A_Memory<
      * @param requiredKeys 
      * @returns 
      */
-    async verifyPrerequisites(
+    async prerequisites(
         requiredKeys: Array<keyof _MemoryType>
     ): Promise<boolean> {
         return requiredKeys.every(key => this._memory.has(key));

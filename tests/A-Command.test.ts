@@ -1,5 +1,5 @@
 import { A_Command } from '@adaas/a-utils/lib/A-Command/A-Command.entity';
-import { A_CONSTANTS__A_Command_Status, A_CONSTANTS_A_Command_Features } from '@adaas/a-utils/lib/A-Command/A-Command.constants';
+import { A_CONSTANTS__A_Command_Status, A_CommandFeatures } from '@adaas/a-utils/lib/A-Command/A-Command.constants';
 import { A_Component, A_Context, A_Error, A_Feature, A_Inject, A_Scope } from '@adaas/a-concept';
 import { A_Memory } from '@adaas/a-utils/lib/A-Memory/A-Memory.context';
 
@@ -44,7 +44,7 @@ describe('A-Command tests', () => {
         A_Context.root.register(command);
 
         command.emit('A_CUSTOM_EVENT_1');
-        command.emit('compile');
+        command.emit('onCompile');
 
         expect(command).toBeInstanceOf(A_Command);
         expect(command.code).toBe('my-command');
@@ -94,7 +94,7 @@ describe('A-Command tests', () => {
         class MyComponent extends A_Component {
 
             @A_Feature.Extend({ scope: [MyCommand] })
-            async [A_CONSTANTS_A_Command_Features.EXECUTE](
+            async [A_CommandFeatures.onExecute](
                 @A_Inject(A_Memory) context: A_Memory<resultType>
             ) {
                 context.set('bar', 'baz');
@@ -131,7 +131,7 @@ describe('A-Command tests', () => {
         class MyComponent extends A_Component {
 
             @A_Feature.Extend({ scope: [MyCommand] })
-            async [A_CONSTANTS_A_Command_Features.EXECUTE](
+            async [A_CommandFeatures.onExecute](
                 @A_Inject(A_Memory) context: A_Memory<resultType>
             ) {
                 context.error(new A_Error({ title: 'Test error' }));
@@ -170,11 +170,11 @@ describe('A-Command tests', () => {
             A_Context.root.register(command);
             
             // Track lifecycle events
-            command.on('init', () => lifecycleOrder.push('init'));
-            command.on('compile', () => lifecycleOrder.push('compile'));
-            command.on('execute', () => lifecycleOrder.push('execute'));
-            command.on('complete', () => lifecycleOrder.push('complete'));
-            command.on('fail', () => lifecycleOrder.push('fail'));
+            command.on(A_CommandFeatures.onInit, () => lifecycleOrder.push('init'));
+            command.on(A_CommandFeatures.onCompile, () => lifecycleOrder.push('compile'));
+            command.on(A_CommandFeatures.onExecute, () => lifecycleOrder.push('execute'));
+            command.on(A_CommandFeatures.onComplete, () => lifecycleOrder.push('complete'));
+            command.on(A_CommandFeatures.onFail, () => lifecycleOrder.push('fail'));
 
             await command.execute();
 
@@ -221,7 +221,7 @@ describe('A-Command tests', () => {
             
             class FailingComponent extends A_Component {
                 @A_Feature.Extend({ scope: [FailingCommand] })
-                async [A_CONSTANTS_A_Command_Features.EXECUTE]() {
+                async [A_CommandFeatures.onExecute]() {
                     throw new A_Error({ title: 'Execution failed' });
                 }
             }
@@ -232,11 +232,11 @@ describe('A-Command tests', () => {
             A_Context.root.register(command);
 
             const lifecycleOrder: string[] = [];
-            command.on('init', () => lifecycleOrder.push('init'));
-            command.on('compile', () => lifecycleOrder.push('compile'));
-            command.on('execute', () => lifecycleOrder.push('execute'));
-            command.on('complete', () => lifecycleOrder.push('complete'));
-            command.on('fail', () => lifecycleOrder.push('fail'));
+            command.on(A_CommandFeatures.onInit, () => lifecycleOrder.push('init'));
+            command.on(A_CommandFeatures.onCompile, () => lifecycleOrder.push('compile'));
+            command.on(A_CommandFeatures.onExecute, () => lifecycleOrder.push('execute'));
+            command.on(A_CommandFeatures.onComplete, () => lifecycleOrder.push('complete'));
+            command.on(A_CommandFeatures.onFail, () => lifecycleOrder.push('fail'));
 
             await command.execute();
 
@@ -279,8 +279,8 @@ describe('A-Command tests', () => {
             const listener1Calls: number[] = [];
             const listener2Calls: number[] = [];
 
-            command.on('init', () => listener1Calls.push(1));
-            command.on('init', () => listener2Calls.push(2));
+            command.on(A_CommandFeatures.onInit, () => listener1Calls.push(1));
+            command.on(A_CommandFeatures.onInit, () => listener2Calls.push(2));
 
             await command.init();
 
@@ -317,12 +317,12 @@ describe('A-Command tests', () => {
             const listenerCalls: number[] = [];
             const listener = () => listenerCalls.push(1);
 
-            command.on('init', listener);
+            command.on(A_CommandFeatures.onInit, listener);
             await command.init();
             expect(listenerCalls).toEqual([1]);
 
             // Remove listener and verify it's not called again
-            command.off('init', listener);
+            command.off(A_CommandFeatures.onInit, listener);
             
             // Reset to call init again
             (command as any)._status = A_CONSTANTS__A_Command_Status.CREATED;
@@ -336,7 +336,7 @@ describe('A-Command tests', () => {
 
             let receivedCommand: A_Command<any, any, any> | undefined = undefined;
 
-            command.on('init', (cmd) => {
+            command.on(A_CommandFeatures.onInit, (cmd) => {
                 receivedCommand = cmd;
             });
 
@@ -352,10 +352,10 @@ describe('A-Command tests', () => {
 
             const successfulCalls: number[] = [];
 
-            command.on('init', () => {
+            command.on(A_CommandFeatures.onInit, () => {
                 throw new Error('Listener error');
             });
-            command.on('init', () => successfulCalls.push(1));
+            command.on(A_CommandFeatures.onInit, () => successfulCalls.push(1));
 
             // Listener errors are propagated and will cause the command to fail
             await expect(command.init()).rejects.toThrow('Listener error');
@@ -429,7 +429,7 @@ describe('A-Command tests', () => {
 
             class ResultProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [ResultCommand] })
-                async [A_CONSTANTS_A_Command_Features.EXECUTE](
+                async [A_CommandFeatures.onExecute](
                     @A_Inject(A_Memory) memory: A_Memory<TestResult>
                 ) {
                     memory.set('processedData', 'processed-input');
@@ -457,7 +457,7 @@ describe('A-Command tests', () => {
 
             // Test deserialization - result is restored to memory and accessible through get method
             const deserializedCommand = new ResultCommand(serialized);
-            const deserializedMemory = deserializedCommand.scope.resolve(A_Memory);
+            const deserializedMemory = deserializedCommand.scope.resolve(A_Memory)!;
             expect(deserializedMemory.get('processedData')).toBe('processed-input');
             expect(deserializedMemory.get('count')).toBe(100);
             expect(deserializedMemory.get('metadata')).toEqual(serialized.result?.metadata);
@@ -470,7 +470,7 @@ describe('A-Command tests', () => {
 
             class ErrorComponent extends A_Component {
                 @A_Feature.Extend({ scope: [ErrorCommand] })
-                async [A_CONSTANTS_A_Command_Features.EXECUTE](
+                async [A_CommandFeatures.onExecute](
                     @A_Inject(A_Memory) memory: A_Memory<{ output: string }>
                 ) {
                     memory.error(new A_Error({ 
@@ -503,7 +503,7 @@ describe('A-Command tests', () => {
 
             // Test deserialization - errors are restored to memory
             const deserializedCommand = new ErrorCommand(serialized);
-            const deserializedMemory = deserializedCommand.scope.resolve(A_Memory);
+            const deserializedMemory = deserializedCommand.scope.resolve(A_Memory)!;
             expect(deserializedMemory.Errors?.size).toBe(2);
             const errorArray = Array.from(deserializedMemory.Errors?.values() || []);
             expect(errorArray[0].title).toBe('First error');

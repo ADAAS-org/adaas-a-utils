@@ -188,125 +188,352 @@ var A_Config = class extends aConcept.A_Fragment {
   }
 };
 
+// src/lib/A-Logger/A-Logger.constants.ts
+var A_LOGGER_DEFAULT_SCOPE_LENGTH = 20;
+var A_LOGGER_COLORS = {
+  green: "32",
+  // Success, completion messages
+  blue: "34",
+  // Info, general messages  
+  red: "31",
+  // Errors, critical issues
+  yellow: "33",
+  // Warnings, caution messages
+  gray: "90",
+  // Debug, less important info
+  magenta: "35",
+  // Special highlighting
+  cyan: "36",
+  // Headers, titles
+  white: "37",
+  // Default text
+  pink: "95"
+  // Custom highlighting
+};
+var A_LOGGER_ANSI = {
+  RESET: "\x1B[0m",
+  PREFIX: "\x1B[",
+  SUFFIX: "m"
+};
+var A_LOGGER_TIME_FORMAT = {
+  MINUTES_PAD: 2,
+  SECONDS_PAD: 2,
+  MILLISECONDS_PAD: 3,
+  SEPARATOR: ":"
+};
+var A_LOGGER_FORMAT = {
+  SCOPE_OPEN: "[",
+  SCOPE_CLOSE: "]",
+  TIME_OPEN: "|",
+  TIME_CLOSE: "|",
+  SEPARATOR: "-------------------------------",
+  PIPE: "| "
+};
+var A_LOGGER_ENV_KEYS = {
+  LOG_LEVEL: "A_LOGGER_LEVEL"
+};
+
 // src/lib/A-Logger/A-Logger.component.ts
 exports.A_Logger = class A_Logger extends aConcept.A_Component {
-  constructor(scope) {
+  // =============================================
+  // Constructor and Initialization
+  // =============================================
+  /**
+   * Initialize A_Logger with dependency injection
+   * 
+   * @param scope - The current scope context for message prefixing
+   * @param config - Optional configuration for log level filtering
+   */
+  constructor(scope, config) {
     super();
     this.scope = scope;
-    this.colors = {
-      green: "32",
-      blue: "34",
-      red: "31",
-      yellow: "33",
-      gray: "90",
-      magenta: "35",
-      cyan: "36",
-      white: "37",
-      pink: "95"
-    };
-    this.config = this.scope.has(A_Config) ? this.scope.resolve(A_Config) : void 0;
+    this.config = config;
+    this.COLORS = A_LOGGER_COLORS;
+    this.STANDARD_SCOPE_LENGTH = config?.get("A_LOGGER_DEFAULT_SCOPE_LENGTH") || A_LOGGER_DEFAULT_SCOPE_LENGTH;
   }
+  // =============================================
+  // Scope and Formatting Utilities
+  // =============================================
+  /**
+   * Get the formatted scope length for consistent message alignment
+   * Uses a standard length to ensure all messages align properly regardless of scope name
+   * 
+   * @returns The scope length to use for padding calculations
+   */
   get scopeLength() {
-    return this.scope.name.length;
+    return Math.max(this.scope.name.length, this.STANDARD_SCOPE_LENGTH);
   }
+  /**
+   * Get the formatted scope name with proper padding
+   * Ensures consistent width for all scope names in log output
+   * 
+   * @returns Padded scope name for consistent formatting
+   */
+  get formattedScope() {
+    return this.scope.name.padEnd(this.STANDARD_SCOPE_LENGTH);
+  }
+  // =============================================
+  // Message Compilation and Formatting
+  // =============================================
+  /**
+   * Compile log arguments into formatted console output with colors and proper alignment
+   * 
+   * This method handles the core formatting logic for all log messages:
+   * - Applies terminal color codes for visual distinction
+   * - Formats scope names with consistent padding
+   * - Handles different data types appropriately
+   * - Maintains proper indentation for multi-line content
+   * 
+   * @param color - The color key to apply to the message
+   * @param args - Variable arguments to format and display
+   * @returns Array of formatted strings ready for console output
+   */
   compile(color, ...args) {
+    const timeString = this.getTime();
+    const scopePadding = " ".repeat(this.scopeLength + 3);
+    const isMultiArg = args.length > 1;
     return [
-      `\x1B[${this.colors[color]}m[${this.scope.name}] |${this.getTime()}|`,
-      args.length > 1 ? `
-${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "",
+      // Header with color, scope, and timestamp
+      `${A_LOGGER_ANSI.PREFIX}${this.COLORS[color]}${A_LOGGER_ANSI.SUFFIX}${A_LOGGER_FORMAT.SCOPE_OPEN}${this.formattedScope}${A_LOGGER_FORMAT.SCOPE_CLOSE} ${A_LOGGER_FORMAT.TIME_OPEN}${timeString}${A_LOGGER_FORMAT.TIME_CLOSE}`,
+      // Top separator for multi-argument messages
+      isMultiArg ? `
+${scopePadding}${A_LOGGER_FORMAT.TIME_OPEN}${A_LOGGER_FORMAT.SEPARATOR}` : "",
+      // Process each argument with appropriate formatting
       ...args.map((arg, i) => {
+        const shouldAddNewline = i > 0 || isMultiArg;
         switch (true) {
           case arg instanceof aConcept.A_Error:
             return this.compile_A_Error(arg);
           case arg instanceof Error:
             return this.compile_Error(arg);
-          case typeof arg === "object":
-            return JSON.stringify(arg, null, 2).replace(/\n/g, `
-${" ".repeat(this.scopeLength + 3)}| `);
+          case (typeof arg === "object" && arg !== null):
+            return this.formatObject(arg, shouldAddNewline, scopePadding);
           default:
-            return String(
-              (i > 0 || args.length > 1 ? "\n" : "") + arg
-            ).replace(/\n/g, `
-${" ".repeat(this.scopeLength + 3)}| `);
+            return this.formatString(String(arg), shouldAddNewline, scopePadding);
         }
       }),
-      args.length > 1 ? `
-${" ".repeat(this.scopeLength + 3)}|-------------------------------\x1B[0m` : "\x1B[0m"
+      // Bottom separator and color reset
+      isMultiArg ? `
+${scopePadding}${A_LOGGER_FORMAT.TIME_OPEN}${A_LOGGER_FORMAT.SEPARATOR}${A_LOGGER_ANSI.RESET}` : A_LOGGER_ANSI.RESET
     ];
   }
-  get allowedToLog() {
-    return this.config ? this.config.get("CONFIG_VERBOSE") !== void 0 && this.config.get("CONFIG_VERBOSE") !== "false" && this.config.get("CONFIG_VERBOSE") !== false : true;
+  /**
+   * Format an object for display with proper JSON indentation
+   * 
+   * @param obj - The object to format
+   * @param shouldAddNewline - Whether to add a newline prefix
+   * @param scopePadding - The padding string for consistent alignment
+   * @returns Formatted object string
+   */
+  formatObject(obj, shouldAddNewline, scopePadding) {
+    let jsonString;
+    try {
+      jsonString = JSON.stringify(obj, null, 2);
+    } catch (error) {
+      const seen = /* @__PURE__ */ new WeakSet();
+      jsonString = JSON.stringify(obj, (key, value) => {
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return "[Circular Reference]";
+          }
+          seen.add(value);
+        }
+        return value;
+      }, 2);
+    }
+    const formatted = jsonString.replace(/\n/g, `
+${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
+    return shouldAddNewline ? `
+${scopePadding}${A_LOGGER_FORMAT.PIPE}` + formatted : formatted;
+  }
+  /**
+   * Format a string for display with proper indentation
+   * 
+   * @param str - The string to format
+   * @param shouldAddNewline - Whether to add a newline prefix
+   * @param scopePadding - The padding string for consistent alignment
+   * @returns Formatted string
+   */
+  formatString(str, shouldAddNewline, scopePadding) {
+    const prefix = shouldAddNewline ? "\n" : "";
+    return (prefix + str).replace(/\n/g, `
+${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
+  }
+  // =============================================
+  // Log Level Management
+  // =============================================
+  /**
+   * Determine if a log message should be output based on configured log level
+   * 
+   * Log level hierarchy:
+   * - debug: Shows all messages
+   * - info: Shows info, warning, and error messages
+   * - warn: Shows warning and error messages only
+   * - error: Shows error messages only
+   * - all: Shows all messages (alias for debug)
+   * 
+   * @param logMethod - The type of log method being called
+   * @returns True if the message should be logged, false otherwise
+   */
+  shouldLog(logMethod) {
+    const shouldLog = this.config?.get(A_LOGGER_ENV_KEYS.LOG_LEVEL) || "all";
+    switch (shouldLog) {
+      case "debug":
+        return true;
+      case "info":
+        return logMethod === "log" || logMethod === "warning" || logMethod === "error";
+      case "warn":
+        return logMethod === "warning" || logMethod === "error";
+      case "error":
+        return logMethod === "error";
+      case "all":
+        return true;
+      default:
+        return false;
+    }
   }
   log(param1, ...args) {
-    if (!this.allowedToLog)
-      return;
-    if (typeof param1 === "string" && this.colors[param1]) {
+    if (!this.shouldLog("log")) return;
+    if (typeof param1 === "string" && this.COLORS[param1]) {
       console.log(...this.compile(param1, ...args));
-      return;
     } else {
       console.log(...this.compile("blue", param1, ...args));
     }
   }
+  /**
+   * Log warning messages with yellow color coding
+   * 
+   * Use for non-critical issues that should be brought to attention
+   * but don't prevent normal operation
+   * 
+   * @param args - Arguments to log as warnings
+   * 
+   * @example
+   * ```typescript
+   * logger.warning('Deprecated method used');
+   * logger.warning('Rate limit approaching:', { current: 95, limit: 100 });
+   * ```
+   */
   warning(...args) {
-    if (!this.allowedToLog)
-      return;
+    if (!this.shouldLog("warning")) return;
     console.log(...this.compile("yellow", ...args));
   }
+  /**
+   * Log error messages with red color coding
+   * 
+   * Use for critical issues, exceptions, and failures that need immediate attention
+   * 
+   * @param args - Arguments to log as errors
+   * @returns void (for compatibility with console.log)
+   * 
+   * @example
+   * ```typescript
+   * logger.error('Database connection failed');
+   * logger.error(new Error('Validation failed'));
+   * logger.error('Critical error:', error, { context: 'user-registration' });
+   * ```
+   */
   error(...args) {
-    if (this.config && this.config.get("CONFIG_IGNORE_ERRORS"))
-      return;
-    return console.log(...this.compile("red", ...args));
+    if (!this.shouldLog("error")) return;
+    console.log(...this.compile("red", ...args));
   }
+  // =============================================
+  // Specialized Error Formatting
+  // =============================================
+  /**
+   * Legacy method for A_Error logging (kept for backward compatibility)
+   * 
+   * @deprecated Use error() method instead which handles A_Error automatically
+   * @param error - The A_Error instance to log
+   */
   log_A_Error(error) {
     const time = this.getTime();
-    console.log(`\x1B[31m[${this.scope.name}] |${time}| ERROR ${error.code}
-${" ".repeat(this.scopeLength + 3)}| ${error.message}
-${" ".repeat(this.scopeLength + 3)}| ${error.description} 
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}| ${error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-\x1B[0m` + (error.originalError ? `\x1B[31m${" ".repeat(this.scopeLength + 3)}| Wrapped From  ${error.originalError.message}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}| ${error.originalError.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-\x1B[0m` : "") + (error.link ? `\x1B[31m${" ".repeat(this.scopeLength + 3)}| Read in docs: ${error.link}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
+    const scopePadding = " ".repeat(this.scopeLength + 3);
+    console.log(`\x1B[31m[${this.formattedScope}] |${time}| ERROR ${error.code}
+${scopePadding}| ${error.message}
+${scopePadding}| ${error.description} 
+${scopePadding}|-------------------------------
+${scopePadding}| ${error.stack?.split("\n").map((line, index) => index === 0 ? line : `${scopePadding}| ${line}`).join("\n") || "No stack trace"}
+${scopePadding}|-------------------------------
+\x1B[0m` + (error.originalError ? `\x1B[31m${scopePadding}| Wrapped From  ${error.originalError.message}
+${scopePadding}|-------------------------------
+${scopePadding}| ${error.originalError.stack?.split("\n").map((line, index) => index === 0 ? line : `${scopePadding}| ${line}`).join("\n") || "No stack trace"}
+${scopePadding}|-------------------------------
+\x1B[0m` : "") + (error.link ? `\x1B[31m${scopePadding}| Read in docs: ${error.link}
+${scopePadding}|-------------------------------
 \x1B[0m` : ""));
   }
+  /**
+   * Format A_Error instances for inline display within compiled messages
+   * 
+   * Provides detailed formatting for A_Error objects including:
+   * - Error code and message
+   * - Description and stack trace
+   * - Original error information (if wrapped)
+   * - Documentation links (if available)
+   * 
+   * @param error - The A_Error instance to format
+   * @returns Formatted string ready for display
+   */
   compile_A_Error(error) {
-    this.getTime();
+    const scopePadding = " ".repeat(this.scopeLength + 3);
     return `
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}|  Error:  | ${error.code}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}|${" ".repeat(10)}| ${error.message}
-${" ".repeat(this.scopeLength + 3)}|${" ".repeat(10)}| ${error.description} 
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}| ${error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------` + (error.originalError ? `${" ".repeat(this.scopeLength + 3)}| Wrapped From  ${error.originalError.message}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------
-${" ".repeat(this.scopeLength + 3)}| ${error.originalError.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n") || "No stack trace"}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "") + (error.link ? `${" ".repeat(this.scopeLength + 3)}| Read in docs: ${error.link}
-${" ".repeat(this.scopeLength + 3)}|-------------------------------` : "");
+${scopePadding}|-------------------------------
+${scopePadding}|  Error:  | ${error.code}
+${scopePadding}|-------------------------------
+${scopePadding}|${" ".repeat(10)}| ${error.message}
+${scopePadding}|${" ".repeat(10)}| ${error.description} 
+${scopePadding}|-------------------------------
+${scopePadding}| ${error.stack?.split("\n").map((line, index) => index === 0 ? line : `${scopePadding}| ${line}`).join("\n") || "No stack trace"}
+${scopePadding}|-------------------------------` + (error.originalError ? `${scopePadding}| Wrapped From  ${error.originalError.message}
+${scopePadding}|-------------------------------
+${scopePadding}| ${error.originalError.stack?.split("\n").map((line, index) => index === 0 ? line : `${scopePadding}| ${line}`).join("\n") || "No stack trace"}
+${scopePadding}|-------------------------------` : "") + (error.link ? `${scopePadding}| Read in docs: ${error.link}
+${scopePadding}|-------------------------------` : "");
   }
+  /**
+   * Format standard Error instances for inline display within compiled messages
+   * 
+   * Converts standard JavaScript Error objects into a readable JSON format
+   * with proper indentation and stack trace formatting
+   * 
+   * @param error - The Error instance to format
+   * @returns Formatted string ready for display
+   */
   compile_Error(error) {
+    const scopePadding = " ".repeat(this.scopeLength + 3);
     return JSON.stringify({
       name: error.name,
       message: error.message,
-      stack: error.stack?.split("\n").map((line, index) => index === 0 ? line : `${" ".repeat(this.scopeLength + 3)}| ${line}`).join("\n")
+      stack: error.stack?.split("\n").map((line, index) => index === 0 ? line : `${scopePadding}| ${line}`).join("\n")
     }, null, 2).replace(/\n/g, `
-${" ".repeat(this.scopeLength + 3)}| `).replace(/\\n/g, "\n");
+${scopePadding}| `).replace(/\\n/g, "\n");
   }
+  // =============================================
+  // Utility Methods
+  // =============================================
+  /**
+   * Generate timestamp string for log messages
+   * 
+   * Format: MM:SS:mmm (minutes:seconds:milliseconds)
+   * This provides sufficient precision for debugging while remaining readable
+   * 
+   * @returns Formatted timestamp string
+   * 
+   * @example
+   * Returns: "15:42:137" for 3:42:15 PM and 137 milliseconds
+   */
   getTime() {
     const now = /* @__PURE__ */ new Date();
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const milliseconds = String(now.getMilliseconds()).padStart(4, "0");
-    return `${minutes}:${seconds}:${milliseconds}`;
+    const minutes = String(now.getMinutes()).padStart(A_LOGGER_TIME_FORMAT.MINUTES_PAD, "0");
+    const seconds = String(now.getSeconds()).padStart(A_LOGGER_TIME_FORMAT.SECONDS_PAD, "0");
+    const milliseconds = String(now.getMilliseconds()).padStart(A_LOGGER_TIME_FORMAT.MILLISECONDS_PAD, "0");
+    return `${minutes}${A_LOGGER_TIME_FORMAT.SEPARATOR}${seconds}${A_LOGGER_TIME_FORMAT.SEPARATOR}${milliseconds}`;
   }
 };
 exports.A_Logger = __decorateClass([
-  __decorateParam(0, aConcept.A_Inject(aConcept.A_Scope))
+  __decorateParam(0, aConcept.A_Inject(aConcept.A_Scope)),
+  __decorateParam(1, aConcept.A_Inject(A_Config))
 ], exports.A_Logger);
 
 // src/lib/A-Channel/A-Channel.component.ts
@@ -615,12 +842,6 @@ __decorateClass([
 ], GlobalErrorhandler.prototype, "anotherError", 1);
 
 // src/lib/A-Command/A-Command.constants.ts
-var A_TYPES__CommandMetaKey = /* @__PURE__ */ ((A_TYPES__CommandMetaKey2) => {
-  A_TYPES__CommandMetaKey2["EXTENSIONS"] = "a-command-extensions";
-  A_TYPES__CommandMetaKey2["FEATURES"] = "a-command-features";
-  A_TYPES__CommandMetaKey2["ABSTRACTIONS"] = "a-command-abstractions";
-  return A_TYPES__CommandMetaKey2;
-})(A_TYPES__CommandMetaKey || {});
 var A_CONSTANTS__A_Command_Status = /* @__PURE__ */ ((A_CONSTANTS__A_Command_Status2) => {
   A_CONSTANTS__A_Command_Status2["CREATED"] = "CREATED";
   A_CONSTANTS__A_Command_Status2["INITIALIZATION"] = "INITIALIZATION";
@@ -632,14 +853,14 @@ var A_CONSTANTS__A_Command_Status = /* @__PURE__ */ ((A_CONSTANTS__A_Command_Sta
   A_CONSTANTS__A_Command_Status2["FAILED"] = "FAILED";
   return A_CONSTANTS__A_Command_Status2;
 })(A_CONSTANTS__A_Command_Status || {});
-var A_CONSTANTS_A_Command_Features = /* @__PURE__ */ ((A_CONSTANTS_A_Command_Features2) => {
-  A_CONSTANTS_A_Command_Features2["INIT"] = "init";
-  A_CONSTANTS_A_Command_Features2["COMPLIED"] = "complied";
-  A_CONSTANTS_A_Command_Features2["EXECUTE"] = "execute";
-  A_CONSTANTS_A_Command_Features2["COMPLETE"] = "complete";
-  A_CONSTANTS_A_Command_Features2["FAIL"] = "fail";
-  return A_CONSTANTS_A_Command_Features2;
-})(A_CONSTANTS_A_Command_Features || {});
+var A_CommandFeatures = /* @__PURE__ */ ((A_CommandFeatures2) => {
+  A_CommandFeatures2["onInit"] = "onInit";
+  A_CommandFeatures2["onCompile"] = "onCompile";
+  A_CommandFeatures2["onExecute"] = "onExecute";
+  A_CommandFeatures2["onComplete"] = "onComplete";
+  A_CommandFeatures2["onFail"] = "onFail";
+  return A_CommandFeatures2;
+})(A_CommandFeatures || {});
 var A_Memory = class extends aConcept.A_Fragment {
   /**
    * Memory object that allows to store intermediate values and errors
@@ -660,7 +881,7 @@ var A_Memory = class extends aConcept.A_Fragment {
    * @param requiredKeys 
    * @returns 
    */
-  async verifyPrerequisites(requiredKeys) {
+  async prerequisites(requiredKeys) {
     return requiredKeys.every((key) => this._memory.has(key));
   }
   /**
@@ -826,9 +1047,8 @@ var A_Command = class extends aConcept.A_Entity {
     }
     this._status = "INITIALIZATION" /* INITIALIZATION */;
     this._startTime = /* @__PURE__ */ new Date();
-    this.checkScopeInheritance();
-    this.emit("init");
-    await this.call("init", this.scope);
+    this.emit("onInit" /* onInit */);
+    await this.call("onInit" /* onInit */, this.scope);
     this._status = "INITIALIZED" /* INITIALIZED */;
   }
   // Should compile everything before execution
@@ -838,8 +1058,8 @@ var A_Command = class extends aConcept.A_Entity {
     }
     this.checkScopeInheritance();
     this._status = "COMPILATION" /* COMPILATION */;
-    this.emit("compile");
-    await this.call("compile", this.scope);
+    this.emit("onCompile" /* onCompile */);
+    await this.call("onCompile" /* onCompile */, this.scope);
     this._status = "COMPILED" /* COMPILED */;
   }
   /**
@@ -852,8 +1072,8 @@ var A_Command = class extends aConcept.A_Entity {
       return;
     this._status = "IN_PROGRESS" /* IN_PROGRESS */;
     this.checkScopeInheritance();
-    this.emit("execute");
-    await this.call("execute", this.scope);
+    this.emit("onExecute" /* onExecute */);
+    await this.call("onExecute" /* onExecute */, this.scope);
   }
   /**
    * Executes the command logic.
@@ -868,6 +1088,7 @@ var A_Command = class extends aConcept.A_Entity {
     } catch (error) {
       await this.fail();
     }
+    this._executionScope.destroy();
   }
   /**
    * Marks the command as completed
@@ -877,8 +1098,8 @@ var A_Command = class extends aConcept.A_Entity {
     this._status = "COMPLETED" /* COMPLETED */;
     this._endTime = /* @__PURE__ */ new Date();
     this._result = this.scope.resolve(A_Memory).toJSON();
-    this.emit("complete");
-    return await this.call("complete", this.scope);
+    this.emit("onComplete" /* onComplete */);
+    await this.call("onComplete" /* onComplete */, this.scope);
   }
   /**
    * Marks the command as failed
@@ -888,8 +1109,8 @@ var A_Command = class extends aConcept.A_Entity {
     this._status = "FAILED" /* FAILED */;
     this._endTime = /* @__PURE__ */ new Date();
     this._errors = this.scope.resolve(A_Memory).Errors;
-    this.emit("fail");
-    return await this.call("fail", this.scope);
+    this.emit("onFail" /* onFail */);
+    await this.call("onFail" /* onFail */, this.scope);
   }
   // --------------------------------------------------------------------------   
   // A-Command Event-Emitter methods
@@ -1716,18 +1937,17 @@ exports.ConfigReader = class ConfigReader extends aConcept.A_Component {
     super();
     this.polyfill = polyfill;
   }
-  async attachContext(container, feature) {
-    if (!container.scope.has(A_Config)) {
-      const newConfig = new A_Config({
+  async attachContext(container, feature, config) {
+    if (!config) {
+      config = new A_Config({
         variables: [
           ...aConcept.A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
           ...A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
         ],
         defaults: {}
       });
-      container.scope.register(newConfig);
+      container.scope.register(config);
     }
-    const config = container.scope.resolve(A_Config);
     const rootDir = await this.getProjectRoot();
     config.set("A_CONCEPT_ROOT_FOLDER", rootDir);
   }
@@ -1767,7 +1987,8 @@ exports.ConfigReader = class ConfigReader extends aConcept.A_Component {
 __decorateClass([
   aConcept.A_Concept.Load(),
   __decorateParam(0, aConcept.A_Inject(aConcept.A_Container)),
-  __decorateParam(1, aConcept.A_Inject(aConcept.A_Feature))
+  __decorateParam(1, aConcept.A_Inject(aConcept.A_Feature)),
+  __decorateParam(2, aConcept.A_Inject(A_Config))
 ], exports.ConfigReader.prototype, "attachContext", 1);
 __decorateClass([
   aConcept.A_Concept.Load(),
@@ -2149,7 +2370,6 @@ var A_Schedule = class extends aConcept.A_Component {
   }
 };
 
-exports.A_CONSTANTS_A_Command_Features = A_CONSTANTS_A_Command_Features;
 exports.A_CONSTANTS__A_Command_Status = A_CONSTANTS__A_Command_Status;
 exports.A_CONSTANTS__CONFIG_ENV_VARIABLES = A_CONSTANTS__CONFIG_ENV_VARIABLES;
 exports.A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY = A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY;
@@ -2160,6 +2380,7 @@ exports.A_ChannelRequest = A_ChannelRequest;
 exports.A_ChannelRequestStatuses = A_ChannelRequestStatuses;
 exports.A_Command = A_Command;
 exports.A_CommandError = A_CommandError;
+exports.A_CommandFeatures = A_CommandFeatures;
 exports.A_Config = A_Config;
 exports.A_ConfigError = A_ConfigError;
 exports.A_ConfigLoader = A_ConfigLoader;
@@ -2170,7 +2391,6 @@ exports.A_ManifestError = A_ManifestError;
 exports.A_Memory = A_Memory;
 exports.A_Schedule = A_Schedule;
 exports.A_ScheduleObject = A_ScheduleObject;
-exports.A_TYPES__CommandMetaKey = A_TYPES__CommandMetaKey;
 exports.A_TYPES__ConfigFeature = A_TYPES__ConfigFeature;
 exports.ENVConfigReader = ENVConfigReader;
 exports.FileConfigReader = FileConfigReader;

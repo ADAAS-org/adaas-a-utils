@@ -1,5 +1,4 @@
-import { A_Component, A_Container, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor, A_TYPES__Fragment_Constructor } from "@adaas/a-concept"
-import { A_TYPES__Container_Constructor } from "@adaas/a-concept/dist/src/global/A-Container/A-Container.types"
+import { A_Component, A_TYPES__Component_Constructor, A_TYPES__Container_Constructor, A_TYPES__Entity_Constructor, A_TYPES__Fragment_Constructor } from "@adaas/a-concept"
 
 
 export type A_UTILS_TYPES__Manifest_Init = Array<A_UTILS_TYPES__Manifest_ComponentLevelConfig>

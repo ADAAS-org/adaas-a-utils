@@ -38,15 +38,15 @@ export class A_ConfigLoader extends A_Container {
             switch (true) {
 
                 case A_Context.environment === 'server' && !!fs.existsSync(`${A_Context.concept}.conf.json`):
-                    this.reader = this.scope.resolve<ConfigReader>(FileConfigReader);
+                    this.reader = this.scope.resolve<ConfigReader>(FileConfigReader)!;
                     break;
 
                 case A_Context.environment === 'server' && !fs.existsSync(`${A_Context.concept}.conf.json`):
-                    this.reader = this.scope.resolve<ConfigReader>(ENVConfigReader);
+                    this.reader = this.scope.resolve<ConfigReader>(ENVConfigReader)!;
                     break;
 
                 case A_Context.environment === 'browser':
-                    this.reader = this.scope.resolve<ConfigReader>(ENVConfigReader);
+                    this.reader = this.scope.resolve<ConfigReader>(ENVConfigReader)!;
                     break;
 
                 default:

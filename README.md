@@ -249,32 +249,82 @@ const configLoader = new A_ConfigLoader();
 
 ### A-Logger
 
-A comprehensive logging system with color support, scope awareness, and configurable output formatting.
+A sophisticated logging component with advanced formatting, scope-based organization, and configurable output levels for ADAAS applications.
 
 **Basic Usage:**
 ```typescript
 import { A_Logger } from '@adaas/a-utils';
 import { A_Scope } from '@adaas/a-concept';
 
-const scope = new A_Scope({
-    name: 'MyApp',
-    components: [A_Logger]
-});
+const scope = new A_Scope({ name: 'MyService' });
+const logger = new A_Logger(scope);
 
-const logger = scope.resolve(A_Logger);
+// Basic logging with colors
+logger.log('Application started');
+logger.log('green', 'Operation successful');
+logger.warning('Resource usage high');
+logger.error('Database connection failed');
 
-logger.log('Hello World');
-logger.error('Something went wrong');
-logger.warning('This is a warning');
-logger.success('Operation completed');
+// Object logging with formatting
+const user = { id: 1, name: 'John', active: true };
+logger.log('blue', 'User data:', user);
+
+// Multi-argument logging
+logger.log('green', 
+    'Processing complete:',
+    'Records:', 150,
+    'Errors:', 2,
+    'Success rate:', '98.7%'
+);
 ```
 
-**Features:**
-- Colored console output
-- Scope-aware logging
-- Multiple log levels (log, error, warning, success)
-- Integration with A-Config for configuration
-- Formatted output with timestamps and scope information
+**Advanced Features:**
+```typescript
+// Error handling with context
+try {
+    throw new Error('Database timeout');
+} catch (error) {
+    logger.error('Operation failed:', error, 'Context:', { 
+        userId: '123', 
+        operation: 'update' 
+    });
+}
+
+// Log level filtering (via A_LOGGER_LEVEL env var)
+// Levels: debug, info, warn, error, all
+process.env.A_LOGGER_LEVEL = 'warn'; // Only warnings and errors
+
+// Scope alignment - all messages align consistently
+const services = [
+    new A_Logger(new A_Scope({ name: 'API' })),
+    new A_Logger(new A_Scope({ name: 'DatabaseConnectionPool' })),
+    new A_Logger(new A_Scope({ name: 'Auth' }))
+];
+```
+
+**Key Features:**
+- ✅ **Scope-based Formatting** - Consistent message alignment regardless of scope name length
+- ✅ **9 Terminal Colors** - green, blue, red, yellow, gray, magenta, cyan, white, pink
+- ✅ **Object Pretty-printing** - JSON formatting with proper indentation
+- ✅ **Error Handling** - Special formatting for A_Error and standard Error objects
+- ✅ **Log Level Filtering** - Configurable filtering (debug, info, warn, error, all)
+- ✅ **Performance Optimized** - Efficient handling of large objects and rapid logging
+- ✅ **Multi-line Support** - Proper alignment for complex multi-argument logs
+- ✅ **Timestamp Integration** - High-precision timestamps (MM:SS:mmm format)
+
+**Output Examples:**
+```
+[API                 ] |15:42:123| Operation successful
+[DatabaseConnectionPool] |15:42:124| Connection established
+[Auth                ] |15:42:125| User authenticated: {"id":1,"name":"John"}
+```
+
+**Log Levels:**
+- `debug` - Shows all messages
+- `info` - Shows info, warning, and error messages  
+- `warn` - Shows warning and error messages only
+- `error` - Shows error messages only
+- `all` - Shows all messages (default)
 
 ---
 

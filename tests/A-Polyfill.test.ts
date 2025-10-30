@@ -14,7 +14,7 @@ describe('A-Polyfill Tests', () => {
         testScope = new A_Scope({
             components: [A_Polyfill, A_Logger],
         });
-        polyfill = testScope.resolve(A_Polyfill);
+        polyfill = testScope.resolve(A_Polyfill)!;
         await polyfill.load();
     });
 
@@ -190,6 +190,7 @@ describe('A-Polyfill Tests', () => {
                 );
 
                 req.on('error', (err) => {
+                    console.log('Request error:', err);
                     reject(err);
                 });
 
@@ -429,7 +430,7 @@ describe('A-Polyfill Tests', () => {
             const freshScope = new A_Scope({
                 components: [A_Polyfill, A_Logger]
             });
-            const freshPolyfill = freshScope.resolve(A_Polyfill);
+            const freshPolyfill = freshScope.resolve(A_Polyfill)!;
 
             // Only initialize the needed polyfills
             const crypto = await freshPolyfill.crypto();
