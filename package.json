@@ -1,6 +1,6 @@
 {
   "name": "@adaas/a-utils",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "A-Utils is a set of utilities that are used across the ADAAS ecosystem. This package is designed to be a collection of utilities that are used across the ADAAS ecosystem.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
