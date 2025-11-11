@@ -1,15 +1,32 @@
 import { defineConfig } from "tsup";
 
-export default defineConfig({
-  entry: ["src/index.ts"],     // 👈 adjust if your main file is elsewhere
-  format: ["esm", "cjs"],      // both Node (CJS) and ESM builds
-  dts: true,                   // generate declaration files
-  sourcemap: true,             // helpful for debugging
-  clean: true,                 // clear dist/ before build
-  target: "es2020",            // good for both Node 18+ and browsers
-  treeshake: true,             // ✅ enable tree-shaking
-  skipNodeModulesBundle: true, // do NOT bundle node_modules (leave them external)
-  splitting: false,            // one file per format (simpler)
-  minify: false,               // optional: turn on if you want smaller bundle
-  platform: "neutral",         // 👈 important: works in Node & browser
-});
+export default defineConfig((options) => ({
+  entry: ["src/index.ts"],
+  format: ["esm", "cjs"],
+  dts: true,
+  clean: !options.watch,
+  sourcemap: true,
+  target: "es2020",
+  minify: !options.watch,
+  treeshake: "recommended",
+  skipNodeModulesBundle: true,
+  splitting: false,
+  silent: false,
+  platform: "neutral",
+  // Add hash to filenames for cache busting in production builds
+  outExtension({ format }) {
+    return {
+      js: format === "esm" ? `.mjs` : `.cjs`,
+    };
+  },
+  // Extra optimization options (for 2025 esbuild)
+  esbuildOptions(options) {
+    options.keepNames = true; // Preserve class/function names for better debugging
+    options.charset = "utf8";
+  },
+
+  // Enable minification for output size (production only)
+  minifyWhitespace: !options.watch,
+  minifyIdentifiers: !options.watch,
+  minifySyntax: !options.watch,
+}));
