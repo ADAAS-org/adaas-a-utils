@@ -979,6 +979,7 @@ declare const A_LoggerEnvVariables: {
      */
     readonly A_LOGGER_DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR";
 };
+declare const A_LoggerEnvVariablesArray: readonly ["A_LOGGER_LEVEL", "A_LOGGER_DEFAULT_SCOPE_LENGTH", "A_LOGGER_DEFAULT_SCOPE_COLOR", "A_LOGGER_DEFAULT_LOG_COLOR"];
 type A_LoggerEnvVariablesType = (typeof A_LoggerEnvVariables)[keyof typeof A_LoggerEnvVariables][];
 
 /**
@@ -1879,6 +1880,98 @@ declare const A_CONSTANTS__CONFIG_ENV_VARIABLES: {};
 type A_TYPES__ConfigENVVariables = (typeof A_CONSTANTS__CONFIG_ENV_VARIABLES)[keyof typeof A_CONSTANTS__CONFIG_ENV_VARIABLES][];
 declare const A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY: readonly [];
 
+type A_LoggerLevel = 'debug' | 'info' | 'warn' | 'error' | 'all';
+
+/**
+ * A-Logger Constants
+ *
+ * Configuration constants and default values for the A_Logger component
+ */
+/**
+ * Default scope length for consistent message alignment
+ */
+declare const A_LOGGER_DEFAULT_SCOPE_LENGTH = 20;
+/**
+ * Default log level when none is specified
+ */
+declare const A_LOGGER_DEFAULT_LEVEL = "all";
+/**
+ * Terminal color codes mapping
+ */
+declare const A_LOGGER_COLORS: {
+    readonly red: "31";
+    readonly yellow: "33";
+    readonly green: "32";
+    readonly blue: "34";
+    readonly cyan: "36";
+    readonly magenta: "35";
+    readonly gray: "90";
+    readonly brightBlue: "94";
+    readonly brightCyan: "96";
+    readonly brightMagenta: "95";
+    readonly darkGray: "30";
+    readonly lightGray: "37";
+    readonly indigo: "38;5;54";
+    readonly violet: "38;5;93";
+    readonly purple: "38;5;129";
+    readonly lavender: "38;5;183";
+    readonly skyBlue: "38;5;117";
+    readonly steelBlue: "38;5;67";
+    readonly slateBlue: "38;5;62";
+    readonly deepBlue: "38;5;18";
+    readonly lightBlue: "38;5;153";
+    readonly periwinkle: "38;5;111";
+    readonly cornflower: "38;5;69";
+    readonly powder: "38;5;152";
+    readonly charcoal: "38;5;236";
+    readonly silver: "38;5;250";
+    readonly smoke: "38;5;244";
+    readonly slate: "38;5;240";
+};
+/**
+ * Safe colors for random selection - grey-blue-violet palette
+ * Excludes system colors (red, yellow, green) to avoid confusion with warnings/errors
+ */
+declare const A_LOGGER_SAFE_RANDOM_COLORS: readonly ["blue", "cyan", "magenta", "gray", "brightBlue", "brightCyan", "brightMagenta", "darkGray", "lightGray", "indigo", "violet", "purple", "lavender", "skyBlue", "steelBlue", "slateBlue", "deepBlue", "lightBlue", "periwinkle", "cornflower", "powder", "charcoal", "silver", "smoke", "slate"];
+/**
+ * ANSI escape codes
+ */
+declare const A_LOGGER_ANSI: {
+    readonly RESET: "\u001B[0m";
+    readonly PREFIX: "\u001B[";
+    readonly SUFFIX: "m";
+};
+/**
+ * Timestamp format configuration
+ */
+declare const A_LOGGER_TIME_FORMAT: {
+    readonly MINUTES_PAD: 2;
+    readonly SECONDS_PAD: 2;
+    readonly MILLISECONDS_PAD: 3;
+    readonly SEPARATOR: ":";
+};
+/**
+ * Log message structure constants
+ */
+declare const A_LOGGER_FORMAT: {
+    readonly SCOPE_OPEN: "[";
+    readonly SCOPE_CLOSE: "]";
+    readonly TIME_OPEN: "|";
+    readonly TIME_CLOSE: "|";
+    readonly SEPARATOR: "-------------------------------";
+    readonly INDENT_BASE: 3;
+    readonly PIPE: "| ";
+};
+/**
+ * Environment variable keys
+ */
+declare const A_LOGGER_ENV_KEYS: {
+    readonly LOG_LEVEL: "A_LOGGER_LEVEL";
+    readonly DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH";
+    readonly DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR";
+    readonly DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR";
+};
+
 type A_UTILS_TYPES__Manifest_Init = Array<A_UTILS_TYPES__Manifest_ComponentLevelConfig>;
 type A_UTILS_TYPES__Manifest_ComponentLevelConfig<T extends A_Component = A_Component> = {
     /**
@@ -2037,6 +2130,12 @@ declare class A_MemoryContext<_MemoryType extends Record<string, any> = Record<s
     get<K extends keyof _MemoryType>(param: K): _MemoryType[K] | undefined;
 }
 
+type A_MemoryContextMeta<T extends Record<string, any> = Record<string, any>> = Omit<T, 'error'> & {
+    error?: A_Error;
+};
+type A_Memory_Storage = Record<string, any> & {
+    error?: A_Error;
+};
 type A_MemoryOperations = 'get' | 'set' | 'drop' | 'clear' | 'has' | 'serialize';
 type A_MemoryOperationContext<T extends any = any> = A_OperationContext<A_MemoryOperations, {
     key: string;
@@ -2115,6 +2214,17 @@ declare class A_Memory<_StorageType extends Record<string, any> = Record<string,
      * @returns - serialized memory object
      */
     toJSON(): Promise<_SerializedType>;
+}
+
+declare class A_MemoryError extends A_Error {
+    static readonly MemoryInitializationError = "Memory initialization error";
+    static readonly MemoryDestructionError = "Memory destruction error";
+    static readonly MemoryGetError = "Memory GET operation failed";
+    static readonly MemorySetError = "Memory SET operation failed";
+    static readonly MemoryDropError = "Memory DROP operation failed";
+    static readonly MemoryClearError = "Memory CLEAR operation failed";
+    static readonly MemoryHasError = "Memory HAS operation failed";
+    static readonly MemorySerializeError = "Memory toJSON operation failed";
 }
 
 type A_UTILS_TYPES__ScheduleObjectConfig = {
@@ -2225,4 +2335,9 @@ declare class A_Deferred<T> {
     reject(reason?: any): void;
 }
 
-export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandFeatures, A_CommandTransitions, type A_Command_Event, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_Logger, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_Polyfill, A_Schedule, A_ScheduleObject, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+declare class A_StateMachineError extends A_Error {
+    static readonly InitializationError = "A-StateMachine Initialization Error";
+    static readonly TransitionError = "A-StateMachine Transition Error";
+}
+
+export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandFeatures, A_CommandTransitions, type A_Command_Event, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Schedule, A_ScheduleObject, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
