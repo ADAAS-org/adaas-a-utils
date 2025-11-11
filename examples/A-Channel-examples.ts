@@ -28,7 +28,6 @@ async function basicChannelExample() {
     });
 
     console.log('Request params:', response.params);
-    console.log('Request status:', response.status);
 }
 
 // Example 2: HTTP Client Channel
@@ -94,7 +93,7 @@ class HttpProcessor extends A_Component {
             }
         };
         
-        (context as any)._result = mockResponse;
+        context.succeed(mockResponse);
     }
     
     @A_Feature.Extend({ scope: [HttpChannel] })
@@ -338,7 +337,7 @@ class DatabaseProcessor extends A_Component {
                 throw new Error(`Unsupported operation: ${operation}`);
         }
         
-        (context as any)._result = result;
+        context.succeed(result);
     }
     
     @A_Feature.Extend({ scope: [DatabaseChannel] })
@@ -445,7 +444,7 @@ class RobustProcessor extends A_Component {
         const currentRetries = this.retryCount.get(requestId) || 0;
         const maxRetries = 3;
         
-        console.log(`Error occurred (attempt ${currentRetries + 1}/${maxRetries + 1}):`, context.failed);
+        console.log(`Error occurred (attempt ${currentRetries + 1}/${maxRetries + 1}):`, context.error?.message);
         
         if (currentRetries < maxRetries) {
             this.retryCount.set(requestId, currentRetries + 1);
@@ -476,13 +475,16 @@ async function errorHandlingExample() {
     console.log('Success result:', successResult.data);
 
     // Test failing operation
-    const failResult = await robustChannel.request({
-        operation: 'process-data',
-        shouldFail: true
-    });
-    
-    console.log('Fail result status:', failResult.status);
-    console.log('Failed:', failResult.failed);
+    try {
+        const failResult = await robustChannel.request({
+            operation: 'process-data',
+            shouldFail: true
+        });
+        
+        console.log('Fail result status:', failResult.status);
+    } catch (error) {
+        console.log('Request failed as expected:', (error as Error).message);
+    }
 }
 
 // Run all examples

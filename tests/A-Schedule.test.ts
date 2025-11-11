@@ -21,7 +21,7 @@ describe('A-Schedule Tests', () => {
             components: [A_Schedule]
         });
 
-        const schedule = testScope.resolve(A_Schedule);
+        const schedule = testScope.resolve(A_Schedule)!;
 
         const start = Date.now();
         let res = '';
@@ -53,7 +53,7 @@ describe('A-Schedule Tests', () => {
             components: [A_Schedule]
         });
 
-        const schedule = testScope.resolve(A_Schedule);
+        const schedule = testScope.resolve(A_Schedule)!;
 
         expect(schedule).toBeInstanceOf(A_Schedule);
 

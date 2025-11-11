@@ -1,4 +1,4 @@
-import { A_Caller, A_Concept, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_Container, A_Context, A_Inject, A_Scope, A_ScopeError } from "@adaas/a-concept";
+import { A_Caller, A_Concept, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_Container, A_Context, A_Fragment, A_Inject, A_Scope, A_ScopeError } from "@adaas/a-concept";
 import { ConfigReader } from "./components/ConfigReader.component";
 import { A_Config } from "./A-Config.context";
 import { A_Polyfill } from "../A-Polyfill/A-Polyfill.component";
@@ -28,7 +28,7 @@ export class A_ConfigLoader extends A_Container {
                 defaults: {}
             });
 
-            this.scope.register(newConfig);
+            this.scope.register<A_Fragment>(newConfig);
         }
 
 

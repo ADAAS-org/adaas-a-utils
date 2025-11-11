@@ -43,22 +43,24 @@ npm install @adaas/a-utils
 
 ```typescript
 import { A_Command } from '@adaas/a-utils/lib/A-Command/A-Command.entity';
-import { A_Context } from '@adaas/a-concept';
+import { A_Scope } from '@adaas/a-concept';
 
-// Create a basic command
+// Create a basic command with parameters
 const command = new A_Command({
     action: 'greet',
     name: 'World'
 });
 
-// Register command in context
-A_Context.root.register(command);
+// Register command in scope for dependency injection
+const scope = A_Scope.context();
+scope.register(command);
 
-// Execute the command
+// Execute the command (automatically handles complete lifecycle)
 await command.execute();
 
-console.log(`Command status: ${command.status}`);
+console.log(`Command status: ${command.status}`); // COMPLETED
 console.log(`Execution duration: ${command.duration}ms`);
+console.log(`Command result:`, command.result);
 ```
 
 ### Typed Command with Custom Parameters and Result
@@ -99,7 +101,7 @@ console.log(`Created user: ${result?.userId}`);
 ```typescript
 import { A_Component, A_Feature, A_Inject } from '@adaas/a-concept';
 import { A_Memory } from '@adaas/a-utils/lib/A-Memory/A-Memory.context';
-import { A_CONSTANTS_A_Command_Features } from '@adaas/a-utils/lib/A-Command/A-Command.constants';
+import { A_CommandFeatures } from '@adaas/a-utils/lib/A-Command/A-Command.constants';
 
 // Define command types
 interface OrderProcessParams {
@@ -115,37 +117,75 @@ interface OrderProcessResult {
     paymentProcessed: boolean;
 }
 
-class ProcessOrderCommand extends A_Command<OrderProcessParams, OrderProcessResult> {}
-
-// Create a component with custom execution logic
-class OrderProcessor extends A_Component {
+class ProcessOrderCommand extends A_Command<OrderProcessParams, OrderProcessResult> {
     
-    @A_Feature.Extend({ scope: [ProcessOrderCommand] })
-    async [A_CONSTANTS_A_Command_Features.EXECUTE](
-        @A_Inject(A_Memory) memory: A_Memory<OrderProcessResult>
-    ) {
-        // Access command parameters through the command instance
-        const command = A_Context.scope(this).resolve(ProcessOrderCommand);
-        const { orderId, items, customerId } = command.params;
-        
-        // Process the order
-        const orderNumber = `ORD-${Date.now()}`;
-        const totalAmount = items.reduce((sum, item) => sum + (item.quantity * 10), 0);
-        const estimatedDelivery = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-        
-        // Store results in memory
-        await memory.set('orderNumber', orderNumber);
-        await memory.set('totalAmount', totalAmount);
-        await memory.set('estimatedDelivery', estimatedDelivery);
-        await memory.set('paymentProcessed', true);
-        
-        console.log(`Processed order ${orderNumber} for customer ${customerId}`);
+    /**
+     * Custom execution logic with feature-based processing
+     * This method is automatically called during command execution
+     */
+    @A_Feature.Define({
+        template: [
+            {
+                name: 'orderNumber',
+                component: 'OrderProcessor',
+                handler: 'generateOrderNumber'
+            },
+            {
+                name: 'totalAmount', 
+                component: 'OrderProcessor',
+                handler: 'calculateTotal'
+            },
+            {
+                name: 'paymentProcessed',
+                component: 'PaymentProcessor', 
+                handler: 'processPayment'
+            }
+        ]
+    })
+    protected async [A_CommandFeatures.onExecute](): Promise<void> {
+        console.log(`Processing order ${this.params.orderId} for customer ${this.params.customerId}`);
     }
 }
 
-// Usage
-A_Context.reset();
-A_Context.root.register(OrderProcessor);
+// Create components with specialized handlers
+class OrderProcessor extends A_Component {
+    
+    generateOrderNumber() {
+        return `ORD-${Date.now()}`;
+    }
+    
+    calculateTotal(@A_Inject(ProcessOrderCommand) command: ProcessOrderCommand) {
+        return command.params.items.reduce((sum, item) => sum + (item.quantity * 10), 0);
+    }
+}
+
+class PaymentProcessor extends A_Component {
+    
+    async processPayment(@A_Inject(ProcessOrderCommand) command: ProcessOrderCommand) {
+        console.log(`Processing payment for order ${command.params.orderId}`);
+        // Simulate payment processing
+        await new Promise(resolve => setTimeout(resolve, 100));
+        return true;
+    }
+}
+
+// Usage with A_Concept architecture
+const concept = new A_Concept({
+    containers: [
+        new A_Container({
+            name: 'Order Processing',
+            components: [
+                ProcessOrderCommand,
+                OrderProcessor,
+                PaymentProcessor,
+                A_Memory,
+                A_Logger
+            ]
+        })
+    ]
+});
+
+await concept.load();
 
 const command = new ProcessOrderCommand({
     orderId: 'order-123',
@@ -156,7 +196,7 @@ const command = new ProcessOrderCommand({
     ]
 });
 
-A_Context.root.register(command);
+concept.scope.register(command);
 await command.execute();
 
 console.log('Order processed:', command.result);
@@ -193,11 +233,24 @@ console.log('Duration:', command.duration, 'ms');
 
 ### Lifecycle Phases
 
+A-Command follows a structured lifecycle with automatic state transitions:
+
 1. **CREATED** - Initial state when command is instantiated
-2. **INITIALIZATION** - Setting up execution scope and dependencies
-3. **INITIALIZED** - Ready for compilation
-4. **COMPILATION** - Preparing execution environment
-5. **COMPILED** - Ready for execution
+2. **INITIALIZED** - Dependencies resolved and scope configured  
+3. **COMPILED** - Execution environment prepared and validated
+4. **EXECUTING** - Command is currently running
+5. **COMPLETED** - Execution finished successfully
+6. **FAILED** - Execution encountered errors and terminated
+
+### Status Transitions
+
+The command automatically transitions through states during execution:
+
+```
+CREATED → INITIALIZED → COMPILED → EXECUTING → COMPLETED/FAILED
+```
+
+Each transition triggers corresponding lifecycle events that you can subscribe to for monitoring and custom logic.
 6. **COMPLETED** - Successfully finished execution
 7. **FAILED** - Execution failed with errors
 
@@ -443,43 +496,86 @@ enum A_CONSTANTS_A_Command_Features {
 
 ## Examples
 
-### File Processing Command
+The A-Command library comes with comprehensive examples demonstrating various usage patterns and architectures. These examples are fully documented with detailed explanations of concepts and implementation patterns.
+
+### 📁 Example Files
+
+#### Multi-Service Distributed Processing
+**File:** `examples/A-Command-examples.ts`
+
+This example demonstrates advanced multi-service command processing architecture:
+
+- **Multi-Service Architecture**: Commands distributed across Service A and Service B
+- **Inter-Service Communication**: Commands routed between services using channels
+- **Shared Memory**: State sharing between services for coordinated processing
+- **Lifecycle Management**: Complete command lifecycle across distributed services
+- **Component-Based Processing**: Specialized processors for different execution phases
 
 ```typescript
-interface FileProcessParams {
-    filePath: string;
-    operation: 'compress' | 'encrypt' | 'convert';
-    options: Record<string, any>;
+// Example: Command processing across multiple services
+const command = new TestCommand({ userId: '123' });
+const channel = scope.resolve(SimpleChannel);
+const result = await channel.execute(command); // Distributed execution
+```
+
+**Key Concepts Covered:**
+- Service container registration and discovery
+- Command routing and channel implementation
+- Cross-service state management with shared memory
+- Pre/main/post execution phases across services
+- Result aggregation from distributed processing
+
+#### Feature-Driven Template Processing
+**File:** `examples/A-Command-examples-2.ts`
+
+This example showcases feature-driven command architecture using templates:
+
+- **Template-Based Execution**: Result properties mapped to component handlers
+- **Automated Processing**: Framework automatically calls mapped component methods
+- **Modular Components**: Specialized components for different result aspects
+- **Result Compilation**: Handler outputs automatically compiled into result object
+- **Container-Based Execution**: Integrated execution environment with dependency injection
+
+```typescript
+// Example: Feature template mapping result properties to handlers
+@A_Feature.Define({
+    template: [
+        { name: 'itemName', component: 'ComponentA', handler: 'resolveItemName' },
+        { name: 'itemPrice', component: 'ComponentB', handler: 'calculatePrice' }
+    ]
+})
+protected async [A_CommandFeatures.onExecute](): Promise<void> {
+    // Template processing happens automatically after this method
 }
+```
 
-interface FileProcessResult {
-    outputPath: string;
-    originalSize: number;
-    processedSize: number;
-    processingTime: number;
-}
+**Key Concepts Covered:**
+- Feature template configuration and mapping
+- Component handler automatic execution
+- Result property compilation from handler outputs
+- Container-based dependency injection
+- Modular component architecture
 
-class FileProcessCommand extends A_Command<FileProcessParams, FileProcessResult> {}
+### 🚀 Running the Examples
 
-class FileProcessor extends A_Component {
-    
-    @A_Feature.Extend({ scope: [FileProcessCommand] })
-    async [A_CONSTANTS_A_Command_Features.EXECUTE](
-        @A_Inject(A_Memory) memory: A_Memory<FileProcessResult>
-    ) {
-        const command = A_Context.scope(this).resolve(FileProcessCommand);
-        const { filePath, operation, options } = command.params;
-        
-        const startTime = Date.now();
-        
-        // Simulate file processing
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const endTime = Date.now();
-        
-        await memory.set('outputPath', `processed_${filePath}`);
-        await memory.set('originalSize', 1024);
-        await memory.set('processedSize', 512);
+```bash
+# Clone the repository
+git clone <repository-url>
+cd adaas-a-utils
+
+# Install dependencies
+npm install
+
+# Run multi-service distributed processing example
+npx ts-node examples/A-Command-examples.ts
+
+# Run feature-driven template processing example
+npx ts-node examples/A-Command-examples-2.ts
+```
+
+### 📚 Additional Examples
+
+#### Basic Command Creation
         await memory.set('processingTime', endTime - startTime);
     }
 }

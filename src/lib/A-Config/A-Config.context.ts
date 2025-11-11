@@ -5,7 +5,9 @@ import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "./A-Config.constants";
 
 export class A_Config<
     T extends Array<string | A_TYPES__ConceptENVVariables[number]> = any[]
-> extends A_Fragment {
+> extends A_Fragment<{
+    [key in T[number]]: any
+}> {
 
     config: A_TYPES__ConfigContainerConstructor<T>;
 
@@ -50,21 +52,33 @@ export class A_Config<
      * @param property 
      * @returns 
      */
-    get<_OutType = any>(
-        property: T[number] | typeof this.DEFAULT_ALLOWED_TO_READ_PROPERTIES[number]
-    ): _OutType {
+    get<K extends T[number]>(
+        property: K | typeof this.DEFAULT_ALLOWED_TO_READ_PROPERTIES[number]
+    ): { [key in T[number]]: any; }[K] | undefined {
         if (this.CONFIG_PROPERTIES.includes(property as any)
             || this.DEFAULT_ALLOWED_TO_READ_PROPERTIES.includes(property as any)
             || !(this.config.strict)
         )
-            return this.VARIABLES.get(A_FormatterHelper.toUpperSnakeCase(property)) as _OutType;
+            return this.VARIABLES.get(A_FormatterHelper.toUpperSnakeCase(property));
 
         throw new Error('Property not exists or not allowed to read') as never;
         // return this.concept.Errors.throw(A_SDK_CONSTANTS__ERROR_CODES.CONFIGURATION_PROPERTY_NOT_EXISTS_OR_NOT_ALLOWED_TO_READ) as never;
+
     }
 
 
+    //  get<_OutType = any>(
+    //         property: T[number] | typeof this.DEFAULT_ALLOWED_TO_READ_PROPERTIES[number] | string
+    //     ): _OutType {
+    //         if (this.CONFIG_PROPERTIES.includes(property as any)
+    //             || this.DEFAULT_ALLOWED_TO_READ_PROPERTIES.includes(property as any)
+    //             || !(this.config.strict)
+    //         )
+    //             return this.VARIABLES.get(A_FormatterHelper.toUpperSnakeCase(property)) as _OutType;
 
+    //         throw new Error('Property not exists or not allowed to read') as never;
+    //         // return this.concept.Errors.throw(A_SDK_CONSTANTS__ERROR_CODES.CONFIGURATION_PROPERTY_NOT_EXISTS_OR_NOT_ALLOWED_TO_READ) as never;
+    //     }
     /**
      * 
      * This method is used to set the configuration property by name

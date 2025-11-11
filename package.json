@@ -71,6 +71,7 @@
     "start": "nodemon ./tests/log.ts",
     "examples:config": "nodemon ./examples/config.ts",
     "examples:logger": "nodemon ./examples/A-Logger-examples.ts",
+    "examples:command": "nodemon ./examples/A-Command-examples.ts",
     "release": "npm run test && npm run build && git add . && git commit -m \"new version created :: $(cat package.json | grep version | head -1  | awk -F: '{ print $2 }'  | sed 's/[\",]//g')\" && npm version patch && npm publish --access public",
     "preversion": "echo test",
     "version": "echo git add .",
@@ -79,7 +80,7 @@
     "build": "tsup --config tsup.config.ts"
   },
   "dependencies": {
-    "@adaas/a-concept": "^0.1.29"
+    "@adaas/a-concept": "^0.1.44"
   },
   "devDependencies": {
     "@types/chai": "^4.3.14",

@@ -3,7 +3,6 @@
 // A-Channel Components
 // ============================================================================
 export { A_Channel } from './lib/A-Channel/A-Channel.component';
-export { A_ChannelRequest } from './lib/A-Channel/A-ChannelRequest.context';
 export { A_ChannelError } from './lib/A-Channel/A-Channel.error';
 export * from './lib/A-Channel/A-Channel.types';
 export * from './lib/A-Channel/A-Channel.constants';
@@ -50,7 +49,7 @@ export * from './lib/A-Manifest/A-Manifest.types';
 // ============================================================================
 // A-Memory Components
 // ============================================================================
-export { A_Memory } from './lib/A-Memory/A-Memory.context';
+export { A_Memory } from './lib/A-Memory/A-Memory.component';
 
 
 // ============================================================================

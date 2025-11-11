@@ -1,9 +1,8 @@
 import { A_Component, A_Context, A_Error, A_Feature, A_IdentityHelper, A_Inject, A_Scope, A_TYPES__InjectableConstructors, A_TYPES__InjectableTargets } from "@adaas/a-concept";
 import { A_ChannelError } from "./A-Channel.error";
 import { A_ChannelFeatures } from "./A-Channel.constants";
+import { A_OperationContext } from "../A-Operation/A-Operation.context";
 import { A_ChannelRequest } from "./A-ChannelRequest.context";
-import { A_Logger } from "../A-Logger/A-Logger.component";
-import { A_Config } from "../A-Config/A-Config.context";
 
 /**
  * A-Channel - A powerful, extensible communication channel component
@@ -406,7 +405,6 @@ export class A_Channel extends A_Component {
 
         try {
             // Set up dependency injection scope
-            requestScope.inherit(A_Context.scope(this));
             requestScope.register(context);
 
             // Execute request lifecycle
@@ -415,6 +413,7 @@ export class A_Channel extends A_Component {
             await this.call(A_ChannelFeatures.onAfterRequest, requestScope);
 
             this._processing = false;
+
             return context;
 
         } catch (error) {
@@ -423,11 +422,14 @@ export class A_Channel extends A_Component {
             // Create channel-specific error
             const channelError = new A_ChannelError(error);
             context.fail(channelError);
+            requestScope.register(channelError);
 
             // Call error handling hook
             await this.call(A_ChannelFeatures.onError, requestScope);
 
-            return context;
+            requestScope.destroy();
+
+            throw channelError;
         }
     }
 
@@ -488,7 +490,7 @@ export class A_Channel extends A_Component {
         });
 
         // Create request context for the message
-        const context = new A_ChannelRequest<_ParamsType>(message);
+        const context = new A_OperationContext('send', message);
 
         try {
             // Set up dependency injection scope
@@ -505,10 +507,13 @@ export class A_Channel extends A_Component {
 
             // Create channel-specific error
             const channelError = new A_ChannelError(error);
+            requestScope.register(channelError);
             context.fail(channelError);
 
             // Call error handling hook
             await this.call(A_ChannelFeatures.onError, requestScope);
+
+            requestScope.destroy();
 
             // Note: We don't re-throw the error for fire-and-forget operations
             // The error is handled by the onError hook
@@ -523,14 +528,14 @@ export class A_Channel extends A_Component {
      * For fire-and-forget pattern: Use send()
      * For consumer patterns: Implement custom consumer logic using request() in a loop
      */
-    async consume<T extends Record<string, any> = Record<string, any>>(): Promise<A_ChannelRequest<any, T>> {
+    async consume<T extends Record<string, any> = Record<string, any>>(): Promise<A_OperationContext<any, T>> {
         await this.initialize;
 
         this._processing = true;
 
         const requestScope = new A_Scope({ name: `a-channel@scope:consume:${A_IdentityHelper.generateTimeId()}` });
 
-        const context = new A_ChannelRequest<any, T>();
+        const context = new A_OperationContext('consume', {} as T);
 
         try {
             requestScope.inherit(A_Context.scope(this));
@@ -541,7 +546,7 @@ export class A_Channel extends A_Component {
 
             this._processing = false;
 
-            return context
+            return context as A_OperationContext<any, T>;
 
         } catch (error) {
 
@@ -553,73 +558,8 @@ export class A_Channel extends A_Component {
 
             await this.call(A_ChannelFeatures.onError, requestScope);
 
-            return context;
+            return context as A_OperationContext<any, T>;
         }
     }
 
-}
-
-
-
-
-class HttpChannel extends A_Channel {
-
-    protected baseUrl!: string
-}
-
-
-class SSOChannel extends HttpChannel {
-    constructor() {
-        super();
-
-        this.baseUrl = 'https://sso.example.com';
-    }
-}
-
-
-class PrstChannel extends HttpChannel {
-
-    constructor() {
-        super();
-
-        this.baseUrl = 'https://prst.example.com';
-    }
-}
-
-
-class PollyspotChannel extends HttpChannel {
-
-    constructor() {
-        super();
-
-        this.baseUrl = 'https://pollyspot.example.com';
-    }
-}
-
-
-class GlobalErrorhandler extends A_Component {
-
-    @A_Feature.Extend({
-        name: A_ChannelFeatures.onError,
-        scope: [PollyspotChannel]
-    })
-    async handleError(
-        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<any, any>,
-        @A_Inject(A_Logger) logger: A_Logger,
-        @A_Inject(A_Config) config: A_Config
-    ) {
-        // Handle the error
-    }
-
-    @A_Feature.Extend({
-        name: A_ChannelFeatures.onError,
-    })
-    async anotherError(
-        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<any, any>,
-        @A_Inject(A_Logger) logger: A_Logger,
-        @A_Inject(A_Config) config: A_Config
-    ) {
-        // Handle the error
-
-    }
 }

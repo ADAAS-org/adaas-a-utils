@@ -8,19 +8,35 @@ export const A_LoggerEnvVariables = {
      */
     A_LOGGER_LEVEL: 'A_LOGGER_LEVEL',
 
-
     /**     
      * Sets the default scope length for log messages
      * 
      * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
      */
     A_LOGGER_DEFAULT_SCOPE_LENGTH: 'A_LOGGER_DEFAULT_SCOPE_LENGTH',
+
+    /**
+     * Sets the default color for scope display in log messages
+     * 
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    A_LOGGER_DEFAULT_SCOPE_COLOR: 'A_LOGGER_DEFAULT_SCOPE_COLOR',
+
+    /**
+     * Sets the default color for log message content
+     * 
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    A_LOGGER_DEFAULT_LOG_COLOR: 'A_LOGGER_DEFAULT_LOG_COLOR',
 } as const;
 
 
 
 export const A_LoggerEnvVariablesArray = [
     A_LoggerEnvVariables.A_LOGGER_LEVEL,
+    A_LoggerEnvVariables.A_LOGGER_DEFAULT_SCOPE_LENGTH,
+    A_LoggerEnvVariables.A_LOGGER_DEFAULT_SCOPE_COLOR,
+    A_LoggerEnvVariables.A_LOGGER_DEFAULT_LOG_COLOR,
 ] as const;
 
 

@@ -1,270 +1,555 @@
+
 /**
- * A-Command Examples
+ * A-Command Multi-Service Processing Example
  * 
- * This file contains practical examples of using A-Command for various scenarios.
- * Run with: npx ts-node examples/command-examples.ts
+ * This example demonstrates the core concepts of A-Command:
+ * 
+ * 1. **Multi-Service Processing**: Commands can be executed across different services
+ * 2. **Serialization**: Commands can be serialized and transmitted between services
+ * 3. **Component-Based Behavior**: Different components can extend command behavior
+ * 4. **Dependency Injection**: Commands use DI for accessing services and resources
+ * 5. **Lifecycle Management**: Commands follow a structured execution lifecycle
+ * 
+ * The example shows:
+ * - Service A starts command execution and delegates to Service B
+ * - Service B processes the command with access to shared memory
+ * - A simple channel routes commands between services
+ * - Each service has its own component extending command behavior
  */
 
-import { A_Command } from '../src/lib/A-Command/A-Command.entity';
-import { A_CommandFeatures } from '../src/lib/A-Command/A-Command.constants';
-import { A_Memory } from '../src/lib/A-Memory/A-Memory.context';
-import { A_Component, A_Context, A_Feature, A_Inject, A_Error, A_Dependency } from '@adaas/a-concept';
+import { A_Caller, A_Component, A_Concept, A_Container, A_Error, A_Feature, A_FormatterHelper, A_Inject } from "@adaas/a-concept"
+import { A_ChannelRequest } from "@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context";
+import { A_MemoryContext } from "@adaas/a-utils/lib/A-Memory/A-Memory.context";
+import { A_OperationContext } from "@adaas/a-utils/lib/A-Operation/A-Operation.context";
+import { A_StateMachine } from "@adaas/a-utils/lib/A-StateMachine/A-StateMachine.component";
+import { A_Channel, A_Command, A_Command_Status, A_CommandFeatures, A_Logger, A_Memory, A_TYPES__Command_Serialized } from "src"
 
-// Example 1: Basic Command Usage
-async function basicCommandExample() {
-    console.log('\n=== Basic Command Example ===');
 
-    const command = new A_Command({
-        action: 'greet',
-        name: 'World'
-    });
+// ============================================================================
+// ====================== Command Definition =================================
+// ============================================================================
 
-    A_Context.root.register(command);
+/**
+ * Command parameter type definition
+ * Defines the input data structure required to execute the command
+ */
+type myCommandParams = { userId: string };
 
-    // Add event listeners
-    command.on(A_CommandFeatures.onInit, () => console.log('Command initializing...'));
-    command.on(A_CommandFeatures.onComplete, () => console.log('Command completed!'));
+/**
+ * Command result type definition  
+ * Defines the output data structure produced by successful execution
+ */
+type myCommandResult = { success: boolean };
 
-    await command.execute();
+/**
+ * Custom Command Implementation
+ * 
+ * This command demonstrates:
+ * - Type-safe parameter and result definitions
+ * - Custom properties for storing runtime data
+ * - Custom serialization extending the base toJSON method
+ * - Cross-service data transmission capabilities
+ */
+class myCommand extends A_Command<myCommandParams, myCommandResult> {
 
-    console.log(`Status: ${command.status}`);
-    console.log(`Duration: ${command.duration}ms`);
-    console.log(`Code: ${command.code}`);
-}
+    /** Runtime property to store user data fetched during execution */
+    user?: { id: string };
 
-// Example 2: Typed Command with Custom Logic
-interface UserCreateParams {
-    name: string;
-    email: string;
-    role: 'admin' | 'user';
-}
-
-interface UserCreateResult {
-    userId: string;
-    createdAt: string;
-    profileCreated: boolean;
-}
-
-class CreateUserCommand extends A_Command<UserCreateParams, UserCreateResult> { }
-
-class UserCreationService extends A_Component {
-
-    @A_Feature.Extend({ scope: [CreateUserCommand] })
-    async [A_CommandFeatures.onExecute](
-        @A_Inject(A_Memory) memory: A_Memory<UserCreateResult>
-    ) {
-        const command = A_Context.scope(this).resolve(CreateUserCommand)!;
-        const { name, email, role } = command.params;
-
-        console.log(`Creating user: ${name} (${email}) with role: ${role}`);
-
-        // Simulate user creation
-        const userId = `user_${Date.now()}`;
-        const createdAt = new Date().toISOString();
-
-        // Store results in memory
-        await memory.set('userId', userId);
-        await memory.set('createdAt', createdAt);
-        await memory.set('profileCreated', true);
-
-        console.log(`User created with ID: ${userId}`);
+    /**
+     * Custom serialization method
+     * 
+     * Extends the base toJSON to include additional properties
+     * for cross-service transmission. This allows other services
+     * to receive not just the standard command data but also
+     * custom fields relevant to the business logic.
+     */
+    toJSON(): A_TYPES__Command_Serialized<myCommandParams, myCommandResult> & { userId: string } {
+        return {
+            ...super.toJSON(),
+            userId: this.params.userId,
+        }
     }
 }
 
-async function typedCommandExample() {
-    console.log('\n=== Typed Command with Custom Logic Example ===');
 
-    A_Context.reset();
-    A_Context.root.register(UserCreationService);
+// ============================================================================
+// ====================== Service A Component ===============================
+// ============================================================================
 
-    const command = new CreateUserCommand({
-        name: 'John Doe',
-        email: 'john@example.com',
-        role: 'user'
-    });
+/**
+ * Service A Command Processor
+ * 
+ * This component extends the command lifecycle in Service A by implementing
+ * custom behavior at different execution phases. It demonstrates:
+ * 
+ * - Pre-execution setup (storing data in shared memory)
+ * - Main execution logic (delegating to Service B via channel)
+ * - Post-execution cleanup and logging
+ * - Inter-service communication patterns
+ */
+class ServiceA_MyCommandProcessor extends A_Component {
 
-    A_Context.root.register(command);
-    await command.execute();
-
-    console.log('User creation result:', command.result);
-}
-
-// Example 3: Command Serialization and Persistence
-async function serializationExample() {
-    console.log('\n=== Command Serialization Example ===');
-
-    A_Context.reset();
-    A_Context.root.register(UserCreationService);
-
-    // Create and execute original command
-    const originalCommand = new CreateUserCommand({
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        role: 'admin'
-    });
-
-    A_Context.root.register(originalCommand);
-    await originalCommand.execute();
-
-    // Serialize command
-    const serialized = originalCommand.toJSON();
-    console.log('Command serialized for storage/transmission');
-
-    // Simulate storage and retrieval
-    const serializedJson = JSON.stringify(serialized);
-    const parsedData = JSON.parse(serializedJson);
-
-    // Restore command from serialized data
-    const restoredCommand = new CreateUserCommand(parsedData);
-
-    console.log('Command restored from serialization:');
-    console.log(`- Status: ${restoredCommand.status}`);
-    console.log(`- Duration: ${restoredCommand.duration}ms`);
-    console.log(`- User ID: ${restoredCommand.result?.userId}`);
-    console.log(`- Created At: ${restoredCommand.result?.createdAt}`);
-}
-
-// Example 4: Error Handling
-class FailingCommand extends A_Command<{ shouldFail: boolean }, { success: boolean }> { }
-
-class FailingService extends A_Component {
-
-    @A_Feature.Extend({ scope: [FailingCommand] })
-    async [A_CommandFeatures.onExecute](
-        @A_Inject(A_Memory) memory: A_Memory<{ success: boolean }>
+    /**
+     * Pre-execution phase handler
+     * 
+     * Runs before the main command execution begins.
+     * Used for:
+     * - Initial setup and preparation
+     * - Storing data in shared memory for other services
+     * - Validation and pre-processing
+     * 
+     * @param command - The command instance being executed
+     * @param memory - Shared memory for cross-service data storage
+     * @param logger - Logger instance for tracking execution
+     */
+    @A_Feature.Extend()
+    async [A_CommandFeatures.onBeforeExecute](
+        @A_Inject(A_Caller) command: myCommand,
+        @A_Inject(A_Memory) memory: A_Memory<{ user: { id: string } }>,
+        @A_Inject(A_Logger) logger: A_Logger,
     ) {
-        const command = A_Context.scope(this).resolve(FailingCommand)!;
+        logger.info('Starting command execution in Service A');
 
-        if (command.params.shouldFail) {
-            // Add error to memory
-            await memory.error(new A_Error({
-                title: 'Intentional Failure',
-                message: 'This command was designed to fail',
-                code: 'INTENTIONAL_FAIL'
-            }));
+        // Store user data in shared memory for Service B to access
+        await memory.set('user', { id: '555' });
+    }
 
-            throw new Error('Command failed as requested');
+    /**
+     * Main execution phase handler
+     * 
+     * Contains the core business logic for Service A.
+     * In this example, it delegates processing to Service B
+     * by sending the serialized command through a channel.
+     * 
+     * @param command - The command instance being executed
+     * @param channel - Communication channel for inter-service requests
+     * @param logger - Logger instance for tracking execution
+     */
+    @A_Feature.Extend()
+    async [A_CommandFeatures.onExecute](
+        @A_Inject(A_Caller) command: myCommand,
+        @A_Inject(A_Channel) channel: A_Channel,
+        @A_Inject(A_Logger) logger: A_Logger,
+    ) {
+
+
+        // Serialize command and send to Service B for processing
+        const response = await channel.request<any, A_TYPES__Command_Serialized<myCommandParams, myCommandResult>>({
+            container: 'ServiceB',
+            command: command.toJSON()
+        });
+
+        command.fromJSON(response.data!);
+
+    }
+
+    /**
+     * Post-execution phase handler
+     * 
+     * Runs after the main execution completes (success or failure).
+     * Used for:
+     * - Cleanup operations
+     * - Final logging and metrics
+     * - Notification sending
+     * 
+     * @param command - The command instance that was executed
+     * @param logger - Logger instance for tracking execution
+     */
+    @A_Feature.Extend()
+    async [A_CommandFeatures.onAfterExecute](
+        @A_Inject(A_Caller) command: myCommand,
+        @A_Inject(A_Logger) logger: A_Logger,
+    ) {
+        logger.info('Finishing command execution in Service A');
+
+    }
+}
+
+
+// ============================================================================
+// ====================== Service B Component ===============================
+// ============================================================================
+
+/**
+ * Service B Command Processor
+ * 
+ * This component handles command processing in Service B after receiving
+ * the command from Service A. It demonstrates:
+ * 
+ * - Accessing shared memory data from other services
+ * - Processing commands with context from previous services
+ * - Stateful command execution across service boundaries
+ */
+class ServiceB_MyCommandProcessor extends A_Component {
+
+    /**
+     * Pre-execution setup in Service B
+     * 
+     * Retrieves data from shared memory that was stored by Service A
+     * and populates the command with additional context needed for processing.
+     * 
+     * This shows how commands can accumulate state and data as they
+     * move through different services in a distributed system.
+     * 
+     * @param command - The command instance being executed
+     * @param memory - Shared memory for accessing cross-service data
+     * @param logger - Logger instance for tracking execution
+     */
+    @A_Feature.Extend()
+    async [A_CommandFeatures.onBeforeExecute](
+        @A_Inject(A_Caller) command: myCommand,
+        @A_Inject(A_Memory) memory: A_Memory<{ user: { id: string } }>,
+        @A_Inject(A_Logger) logger: A_Logger,
+    ) {
+        logger.info('Starting command execution in Service B');
+
+        // Retrieve user data that was stored by Service A
+        const user = await memory.get('user');
+
+        logger.info('Retrieved user from memory:', user);
+
+        // Populate command with additional context
+        command.user = user;
+        // throw new Error('Simulated error in Service B');
+    }
+
+    /**
+     * Main execution logic in Service B
+     * 
+     * Handles the actual business logic processing for this command
+     * in Service B. This is where the final processing occurs after
+     * the command has been prepared by Service A.
+     * 
+     * @param command - The command instance being executed
+     * @param logger - Logger instance for tracking execution
+     */
+    @A_Feature.Extend()
+    async [A_CommandFeatures.onExecute](
+        @A_Inject(A_Caller) command: myCommand,
+        @A_Inject(A_Logger) logger: A_Logger,
+    ) {
+        logger.info('Executing command in Service B', command.status);
+
+        // Perform the actual business logic processing
+        // In a real scenario, this might involve:
+        // - Database operations
+        // - External API calls  
+        // - Complex business logic calculations
+        // - Result generation
+
+        // For this example, we'll just set a success result
+        // Uncomment the next line to see result handling:
+        // command.result = { success: true };
+        //  await  command.complete({success: true});
+
+        throw new Error('Simulated error in Service B');
+
+    }
+}
+
+
+// ============================================================================
+// ====================== Inter-Service Communication ========================
+// ============================================================================
+
+/**
+ * Simple Channel Implementation
+ * 
+ * A basic channel for routing commands between different services/containers.
+ * This demonstrates:
+ * 
+ * - Command routing based on container names
+ * - Command deserialization and reconstruction in target service
+ * - Command execution in the target service context
+ * - Result serialization and response handling
+ * 
+ * In production, this might be replaced with more sophisticated
+ * message queues, HTTP APIs, or service mesh communications.
+ */
+class SimpleChannel extends A_Channel {
+
+    /**
+     * Handle incoming command routing requests
+     * 
+     * This method:
+     * 1. Finds the target container by name
+     * 2. Resolves the command constructor in the target scope
+     * 3. Reconstructs the command from serialized data
+     * 4. Executes the command in the target service
+     * 5. Returns the serialized result
+     * 
+     * @param memory - Shared memory containing registered containers
+     * @param context - Operation context with routing parameters
+     * @param logger - Logger for tracking routing operations
+     */
+    async onRequest(
+        @A_Inject(A_Memory) memory: A_Memory<{ containers: Array<A_Container> }>,
+        @A_Inject(A_ChannelRequest) context: A_ChannelRequest<{ container: string, command: A_TYPES__Command_Serialized }>,
+        @A_Inject(A_Logger) logger: A_Logger,
+    ): Promise<void> {
+
+        logger.info(`Channel: Routing command ${context.params.command.code} to container ${context.params.container}`);
+
+        // Get all registered containers from shared memory
+        const containers = await memory.get('containers') || [];
+
+        // Find target container by name (supports both exact match and camelCase conversion)
+        const target = containers
+            .find(c => A_FormatterHelper.toCamelCase(c.name) === A_FormatterHelper.toCamelCase(context.params.container)
+                || c.name === context.params.container
+            )
+
+        // Resolve the command constructor in the target container's scope
+        const commandConstructor = target?.scope.resolveConstructor<A_Command>(context.params.command.code);
+
+        if (!commandConstructor) {
+            throw new A_Error(`Channel: Unable to find command constructor for ${context.params.command.code} in container ${context.params.container}`);
         }
 
-        await memory.set('success', true);
+        // Reconstruct the command from serialized data
+        const command = new commandConstructor(context.params.command);
+
+        // Register the command in the target container's scope
+        target?.scope.register(command);
+
+        // Execute the command in the target service
+        await command.execute();
+
+        // Serialize the result and send it back
+        const serialized = command.toJSON();
+
+        context.succeed(serialized);
     }
 }
 
-async function errorHandlingExample() {
-    console.log('\n=== Error Handling Example ===');
 
-    A_Context.reset();
-    A_Context.root.register(FailingService);
+// ============================================================================
+// ====================== Service Container Definition =======================
+// ============================================================================
 
-    // Test successful command
-    const successCommand = new FailingCommand({ shouldFail: false });
-    A_Context.root.register(successCommand);
-    await successCommand.execute();
+/**
+ * Base Service Container
+ * 
+ * A reusable container class that automatically registers itself
+ * in shared memory during the concept loading phase. This enables
+ * the channel to discover and route commands to different services.
+ * 
+ * Each service instance:
+ * - Registers itself in shared memory during startup
+ * - Makes itself discoverable for command routing
+ * - Provides a scope for command execution
+ */
+class Service extends A_Container {
 
-    console.log(`Success command - Status: ${successCommand.status}`);
-    console.log(`Success command - Result:`, successCommand.result);
-
-    // Test failing command
-    const failCommand = new FailingCommand({ shouldFail: true });
-    A_Context.root.register(failCommand);
-    await failCommand.execute();
-
-    console.log(`Fail command - Status: ${failCommand.status}`);
-    console.log(`Fail command - Is Failed: ${failCommand.isFailed}`);
-    console.log(`Fail command - Errors:`, Array.from(failCommand.errors?.values() || []));
-}
-
-// Example 5: Custom Events
-type FileProcessEvents = 'validation-started' | 'processing' | 'cleanup';
-
-class FileProcessCommand extends A_Command<
-    { filePath: string; operation: string },
-    { outputPath: string; size: number },
-    FileProcessEvents
-> { }
-
-class FileProcessor extends A_Component {
-
-    @A_Feature.Extend({ scope: [FileProcessCommand] })
-    async [A_CommandFeatures.onExecute](
-        @A_Inject(A_Memory) memory: A_Memory<{ outputPath: string; size: number }>,
-
-        @A_Dependency.Required()
-        @A_Inject(FileProcessCommand) command: FileProcessCommand
+    /**
+     * Container initialization during concept loading
+     * 
+     * This method runs during the concept loading phase and ensures
+     * that all service containers are registered in shared memory
+     * so they can be discovered by the routing channel.
+     * 
+     * @param memory - Shared memory for storing container registry
+     * @param logger - Logger for tracking service registration
+     */
+    @A_Concept.Load()
+    async init(
+        @A_Inject(A_Memory) memory: A_Memory<{ containers: Array<A_Container> }>,
+        @A_Inject(A_Logger) logger: A_Logger,
     ) {
-        const { filePath, operation } = command.params;
+        logger.info(`Registering container ${this.name} in shared memory`);
 
-        // Emit custom events during processing
-        command.emit('validation-started');
-        console.log(`Validating file: ${filePath}`);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Get existing container registry or create new one
+        const containers = await memory.get('containers') || [];
 
-        command.emit('processing');
-        console.log(`Processing file with operation: ${operation}`);
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Add this container to the registry
+        containers.push(this);
 
-        command.emit('cleanup');
-        console.log('Cleaning up temporary files');
-        await new Promise(resolve => setTimeout(resolve, 50));
-
-        await memory.set('outputPath', `processed_${filePath}`);
-        await memory.set('size', 1024);
+        // Store updated registry in shared memory
+        await memory.set('containers', containers);
     }
 }
 
-async function customEventsExample() {
-    console.log('\n=== Custom Events Example ===');
+// ============================================================================
+// ====================== Application Setup and Execution ===================
+// ============================================================================
 
-    A_Context.reset();
-    A_Context.root.register(FileProcessor);
+/**
+ * Multi-Service Command Processing Demonstration
+ * 
+ * This example demonstrates how to set up and execute commands
+ * across multiple services using the A_Concept architecture.
+ * 
+ * Architecture Overview:
+ * - Two separate service containers (ServiceA and ServiceB)
+ * - Shared memory context for inter-service communication
+ * - Distributed command processing with lifecycle management
+ * - State tracking and result aggregation
+ */
+(async () => {
+    // ============================================================================
+    // ====================== Shared Memory Configuration ========================
+    // ============================================================================
 
-    const command = new FileProcessCommand({
-        filePath: 'document.pdf',
-        operation: 'compress'
+    /**
+     * Shared Memory Context
+     * 
+     * Creates a shared memory space that will be accessible by both services.
+     * This enables inter-service communication and state sharing during
+     * command execution.
+     */
+    const sharedMemory = new A_MemoryContext();
+
+    // ============================================================================
+    // ====================== Service Container Setup ============================
+    // ============================================================================
+
+    /**
+     * Service A Container
+     * 
+     * Specialized service for handling the initial phases of command processing.
+     * Contains its own processor, routing channel, and shared dependencies.
+     * 
+     * Components:
+     * - ServiceA_MyCommandProcessor: Handles pre-processing and main logic
+     * - SimpleChannel: Routes commands between services
+     * - A_Memory: Provides access to shared state
+     * - A_StateMachine: Manages command lifecycle transitions
+     * - A_Logger: Provides scoped logging
+     */
+    const containerA = new Service({
+        name: 'ServiceA',
+        fragments: [sharedMemory], // Share memory context between services
+        components: [
+            ServiceA_MyCommandProcessor, // Service-specific command processor
+            SimpleChannel,               // Inter-service communication channel
+            A_Memory,                   // Memory management
+            A_StateMachine,             // State machine for command lifecycle
+            A_Logger                    // Scoped logging
+        ],
+        entities: [myCommand], // Register command entity for this service
     });
 
-    // Subscribe to custom events
-    command.on('validation-started', () => console.log('📋 Validation phase started'));
-    command.on('processing', () => console.log('⚙️  Processing phase started'));
-    command.on('cleanup', () => console.log('🧹 Cleanup phase started'));
+    /**
+     * Service B Container
+     * 
+     * Specialized service for handling secondary processing and finalization.
+     * Shares memory context with Service A but has its own processor logic.
+     * 
+     * Note: Service B doesn't include SimpleChannel as it's primarily
+     * a target for routed commands rather than an initiator.
+     */
+    const containerB = new Service({
+        name: 'ServiceB',
+        fragments: [sharedMemory], // Same shared memory as Service A
+        components: [
+            ServiceB_MyCommandProcessor, // Service-specific command processor
+            A_Memory,                   // Memory management (shared)
+            A_StateMachine,             // State machine for command lifecycle
+            A_Logger                    // Scoped logging
+        ],
+        entities: [myCommand], // Register command entity for this service
+    });
 
-    // Subscribe to lifecycle events
-    command.on('onComplete', () => console.log('✅ File processing completed'));
+    // ============================================================================
+    // ====================== Concept Architecture Setup =========================
+    // ============================================================================
 
-    A_Context.root.register(command);
+    /**
+     * A_Concept - Application Architecture
+     * 
+     * Defines the overall application architecture by combining:
+     * - Multiple service containers
+     * - Shared components available across all services
+     * - Global dependency injection configuration
+     * 
+     * This creates a distributed system where commands can be processed
+     * across multiple services while maintaining shared state and communication.
+     */
+    const concept = new A_Concept({
+        containers: [containerA, containerB], // Register both service containers
+        components: [
+            SimpleChannel, // Global routing channel
+            A_Memory,      // Global memory management
+            A_Logger       // Global logging system
+        ],
+    });
+
+    console.log('🏛️  Concept architecture defined with distributed services');
+
+    // ============================================================================
+    // ====================== System Initialization ==============================
+    // ============================================================================
+
+    /**
+     * Load and Initialize the Distributed System
+     * 
+     * This triggers:
+     * 1. Container registration in shared memory
+     * 2. Component dependency resolution
+     * 3. Service discovery and routing table setup
+     * 4. Shared state initialization
+     */
+    console.log('⚡ Loading and initializing distributed system...');
+    await concept.load();
+    console.log('✅ System loaded - all services are ready\n');
+
+    // ============================================================================
+    // ====================== Command Creation and Execution =====================
+    // ============================================================================
+
+    /**
+     * Create Command Instance
+     * 
+     * Instantiate the command with initial parameters.
+     * The command will go through the complete lifecycle:
+     * CREATED → INITIALIZED → COMPILED → EXECUTING → COMPLETED/FAILED
+     */
+    const command = new myCommand({ userId: '123' });
+    console.log(`📝 Created command: ${command.id} for user: 123`);
+    console.log(`   Initial status: ${command.status}`);
+
+    /**
+     * Register Command in Service A
+     * 
+     * Register the command in Service A's scope, making it available
+     * for dependency injection and lifecycle management within that service.
+     */
+    containerA.scope.register(command);
+    console.log('🔗 Command registered in ServiceA scope');
+
+    /**
+     * Execute Distributed Command
+     * 
+     * This will trigger:
+     * 1. ServiceA_MyCommandProcessor.pre() - Pre-processing setup
+     * 2. ServiceA_MyCommandProcessor.main() - Route to ServiceB
+     * 3. ServiceB_MyCommandProcessor processing - Secondary processing
+     * 4. ServiceA_MyCommandProcessor.post() - Result aggregation
+     * 5. State transitions and result compilation
+     */
+    console.log('🚀 Executing distributed command across services...\n');
     await command.execute();
 
-    console.log('Final result:', command.result);
-}
+    // ============================================================================
+    // ====================== Results and Logging ================================
+    // ============================================================================
 
-// Run all examples
-async function runAllExamples() {
-    console.log('🚀 Running A-Command Examples\n');
+    /**
+     * Result Analysis and Logging
+     * 
+     * After execution, analyze the command state and results.
+     * The logger is resolved from the concept scope to provide
+     * centralized logging across all services.
+     */
+    const logger = concept.scope.resolve(A_Logger)!;
 
-    try {
-        await basicCommandExample();
-        await typedCommandExample();
-        await serializationExample();
-        await errorHandlingExample();
-        await customEventsExample();
+    // Log final execution status
+    logger.info('✨ Command execution completed');
+    logger.info(`   Final status: ${command.status}`);
+    logger.info('   Command state:', command.toJSON());
 
-        console.log('\n✅ All examples completed successfully!');
-    } catch (error) {
-        console.error('\n❌ Example failed:', error);
-    }
-}
+    console.log('\n🎉 Multi-service command processing example completed!');
+    console.log('Check the logs above to see the distributed processing flow.');
 
-// Export for use as module or run directly
-export {
-    basicCommandExample,
-    typedCommandExample,
-    serializationExample,
-    errorHandlingExample,
-    customEventsExample,
-    runAllExamples
-};
+})();
 
-// Run if this file is executed directly
-if (require.main === module) {
-    runAllExamples();
-}

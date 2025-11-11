@@ -4,6 +4,7 @@ import { A_Channel } from '@adaas/a-utils/lib/A-Channel/A-Channel.component';
 import { A_ChannelFeatures } from '@adaas/a-utils/lib/A-Channel/A-Channel.constants';
 import { A_ChannelRequest } from '@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context';
 import { A_ChannelError } from '@adaas/a-utils/lib/A-Channel/A-Channel.error';
+import { A_OperationContext } from '@adaas/a-utils/lib/A-Operation/A-Operation.context';
 
 jest.retryTimes(0);
 
@@ -122,7 +123,7 @@ describe('A-Channel tests', () => {
                 ) {
                     processingOrder.push('during');
                     // Simulate processing and setting result
-                    (context as any)._result = { processed: true, original: context.params };
+                    context.succeed({ processed: true, original: context.params });
                 }
 
                 @A_Feature.Extend({ scope: [TestChannel] })
@@ -162,7 +163,7 @@ describe('A-Channel tests', () => {
                     @A_Inject(A_ChannelRequest) context: A_ChannelRequest
                 ) {
                     errorCalls.push('error-handled');
-                    expect(context.failed).toBe(true);
+                    expect(context.error).toBeDefined();
                 }
             }
 
@@ -172,10 +173,11 @@ describe('A-Channel tests', () => {
             A_Context.root.register(channel);
 
             const params = { action: 'fail' };
-            const context = await channel.request(params);
+            
+            // Request should throw an error since the processing fails
+            await expect(channel.request(params)).rejects.toThrow();
 
             expect(errorCalls).toEqual(['error-handled']);
-            expect(context.failed).toBe(true);
             expect(channel.processing).toBe(false); // Should reset even on error
         });
 
@@ -199,11 +201,11 @@ describe('A-Channel tests', () => {
                     @A_Inject(A_ChannelRequest) context: A_ChannelRequest<TestParams, TestResult>
                 ) {
                     const { userId, action } = context.params;
-                    (context as any)._result = {
+                    context.succeed({
                         success: true,
                         userId,
                         timestamp: new Date().toISOString()
-                    };
+                    });
                 }
             }
 
@@ -243,7 +245,7 @@ describe('A-Channel tests', () => {
             class SendProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [SendChannel] })
                 async [A_ChannelFeatures.onSend](
-                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
+                    @A_Inject(A_OperationContext) context: A_OperationContext
                 ) {
                     sentMessages.push(context.params);
                 }
@@ -278,10 +280,10 @@ describe('A-Channel tests', () => {
 
                 @A_Feature.Extend({ scope: [ErrorSendChannel] })
                 async [A_ChannelFeatures.onError](
-                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
+                    @A_Inject(A_OperationContext) context: A_OperationContext
                 ) {
                     errorCalls.push('send-error-handled');
-                    expect(context.failed).toBe(true);
+                    expect(context.error).toBeDefined();
                 }
             }
 
@@ -344,9 +346,10 @@ describe('A-Channel tests', () => {
             const channel = new MultiErrorChannel();
             A_Context.root.register(channel);
 
-            await channel.request({ errorType: 'network' });
-            await channel.request({ errorType: 'validation' });
-            await channel.request({ errorType: 'timeout' });
+            // These requests should all throw errors, but the error handler should be called
+            try { await channel.request({ errorType: 'network' }); } catch (e) { /* expected */ }
+            try { await channel.request({ errorType: 'validation' }); } catch (e) { /* expected */ }
+            try { await channel.request({ errorType: 'timeout' }); } catch (e) { /* expected */ }
             await channel.request({ errorType: 'none' }); // Should not error
 
             expect(errorTypes).toEqual(['network', 'validation', 'timeout']);
@@ -414,7 +417,7 @@ describe('A-Channel tests', () => {
             class WebSocketProcessor extends A_Component {
                 @A_Feature.Extend({ scope: [WebSocketChannel] })
                 async [A_ChannelFeatures.onSend](
-                    @A_Inject(A_ChannelRequest) context: A_ChannelRequest
+                    @A_Inject(A_OperationContext) context: A_OperationContext
                 ) {
                     wsCalls.push(`WS: ${context.params.message}`);
                 }
@@ -451,7 +454,7 @@ describe('A-Channel tests', () => {
                     const delay = context.params.delay || 0;
                     await new Promise(resolve => setTimeout(resolve, delay));
                     processingOrder.push(context.params.id);
-                    (context as any)._result = { processed: context.params.id };
+                    context.succeed({ processed: context.params.id });
                 }
             }
 

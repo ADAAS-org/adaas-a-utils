@@ -1,71 +1,126 @@
 /**
- * A-Command Statuses
+ * A-Command Status Enumeration
+ * 
+ * Defines all possible states a command can be in during its lifecycle.
+ * Commands progress through these states in a specific order:
+ * CREATED → INITIALIZED → COMPILED → EXECUTING → COMPLETED/FAILED
  */
-export enum A_CONSTANTS__A_Command_Status {
+export enum A_Command_Status {
     /**
-     * Command has been created but not yet initialized
+     * Initial state when command is instantiated but not yet ready for execution
      */
     CREATED = 'CREATED',
-    /** 
-     * Command is initializing
-     */
-    INITIALIZATION = 'INITIALIZATION',
+    
     /**
-     * Command has been initialized
+     * Command has been initialized with execution scope and dependencies
      */
     INITIALIZED = 'INITIALIZED',
+    
     /**
-     * Command is compiling
-     */
-    COMPILATION = 'COMPILATION',
-    /**
-     * Command is compiled
+     * Command has been compiled and is ready for execution
      */
     COMPILED = 'COMPILED',
+    
     /**
-     * Command is executing
+     * Command is currently being executed
      */
-    IN_PROGRESS = 'IN_PROGRESS',
+    EXECUTING = 'EXECUTING',
+    
     /**
      * Command has completed successfully
      */
     COMPLETED = 'COMPLETED',
+    
     /**
-     * Command has failed
+     * Command execution has failed with errors
      */
     FAILED = 'FAILED',
 }
 
+
+/**
+ * A-Command State Transitions
+ * 
+ * Defines valid state transitions for command lifecycle management.
+ * These transitions are used by the StateMachine to enforce proper command flow.
+ */
+export enum A_CommandTransitions {
+    /** Transition from CREATED to INITIALIZED state */
+    CREATED_TO_INITIALIZED = 'created_initialized',
+    
+    /** Transition from INITIALIZED to EXECUTING state */
+    INITIALIZED_TO_EXECUTING = 'initialized_executing',
+    
+    /** Transition from EXECUTING to COMPLETED state (success path) */
+    EXECUTING_TO_COMPLETED = 'executing_completed',
+    
+    /** Transition from EXECUTING to FAILED state (error path) */
+    EXECUTING_TO_FAILED = 'executing_failed',
+}
+
 /**
  * A-Command Lifecycle Features
+ * 
+ * Defines feature extension points that components can implement to customize
+ * command behavior at different stages of the lifecycle.
+ * 
+ * Components can use @A_Feature.Extend() decorator with these feature names
+ * to inject custom logic into command execution.
  */
 export enum A_CommandFeatures {
     /**
-     * Allows to extend initialization logic and behavior
+     * Triggered during command initialization phase
+     * Use to set up execution environment, validate parameters, or prepare resources
      */
     onInit = 'onInit',
+    
     /**
-     * Allows to extend compilation logic and behavior
+     * Triggered before command execution starts
+     * Use for pre-execution validation, logging, or setup tasks
      */
-    onCompile = 'onCompile',
+    onBeforeExecute = 'onBeforeExecute',
+    
     /**
-     * Allows to extend execution logic and behavior
+     * Main command execution logic
+     * Core business logic should be implemented here
      */
     onExecute = 'onExecute',
+    
     /**
-     * Allows to extend completion logic and behavior
+     * Triggered after command execution completes (success or failure)
+     * Use for cleanup, logging, or post-processing tasks
+     */
+    onAfterExecute = 'onAfterExecute',
+    
+    /**
+     * Triggered when command completes successfully
+     * Use for success-specific operations like notifications or result processing
      */
     onComplete = 'onComplete',
+    
     /**
-     * 
+     * Triggered when command execution fails
+     * Use for error handling, cleanup, or failure notifications
      */
     onFail = 'onFail',
+    
+    /**
+     * Triggered when an error occurs during execution
+     * Use for error logging, transformation, or recovery attempts
+     */
+    onError = 'onError',
 }
 
 
 
 
-export type A_CONSTANTS__A_Command_Event = keyof typeof A_CommandFeatures;
+/**
+ * Type alias for command lifecycle event names
+ * Represents all available events that can be listened to on a command instance
+ */
+export type A_Command_Event = keyof typeof A_CommandFeatures;
+
+
 
 
 

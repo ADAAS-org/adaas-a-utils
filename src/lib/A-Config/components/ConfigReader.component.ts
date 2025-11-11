@@ -18,7 +18,7 @@ export class ConfigReader extends A_Component {
     async attachContext(
         @A_Inject(A_Container) container: A_Container,
         @A_Inject(A_Feature) feature: A_Feature,
-        @A_Inject(A_Config) config?: A_Config,
+        @A_Inject(A_Config) config?: A_Config<any>,
     ) {
         if (!config) {
             config= new A_Config({

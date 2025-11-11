@@ -18,16 +18,53 @@ export const A_LOGGER_DEFAULT_LEVEL = 'all';
  * Terminal color codes mapping
  */
 export const A_LOGGER_COLORS = {
-    green: '32',    // Success, completion messages
-    blue: '34',     // Info, general messages  
-    red: '31',      // Errors, critical issues
-    yellow: '33',   // Warnings, caution messages
-    gray: '90',     // Debug, less important info
-    magenta: '35',  // Special highlighting
-    cyan: '36',     // Headers, titles
-    white: '37',    // Default text
-    pink: '95',     // Custom highlighting
+    // System colors (reserved for specific purposes)
+    red: '31',          // Errors, critical issues
+    yellow: '33',       // Warnings, caution messages
+    green: '32',        // Success, completion messages
+    
+    // Safe palette for random selection (grey-blue-violet theme)
+    blue: '34',         // Info, general messages
+    cyan: '36',         // Headers, titles
+    magenta: '35',      // Special highlighting
+    gray: '90',         // Debug, less important info
+    brightBlue: '94',   // Bright blue variant
+    brightCyan: '96',   // Bright cyan variant
+    brightMagenta: '95', // Bright magenta variant
+    darkGray: '30',     // Dark gray
+    lightGray: '37',    // Light gray (white)
+    
+    // Extended blue-violet palette
+    indigo: '38;5;54',      // Deep indigo
+    violet: '38;5;93',      // Violet
+    purple: '38;5;129',     // Purple
+    lavender: '38;5;183',   // Lavender
+    skyBlue: '38;5;117',    // Sky blue
+    steelBlue: '38;5;67',   // Steel blue
+    slateBlue: '38;5;62',   // Slate blue
+    deepBlue: '38;5;18',    // Deep blue
+    lightBlue: '38;5;153',  // Light blue
+    periwinkle: '38;5;111', // Periwinkle
+    cornflower: '38;5;69',  // Cornflower blue
+    powder: '38;5;152',     // Powder blue
+    
+    // Additional grays for variety
+    charcoal: '38;5;236',   // Charcoal
+    silver: '38;5;250',     // Silver
+    smoke: '38;5;244',      // Smoke gray
+    slate: '38;5;240',      // Slate gray
 } as const;
+
+/**
+ * Safe colors for random selection - grey-blue-violet palette
+ * Excludes system colors (red, yellow, green) to avoid confusion with warnings/errors
+ */
+export const A_LOGGER_SAFE_RANDOM_COLORS = [
+    'blue', 'cyan', 'magenta', 'gray', 'brightBlue', 'brightCyan', 'brightMagenta',
+    'darkGray', 'lightGray', 'indigo', 'violet', 'purple', 'lavender', 'skyBlue',
+    'steelBlue', 'slateBlue', 'deepBlue', 'lightBlue', 'periwinkle', 'cornflower',
+    'powder', 'charcoal', 'silver', 'smoke', 'slate'
+] as const;
 
 /**
  * ANSI escape codes
@@ -65,5 +102,8 @@ export const A_LOGGER_FORMAT = {
  * Environment variable keys
  */
 export const A_LOGGER_ENV_KEYS = {
-    LOG_LEVEL: 'A_LOGGER_LEVEL'
+    LOG_LEVEL: 'A_LOGGER_LEVEL',
+    DEFAULT_SCOPE_LENGTH: 'A_LOGGER_DEFAULT_SCOPE_LENGTH',
+    DEFAULT_SCOPE_COLOR: 'A_LOGGER_DEFAULT_SCOPE_COLOR',
+    DEFAULT_LOG_COLOR: 'A_LOGGER_DEFAULT_LOG_COLOR'
 } as const;
