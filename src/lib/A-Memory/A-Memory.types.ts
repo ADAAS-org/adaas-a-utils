@@ -19,3 +19,14 @@ export type A_MemoryOperationContext<T extends any = any> = A_OperationContext<
     { key: string, value?: any },
     T
 >;
+
+
+export type A_MemoryOperationContextMeta<
+    T extends any = any,
+    I extends any = any
+> = {
+    result: T,
+    operation: A_MemoryOperations,
+    key: string,
+    value?: I,
+}

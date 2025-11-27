@@ -1,4 +1,5 @@
 import {
+    A_Command_ExecutionContext,
     A_TYPES__Command_Init,
     A_TYPES__Command_Listener,
     A_TYPES__Command_Serialized
@@ -9,13 +10,13 @@ import {
     A_Command_Status,
     A_CommandTransitions
 } from "./A-Command.constants";
-import { A_Caller, A_Context, A_Dependency, A_Entity, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
+import {  A_Context, A_Dependency, A_Entity, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_CommandError } from "./A-Command.error";
-import { A_OperationContext } from "../A-Operation/A-Operation.context";
 import { A_StateMachine } from "../A-StateMachine/A-StateMachine.component";
 import { A_StateMachineFeatures } from "../A-StateMachine/A-StateMachine.constants";
 import { A_Logger } from "../A-Logger/A-Logger.component";
 import { A_StateMachineTransition } from "../A-StateMachine/A-StateMachineTransition.context";
+import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
 
 /**
  * A_Command - Advanced Command Pattern Implementation
@@ -172,6 +173,12 @@ export class A_Command<
      */
     get scope(): A_Scope {
         return this._executionScope;
+    }
+    /**
+     * Execution context associated with the command
+     */
+    get context(): A_ExecutionContext<A_Command_ExecutionContext<InvokeType, ResultType>> {
+        return this.scope.resolve(A_ExecutionContext<A_Command_ExecutionContext<InvokeType, ResultType>>)!;
     }
 
     /**
@@ -438,7 +445,7 @@ export class A_Command<
     protected async [A_CommandFeatures.onFail](
         @A_Dependency.Required()
         @A_Inject(A_StateMachine) stateMachine: A_StateMachine,
-        @A_Inject(A_OperationContext) operation: A_OperationContext,
+        @A_Inject(A_ExecutionContext) operation: A_ExecutionContext<A_Command_ExecutionContext<InvokeType, ResultType>>,
         ...args: any[]
     ): Promise<void> {
         await stateMachine.transition(A_Command_Status.EXECUTING, A_Command_Status.FAILED);
@@ -464,7 +471,7 @@ export class A_Command<
         try {
             this.checkScopeInheritance();
 
-            const context = new A_OperationContext('execute-command');
+            const context = new A_ExecutionContext<A_Command_ExecutionContext<InvokeType, ResultType>>('execute-command');
 
             this.scope.register(context);
 
@@ -536,6 +543,16 @@ export class A_Command<
 
     /**
      * Marks the command as completed
+     * 
+     * 
+     * Calling This method will set the command status to COMPLETED, record the end time,
+     * store the result, emit the onComplete event, and destroy the execution scope.
+     *
+     * [!] After Calling this method, the command is considered fully processed And further processing will be INTERRUPTED. 
+     * [!] If the command is already processed (COMPLETED or FAILED), this method does nothing.
+     * [!] This method can be called with optional result data to store with the command.
+     * 
+     * @param result - Optional result data to store with the command
      */
     async complete(result?: ResultType) {
         if (this.isProcessed) return;

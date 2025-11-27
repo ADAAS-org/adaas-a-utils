@@ -1,4 +1,4 @@
-import { A_Component } from "@adaas/a-concept";
+import { A_Component, A_Entity } from "@adaas/a-concept";
 import { A_Manifest } from "../src/lib/A-Manifest/A-Manifest.context";
 
 describe('A_Manifest', () => {
@@ -84,8 +84,8 @@ describe('A_Manifest', () => {
             put() { return 'user.put'; }
             delete() { return 'user.delete'; }
         }
-        class GuestUser extends A_Component {}
-        class RegisteredUser extends A_Component {}
+        class GuestUser extends A_Entity {}
+        class RegisteredUser extends A_Entity {}
 
         const manifest = new A_Manifest([
             {

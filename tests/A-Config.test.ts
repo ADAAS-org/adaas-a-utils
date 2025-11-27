@@ -32,17 +32,11 @@ describe('A-Config tests', () => {
         expect(config.get('TEST_VAR2')).toBeUndefined();
     });
     it('Should Allow to create a config object with ENV values', async () => {
+
         process.env['TEST_VAR1'] = 'env1';
         process.env['TEST_VAR2'] = 'env2';
 
-        // Because we're resetting the context, we need to re-import the classes
-        // It does automatically by jest.setup.ts script
-        const { A_ConfigLoader } = await import('@adaas/a-utils/lib/A-Config/A-Config.container');
-        const { FileConfigReader } = await import('@adaas/a-utils/lib/A-Config/components/FileConfigReader.component');
-        const { ENVConfigReader } = await import('@adaas/a-utils/lib/A-Config/components/ENVConfigReader.component');
-
-        const config = new A_Config({
-            variables: ['TEST_VAR1', 'TEST_VAR2'] as const,
+        const config = new A_Config<['TEST_VAR1', 'TEST_VAR2']>({
             defaults: {
                 TEST_VAR1: 'default1',
             }
@@ -130,7 +124,7 @@ describe('A-Config tests', () => {
         const configLoader = new A_ConfigLoader({
             name: 'test-config-loader',
             fragments: [config],
-            components: [A_Logger,A_Polyfill, FileConfigReader]
+            components: [A_Logger, A_Polyfill, FileConfigReader]
         })
 
         const concept = new A_Concept({
@@ -147,7 +141,7 @@ describe('A-Config tests', () => {
         fs.unlinkSync('a-concept.conf.json');
     });
     it('Should Allow to create a config object with variables from File with different variable cases', async () => {
-        
+
         // 1. create a config file
         fs.writeFileSync('a-concept.conf.json', JSON.stringify({
             testVar2: 'env2'
@@ -163,7 +157,7 @@ describe('A-Config tests', () => {
         const configLoader = new A_ConfigLoader({
             name: 'test-config-loader',
             fragments: [config],
-            components: [A_Logger,A_Polyfill, FileConfigReader]
+            components: [A_Logger, A_Polyfill, FileConfigReader]
         })
 
         const concept = new A_Concept({

@@ -1,4 +1,4 @@
-import { A_Error, A_TYPES__Error_Serialized, A_Fragment, A_Component, A_TYPES__Entity_Serialized, A_TYPES__ConceptENVVariables, A_TYPES__Fragment_Constructor, A_Scope, A_Entity, A_Container, A_Feature, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor, A_TYPES__Container_Constructor, A_TYPES__Fragment_Serialized } from '@adaas/a-concept';
+import { A_Error, A_TYPES__Error_Serialized, A_Fragment, A_Meta, A_TYPES__Fragment_Serialized, A_Component, A_TYPES__Entity_Serialized, A_TYPES__ConceptENVVariables, A_TYPES__Fragment_Constructor, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_Scope, A_Entity, A_Container, A_Feature, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor, A_TYPES__Container_Constructor } from '@adaas/a-concept';
 
 type A_Operation_Storage<_Result_type extends any = any, _ParamsType extends Record<string, any> = Record<string, any>> = {
     /**
@@ -37,7 +37,21 @@ type A_Operation_Serialized<_Result_type extends any = any, _ParamsType extends 
     error?: A_TYPES__Error_Serialized;
 };
 
-declare class A_OperationContext<_AllowedOperations extends string = string, _ParamsType extends Record<string, any> = Record<string, any>, _ResultType = any, _StorageType extends A_Operation_Storage<_ResultType, _ParamsType> = A_Operation_Storage<_ResultType, _ParamsType>> extends A_Fragment<_StorageType, A_Operation_Serialized<_ResultType, _ParamsType>> {
+declare class A_ExecutionContext<_MetaType extends Record<string, any> = Record<string, any>, _SerializedType extends Record<string, any> = Record<string, any>> extends A_Fragment {
+    protected _meta: A_Meta<_MetaType, _SerializedType>;
+    constructor(name: string, defaults?: Partial<_MetaType>);
+    [Symbol.iterator](): Iterator<[keyof _MetaType, _MetaType[keyof _MetaType]]>;
+    get meta(): A_Meta<_MetaType>;
+    get(key: keyof _MetaType): _MetaType[keyof _MetaType] | undefined;
+    set(key: keyof _MetaType, value: _MetaType[keyof _MetaType]): void;
+    has(key: keyof _MetaType): boolean;
+    drop(key: keyof _MetaType): void;
+    clear(): void;
+    toRaw(): _SerializedType;
+    toJSON(): A_TYPES__Fragment_Serialized;
+}
+
+declare class A_OperationContext<_AllowedOperations extends string = string, _ParamsType extends Record<string, any> = Record<string, any>, _ResultType = any, _StorageType extends A_Operation_Storage<_ResultType, _ParamsType> = A_Operation_Storage<_ResultType, _ParamsType>> extends A_ExecutionContext<_StorageType, A_Operation_Serialized<_ResultType, _ParamsType>> {
     constructor(operation: _AllowedOperations, params?: _ParamsType);
     get name(): _AllowedOperations;
     get result(): _ResultType | undefined;
@@ -706,6 +720,10 @@ type A_TYPES__Command_Serialized<ParamsType extends Record<string, any> = Record
  * ```
  */
 type A_TYPES__Command_Listener<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string = A_Command_Event> = (command?: A_Command<InvokeType, ResultType, LifecycleEvents>) => void;
+type A_Command_ExecutionContext<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>> = {
+    result: ResultType;
+    params: InvokeType;
+};
 
 declare enum A_StateMachineFeatures {
     /**
@@ -921,20 +939,28 @@ type A_TYPES__ConfigContainerConstructor<T extends Array<string | A_TYPES__Conce
     };
 } & A_TYPES__Fragment_Constructor;
 
-declare class A_Config<T extends Array<string | A_TYPES__ConceptENVVariables[number]> = any[]> extends A_Fragment<{
+declare const A_CONSTANTS__CONFIG_ENV_VARIABLES: {};
+type A_TYPES__ConfigENVVariables = (typeof A_CONSTANTS__CONFIG_ENV_VARIABLES)[keyof typeof A_CONSTANTS__CONFIG_ENV_VARIABLES][];
+declare const A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY: readonly [];
+
+declare class A_Config<T extends Array<string | A_TYPES__ConceptENVVariables[number]> = any[]> extends A_ExecutionContext<{
     [key in T[number]]: any;
+} & {
+    [key in typeof A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY[number]]: any;
+} & {
+    [key in typeof A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY[number]]: any;
 }> {
-    config: A_TYPES__ConfigContainerConstructor<T>;
-    private VARIABLES;
-    CONFIG_PROPERTIES: T;
+    protected _strict: boolean;
+    protected _configProperties: T;
     protected DEFAULT_ALLOWED_TO_READ_PROPERTIES: ("A_CONCEPT_NAME" | "A_CONCEPT_ROOT_SCOPE" | "A_CONCEPT_ENVIRONMENT" | "A_CONCEPT_ROOT_FOLDER" | "A_ERROR_DEFAULT_DESCRIPTION")[];
     constructor(config: Partial<A_TYPES__ConfigContainerConstructor<T>>);
+    get strict(): boolean;
     /**
-     * This method is used to get the configuration property by name
-     *
-     * @param property
-     * @returns
-     */
+      * This method is used to get the configuration property by name
+      *
+      * @param property
+      * @returns
+      */
     get<K extends T[number]>(property: K | typeof this.DEFAULT_ALLOWED_TO_READ_PROPERTIES[number]): {
         [key in T[number]]: any;
     }[K] | undefined;
@@ -1403,6 +1429,10 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
      */
     get scope(): A_Scope;
     /**
+     * Execution context associated with the command
+     */
+    get context(): A_ExecutionContext<A_Command_ExecutionContext<InvokeType, ResultType>>;
+    /**
      * Unique command type identifier
      *
      * Derived from the class name and used for:
@@ -1504,7 +1534,7 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
     protected [A_CommandFeatures.onExecute](...args: any[]): Promise<void>;
     protected [A_CommandFeatures.onAfterExecute](...args: any[]): Promise<void>;
     protected [A_CommandFeatures.onComplete](stateMachine: A_StateMachine, ...args: any[]): Promise<void>;
-    protected [A_CommandFeatures.onFail](stateMachine: A_StateMachine, operation: A_OperationContext, ...args: any[]): Promise<void>;
+    protected [A_CommandFeatures.onFail](stateMachine: A_StateMachine, operation: A_ExecutionContext<A_Command_ExecutionContext<InvokeType, ResultType>>, ...args: any[]): Promise<void>;
     /**
      * Initializes the command before execution.
      */
@@ -1515,6 +1545,16 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
     execute(): Promise<any>;
     /**
      * Marks the command as completed
+     *
+     *
+     * Calling This method will set the command status to COMPLETED, record the end time,
+     * store the result, emit the onComplete event, and destroy the execution scope.
+     *
+     * [!] After Calling this method, the command is considered fully processed And further processing will be INTERRUPTED.
+     * [!] If the command is already processed (COMPLETED or FAILED), this method does nothing.
+     * [!] This method can be called with optional result data to store with the command.
+     *
+     * @param result - Optional result data to store with the command
      */
     complete(result?: ResultType): Promise<void>;
     /**
@@ -1831,8 +1871,9 @@ declare class A_ConfigError extends A_Error {
  */
 declare class ConfigReader extends A_Component {
     protected polyfill: A_Polyfill;
+    protected DEFAULT_ALLOWED_TO_READ_PROPERTIES: ("A_CONCEPT_NAME" | "A_CONCEPT_ROOT_SCOPE" | "A_CONCEPT_ENVIRONMENT" | "A_CONCEPT_ROOT_FOLDER" | "A_ERROR_DEFAULT_DESCRIPTION")[];
     constructor(polyfill: A_Polyfill);
-    attachContext(container: A_Container, feature: A_Feature, config?: A_Config<any>): Promise<void>;
+    attachContext(container: A_Container, context: A_Scope, config?: A_Config<any>): Promise<void>;
     initialize(config: A_Config): Promise<void>;
     /**
      * Get the configuration property by Name
@@ -1875,10 +1916,6 @@ declare class FileConfigReader extends ConfigReader {
     resolve<_ReturnType = any>(property: string): _ReturnType;
     read<T extends string>(variables?: Array<T>): Promise<Record<T, any>>;
 }
-
-declare const A_CONSTANTS__CONFIG_ENV_VARIABLES: {};
-type A_TYPES__ConfigENVVariables = (typeof A_CONSTANTS__CONFIG_ENV_VARIABLES)[keyof typeof A_CONSTANTS__CONFIG_ENV_VARIABLES][];
-declare const A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY: readonly [];
 
 type A_LoggerLevel = 'debug' | 'info' | 'warn' | 'error' | 'all';
 
@@ -2123,11 +2160,13 @@ declare enum A_MemoryFeatures {
     onHas = "onHas"
 }
 
-declare class A_MemoryContext<_MemoryType extends Record<string, any> = Record<string, any>, _SerializedType extends A_TYPES__Fragment_Serialized = A_TYPES__Fragment_Serialized> extends A_Fragment<_MemoryType, _MemoryType & _SerializedType> {
-    set<K extends keyof _MemoryType>(param: 'error', value: A_Error): void;
+declare class A_MemoryContext<_MemoryType extends Record<string, any> = Record<string, any>, _SerializedType extends A_TYPES__Fragment_Serialized = A_TYPES__Fragment_Serialized> extends A_Fragment {
+    protected _storage: Map<keyof _MemoryType, _MemoryType[keyof _MemoryType]>;
     set<K extends keyof _MemoryType>(param: K, value: _MemoryType[K]): void;
-    get<K extends keyof A_Error>(param: 'error'): A_Error | undefined;
     get<K extends keyof _MemoryType>(param: K): _MemoryType[K] | undefined;
+    delete<K extends keyof _MemoryType>(param: K): void;
+    has<K extends keyof _MemoryType>(param: K): boolean;
+    clear(): void;
 }
 
 type A_MemoryContextMeta<T extends Record<string, any> = Record<string, any>> = Omit<T, 'error'> & {
@@ -2141,6 +2180,12 @@ type A_MemoryOperationContext<T extends any = any> = A_OperationContext<A_Memory
     key: string;
     value?: any;
 }, T>;
+type A_MemoryOperationContextMeta<T extends any = any, I extends any = any> = {
+    result: T;
+    operation: A_MemoryOperations;
+    key: string;
+    value?: I;
+};
 
 declare class A_Memory<_StorageType extends Record<string, any> = Record<string, any>, _SerializedType extends Record<string, any> = Record<string, any>> extends A_Component {
     protected _ready?: Promise<void>;
@@ -2340,4 +2385,4 @@ declare class A_StateMachineError extends A_Error {
     static readonly TransitionError = "A-StateMachine Transition Error";
 }
 
-export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandFeatures, A_CommandTransitions, type A_Command_Event, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Schedule, A_ScheduleObject, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandFeatures, A_CommandTransitions, type A_Command_Event, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Schedule, A_ScheduleObject, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };

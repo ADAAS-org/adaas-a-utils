@@ -117,7 +117,7 @@ export class A_Memory<
         ...args: any[]
     ): Promise<void> {
         // Handle drop operation
-        context.drop(operation.params.key);
+        context.delete(operation.params.key);
     }
 
     @A_Feature.Extend()

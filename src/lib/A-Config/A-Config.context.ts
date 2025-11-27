@@ -1,20 +1,21 @@
-import { A_CommonHelper, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_FormatterHelper, A_Fragment, A_TYPES__ConceptENVVariables } from "@adaas/a-concept";
+import { A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_FormatterHelper, A_TYPES__ConceptENVVariables } from "@adaas/a-concept";
 import { A_TYPES__ConfigContainerConstructor } from "./A-Config.types";
+import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "./A-Config.constants";
+import { A_ConfigError } from "./A-Config.error";
 
 
 export class A_Config<
     T extends Array<string | A_TYPES__ConceptENVVariables[number]> = any[]
-> extends A_Fragment<{
-    [key in T[number]]: any
-}> {
-
-    config: A_TYPES__ConfigContainerConstructor<T>;
-
-
-    private VARIABLES: Map<T[number], any> = new Map<T[number], any>();
-
-    CONFIG_PROPERTIES!: T;
+> extends A_ExecutionContext<
+    { [key in T[number]]: any; } & {
+        [key in typeof A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY[number]]: any
+    } & {
+        [key in typeof A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY[number]]: any
+    }
+> {
+    protected _strict: boolean;
+    protected _configProperties!: T;
 
     protected DEFAULT_ALLOWED_TO_READ_PROPERTIES = [
         ...A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
@@ -25,60 +26,45 @@ export class A_Config<
     constructor(
         config: Partial<A_TYPES__ConfigContainerConstructor<T>>
     ) {
-        super({
-            name: 'A_Config'
-        });
+        super('a-config');
 
-        this.config = A_CommonHelper.deepCloneAndMerge<A_TYPES__ConfigContainerConstructor<T>>(config as any, {
-            strict: false,
-            defaults: {},
-            variables: A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY as any as T
-        } as any);
+        this._strict = config.strict ?? false;
+        this._configProperties = config.variables ?? [] as any;
 
-        this.CONFIG_PROPERTIES = this.config.variables ? this.config.variables : [] as any as T;
 
-        this.config.variables.forEach((variable) => {
-            this.VARIABLES.set(
-                A_FormatterHelper.toUpperSnakeCase(variable),
-                this.config.defaults[variable]
+        for (const key in config.defaults) {
+            this.set(
+                A_FormatterHelper.toUpperSnakeCase(key),
+                config.defaults[key as T[number]]
             );
-        });
+        }
+    }
+
+
+    get strict(): boolean {
+        return this._strict;
     }
 
 
     /** 
-     * This method is used to get the configuration property by name
-     * 
-     * @param property 
-     * @returns 
-     */
+      * This method is used to get the configuration property by name
+      * 
+      * @param property 
+      * @returns 
+      */
     get<K extends T[number]>(
         property: K | typeof this.DEFAULT_ALLOWED_TO_READ_PROPERTIES[number]
     ): { [key in T[number]]: any; }[K] | undefined {
-        if (this.CONFIG_PROPERTIES.includes(property as any)
+        if (this._configProperties.includes(property as any)
             || this.DEFAULT_ALLOWED_TO_READ_PROPERTIES.includes(property as any)
-            || !(this.config.strict)
+            || !this._strict
         )
-            return this.VARIABLES.get(A_FormatterHelper.toUpperSnakeCase(property));
+            return super.get(A_FormatterHelper.toUpperSnakeCase(property));
 
-        throw new Error('Property not exists or not allowed to read') as never;
-        // return this.concept.Errors.throw(A_SDK_CONSTANTS__ERROR_CODES.CONFIGURATION_PROPERTY_NOT_EXISTS_OR_NOT_ALLOWED_TO_READ) as never;
-
+        throw new A_ConfigError('Property not exists or not allowed to read');
     }
 
 
-    //  get<_OutType = any>(
-    //         property: T[number] | typeof this.DEFAULT_ALLOWED_TO_READ_PROPERTIES[number] | string
-    //     ): _OutType {
-    //         if (this.CONFIG_PROPERTIES.includes(property as any)
-    //             || this.DEFAULT_ALLOWED_TO_READ_PROPERTIES.includes(property as any)
-    //             || !(this.config.strict)
-    //         )
-    //             return this.VARIABLES.get(A_FormatterHelper.toUpperSnakeCase(property)) as _OutType;
-
-    //         throw new Error('Property not exists or not allowed to read') as never;
-    //         // return this.concept.Errors.throw(A_SDK_CONSTANTS__ERROR_CODES.CONFIGURATION_PROPERTY_NOT_EXISTS_OR_NOT_ALLOWED_TO_READ) as never;
-    //     }
     /**
      * 
      * This method is used to set the configuration property by name
@@ -118,14 +104,7 @@ export class A_Config<
                     }));
 
         for (const { property, value } of array) {
-
-            let targetValue = value
-                ? value
-                : this.config?.defaults
-                    ? this.config.defaults[property as T[number]]
-                    : undefined;
-
-            this.VARIABLES.set(A_FormatterHelper.toUpperSnakeCase(property), targetValue);
+            super.set(A_FormatterHelper.toUpperSnakeCase(property), value);
         }
     }
 }

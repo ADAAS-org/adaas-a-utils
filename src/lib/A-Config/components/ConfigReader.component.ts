@@ -1,14 +1,21 @@
-import { A_Component, A_Concept, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_Container, A_Feature, A_Inject } from "@adaas/a-concept";
+import { A_Component, A_Concept, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_Container, A_Context, A_Dependency, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_Config } from "../A-Config.context";
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "../A-Config.constants";
 import { A_Polyfill } from "../../A-Polyfill/A-Polyfill.component";
+import { A_Memory } from "../../A-Memory/A-Memory.component";
 
 /**
  * Config Reader
  */
 export class ConfigReader extends A_Component {
 
+    protected DEFAULT_ALLOWED_TO_READ_PROPERTIES = [
+        ...A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
+        ...A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
+    ];
+
     constructor(
+        @A_Dependency.Required()
         @A_Inject(A_Polyfill) protected polyfill: A_Polyfill,
     ) {
         super();
@@ -17,15 +24,11 @@ export class ConfigReader extends A_Component {
     @A_Concept.Load()
     async attachContext(
         @A_Inject(A_Container) container: A_Container,
-        @A_Inject(A_Feature) feature: A_Feature,
+        @A_Inject(A_Scope) context: A_Scope,
         @A_Inject(A_Config) config?: A_Config<any>,
     ) {
         if (!config) {
-            config= new A_Config({
-                variables: [
-                    ...A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
-                    ...A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
-                ] as const,
+            config = new A_Config({
                 defaults: {}
             });
 
@@ -39,18 +42,15 @@ export class ConfigReader extends A_Component {
 
     @A_Concept.Load()
     async initialize(
+        @A_Dependency.Required()
         @A_Inject(A_Config) config: A_Config,
     ) {
-        const data = await this.read([
-            ...config.CONFIG_PROPERTIES,
-            ...A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
-            ...A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY
-        ]);
+        const data = await this.read();
 
-        config.set(data);
+        for (const key in data) {
+            config.set(key, data[key]);
+        }
     }
-
-
 
     /**
      * Get the configuration property by Name
@@ -79,6 +79,8 @@ export class ConfigReader extends A_Component {
      * @returns {string|null} - The path to the root directory or null if package.json is not found
      */
     protected async getProjectRoot(startPath = __dirname) {
+        const process = await this.polyfill.process();
+
         return process.cwd();
     }
 }

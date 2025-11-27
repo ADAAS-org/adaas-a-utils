@@ -1,12 +1,13 @@
 import { A_Error, A_Fragment } from "@adaas/a-concept";
 import { A_Operation_Serialized, A_Operation_Storage } from "./A-Operation.types";
+import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
 
 export class A_OperationContext<
     _AllowedOperations extends string = string,
     _ParamsType extends Record<string, any> = Record<string, any>,
     _ResultType = any,
     _StorageType extends A_Operation_Storage<_ResultType, _ParamsType> = A_Operation_Storage<_ResultType, _ParamsType>
-> extends A_Fragment<
+> extends A_ExecutionContext<
     _StorageType,
     A_Operation_Serialized<_ResultType, _ParamsType>
 > {
@@ -15,7 +16,7 @@ export class A_OperationContext<
         operation: _AllowedOperations,
         params?: _ParamsType
     ) {
-        super();
+        super('operation-context');
 
         this.meta.set('name', operation);
         this.meta.set('params', params || {} as _ParamsType);

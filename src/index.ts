@@ -60,6 +60,12 @@ export * from './lib/A-Memory/A-Memory.constants';
 export * from './lib/A-Memory/A-Memory.types';
 
 // ============================================================================
+// A-Execution Components
+// ============================================================================
+export { A_ExecutionContext } from './lib/A-Execution/A-Execution.context';
+// export * from './lib/A-Execution/A-Execution.types';
+
+// ============================================================================
 // A-Operation Components
 // ============================================================================
 export { A_OperationContext } from './lib/A-Operation/A-Operation.context';

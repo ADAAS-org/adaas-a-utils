@@ -58,55 +58,55 @@ export type A_TYPES__Command_Serialized<
      * Unique identifier for the command type (derived from class name)
      */
     code: string;
-    
+
     /**
      * Current execution status of the command
      */
     status: A_Command_Status;
-    
+
     /**
      * Parameters used to initialize the command
      */
     params: ParamsType;
-    
+
     // --------------------------------------------------
     // Timing Information
     // --------------------------------------------------
-    
+
     /**
      * ISO timestamp when the command was created
      */
     createdAt: string;
-    
+
     /**
      * ISO timestamp when command execution started (if started)
      */
     startedAt?: string;
-    
+
     /**
      * ISO timestamp when command execution ended (if completed/failed)
      */
     endedAt?: string;
-    
+
     /**
      * Total execution duration in milliseconds (if completed/failed)
      */
     duration?: number;
-    
+
     /**
      * Time between creation and execution start in milliseconds
      */
     idleTime?: number;
-    
+
     // --------------------------------------------------
     // Execution Results
     // --------------------------------------------------
-    
+
     /**
      * Result data produced by successful command execution
      */
     result?: ResultType;
-    
+
     /**
      * Array of serialized errors that occurred during execution
      */
@@ -146,3 +146,11 @@ export type A_TYPES__Command_Listener<
 
 
 
+
+export type A_Command_ExecutionContext<
+    InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init,
+    ResultType extends Record<string, any> = Record<string, any>,
+> = {
+    result: ResultType,
+    params: InvokeType,
+}
