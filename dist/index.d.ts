@@ -66,53 +66,53 @@ declare enum A_ChannelFeatures {
     /**
      * Allows to extend timeout logic and behavior
      */
-    onTimeout = "onTimeout",
+    onTimeout = "_A_Channel_onTimeout",
     /**
      * Allows to extend retry logic and behavior
      */
-    onRetry = "onRetry",
+    onRetry = "_A_Channel_onRetry",
     /**
      * Allows to extend circuit breaker logic and behavior
      */
-    onCircuitBreakerOpen = "onCircuitBreakerOpen",
+    onCircuitBreakerOpen = "_A_Channel_onCircuitBreakerOpen",
     /**
      * Allows to extend cache logic and behavior
      */
-    onCache = "onCache",
+    onCache = "_A_Channel_onCache",
     /**
      * Allows to extend connection logic and behavior
      */
-    onConnect = "onConnect",
+    onConnect = "_A_Channel_onConnect",
     /**
      * Allows to extend disconnection logic and behavior
      */
-    onDisconnect = "onDisconnect",
+    onDisconnect = "_A_Channel_onDisconnect",
     /**
      * Allows to extend request preparation logic and behavior
      */
-    onBeforeRequest = "onBeforeRequest",
+    onBeforeRequest = "_A_Channel_onBeforeRequest",
     /**
      * Allows to extend request sending logic and behavior
      */
-    onRequest = "onRequest",
+    onRequest = "_A_Channel_onRequest",
     /**
      * Allows to extend request post-processing logic and behavior
      */
-    onAfterRequest = "onAfterRequest",
+    onAfterRequest = "_A_Channel_onAfterRequest",
     /**
      * Allows to extend error handling logic and behavior
      *
      * [!] The same approach uses for ALL errors within the channel
      */
-    onError = "onError",
+    onError = "_A_Channel_onError",
     /**
      * Allows to extend send logic and behavior
      */
-    onSend = "onSend",
+    onSend = "_A_Channel_onSend",
     /**
      * Allows to extend consume logic and behavior
      */
-    onConsume = "onConsume"
+    onConsume = "_A_Channel_onConsume"
 }
 declare enum A_ChannelRequestStatuses {
     /**
@@ -576,6 +576,43 @@ declare enum A_CommandFeatures {
      * Triggered during command initialization phase
      * Use to set up execution environment, validate parameters, or prepare resources
      */
+    onInit = "_A_Command_onInit",
+    /**
+     * Triggered before command execution starts
+     * Use for pre-execution validation, logging, or setup tasks
+     */
+    onBeforeExecute = "_A_Command_onBeforeExecute",
+    /**
+     * Main command execution logic
+     * Core business logic should be implemented here
+     */
+    onExecute = "_A_Command_onExecute",
+    /**
+     * Triggered after command execution completes (success or failure)
+     * Use for cleanup, logging, or post-processing tasks
+     */
+    onAfterExecute = "_A_Command_onAfterExecute",
+    /**
+     * Triggered when command completes successfully
+     * Use for success-specific operations like notifications or result processing
+     */
+    onComplete = "_A_Command_onComplete",
+    /**
+     * Triggered when command execution fails
+     * Use for error handling, cleanup, or failure notifications
+     */
+    onFail = "_A_Command_onFail",
+    /**
+     * Triggered when an error occurs during execution
+     * Use for error logging, transformation, or recovery attempts
+     */
+    onError = "_A_Command_onError"
+}
+declare enum A_CommandEvent {
+    /**
+     * Triggered during command initialization phase
+     * Use to set up execution environment, validate parameters, or prepare resources
+     */
     onInit = "onInit",
     /**
      * Triggered before command execution starts
@@ -612,7 +649,7 @@ declare enum A_CommandFeatures {
  * Type alias for command lifecycle event names
  * Represents all available events that can be listened to on a command instance
  */
-type A_Command_Event = keyof typeof A_CommandFeatures;
+type A_CommandEvents = keyof typeof A_CommandEvent;
 
 /**
  * Command Constructor Type
@@ -719,7 +756,7 @@ type A_TYPES__Command_Serialized<ParamsType extends Record<string, any> = Record
  * command.on('onExecute', listener);
  * ```
  */
-type A_TYPES__Command_Listener<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string = A_Command_Event> = (command?: A_Command<InvokeType, ResultType, LifecycleEvents>) => void;
+type A_TYPES__Command_Listener<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string = keyof typeof A_CommandEvent> = (command?: A_Command<InvokeType, ResultType, LifecycleEvents>) => void;
 type A_Command_ExecutionContext<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>> = {
     result: ResultType;
     params: InvokeType;
@@ -729,19 +766,19 @@ declare enum A_StateMachineFeatures {
     /**
      * Allows to extend error handling logic and behavior
      */
-    onError = "onError",
+    onError = "_A_StateMachine_onError",
     /**
      * Allows to extend initialization logic and behavior
      */
-    onInitialize = "onInitialize",
+    onInitialize = "_A_StateMachine_onInitialize",
     /**
      * Allows to extend transition validation logic and behavior
      */
-    onBeforeTransition = "onBeforeTransition",
+    onBeforeTransition = "_A_StateMachine_onBeforeTransition",
     /**
      * Allows to extend post-transition logic and behavior
      */
-    onAfterTransition = "onAfterTransition"
+    onAfterTransition = "_A_StateMachine_onAfterTransition"
 }
 
 /**
@@ -1379,7 +1416,7 @@ declare class A_StateMachineTransition<_ParamsType = any, _ResultType = any> ext
  * console.log('Status:', command.status);
  * ```
  */
-declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string | A_Command_Event = A_Command_Event> extends A_Entity<InvokeType, A_TYPES__Command_Serialized<InvokeType, ResultType>> {
+declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init, ResultType extends Record<string, any> = Record<string, any>, LifecycleEvents extends string | keyof typeof A_CommandEvent = keyof typeof A_CommandEvent> extends A_Entity<InvokeType, A_TYPES__Command_Serialized<InvokeType, ResultType>> {
     /**
      * Static command identifier derived from the class name
      * Used for command registration and serialization
@@ -1398,7 +1435,7 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
     /** Current lifecycle status of the command */
     protected _status: A_Command_Status;
     /** Map of event listeners organized by event name */
-    protected _listeners: Map<LifecycleEvents | A_Command_Event, Set<A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>>>;
+    protected _listeners: Map<LifecycleEvents | keyof typeof A_CommandEvent, Set<A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>>>;
     /** Timestamp when command execution started */
     protected _startTime?: Date;
     /** Timestamp when command execution ended */
@@ -1567,20 +1604,20 @@ declare class A_Command<InvokeType extends A_TYPES__Command_Init = A_TYPES__Comm
      * @param event
      * @param listener
      */
-    on(event: LifecycleEvents | A_Command_Event, listener: A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>): void;
+    on(event: LifecycleEvents | A_CommandEvent, listener: A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>): void;
     /**
      * Removes an event listener for a specific event
      *
      * @param event
      * @param listener
      */
-    off(event: LifecycleEvents | A_Command_Event, listener: A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>): void;
+    off(event: LifecycleEvents | A_CommandEvent, listener: A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>): void;
     /**
      * Emits an event to all registered listeners
      *
      * @param event
      */
-    emit(event: LifecycleEvents | A_Command_Event): void;
+    emit(event: LifecycleEvents | keyof typeof A_CommandEvent): void;
     /**
      * Allows to create a Command instance from new data
      *
@@ -2121,43 +2158,43 @@ declare enum A_MemoryFeatures {
     /**
      * Allows to extend initialization logic and behavior
      */
-    onInit = "onInit",
+    onInit = "_A_Memory_onInit",
     /**
      * Allows to extend destruction logic and behavior
      */
-    onDestroy = "onDestroy",
+    onDestroy = "_A_Memory_onDestroy",
     /**
      * Allows to extend expiration logic and behavior
      */
-    onExpire = "onExpire",
+    onExpire = "_A_Memory_onExpire",
     /**
      * Allows to extend error handling logic and behavior
      */
-    onError = "onError",
+    onError = "_A_Memory_onError",
     /**
      * Allows to extend serialization logic and behavior
      */
-    onSerialize = "onSerialize",
+    onSerialize = "_A_Memory_onSerialize",
     /**
      * Allows to extend set operation logic and behavior
      */
-    onSet = "onSet",
+    onSet = "_A_Memory_onSet",
     /**
      * Allows to extend get operation logic and behavior
      */
-    onGet = "onGet",
+    onGet = "_A_Memory_onGet",
     /**
      * Allows to extend drop operation logic and behavior
      */
-    onDrop = "onDrop",
+    onDrop = "_A_Memory_onDrop",
     /**
      * Allows to extend clear operation logic and behavior
      */
-    onClear = "onClear",
+    onClear = "_A_Memory_onClear",
     /**
      * Allows to extend has operation logic and behavior
      */
-    onHas = "onHas"
+    onHas = "_A_Memory_onHas"
 }
 
 declare class A_MemoryContext<_MemoryType extends Record<string, any> = Record<string, any>, _SerializedType extends A_TYPES__Fragment_Serialized = A_TYPES__Fragment_Serialized> extends A_Fragment {
@@ -2385,4 +2422,4 @@ declare class A_StateMachineError extends A_Error {
     static readonly TransitionError = "A-StateMachine Transition Error";
 }
 
-export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandFeatures, A_CommandTransitions, type A_Command_Event, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Schedule, A_ScheduleObject, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Schedule, A_ScheduleObject, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };

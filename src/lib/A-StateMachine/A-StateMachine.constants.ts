@@ -2,17 +2,17 @@ export enum A_StateMachineFeatures {
     /**
      * Allows to extend error handling logic and behavior
      */
-    onError = 'onError',
+    onError = '_A_StateMachine_onError',
     /**
      * Allows to extend initialization logic and behavior
      */
-    onInitialize = 'onInitialize',
+    onInitialize = '_A_StateMachine_onInitialize',
     /**
      * Allows to extend transition validation logic and behavior
      */
-    onBeforeTransition = 'onBeforeTransition',
+    onBeforeTransition = '_A_StateMachine_onBeforeTransition',
     /**
      * Allows to extend post-transition logic and behavior
      */
-    onAfterTransition = 'onAfterTransition',
+    onAfterTransition = '_A_StateMachine_onAfterTransition',
 }

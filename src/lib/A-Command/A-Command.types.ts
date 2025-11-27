@@ -1,5 +1,5 @@
 import { A_Command } from "./A-Command.entity";
-import { A_Command_Event, A_Command_Status, } from "./A-Command.constants";
+import { A_CommandEvent, A_Command_Status, } from "./A-Command.constants";
 import { A_TYPES__Entity_Serialized, A_TYPES__Error_Serialized } from "@adaas/a-concept";
 
 // ============================================================================
@@ -141,7 +141,7 @@ export type A_TYPES__Command_Serialized<
 export type A_TYPES__Command_Listener<
     InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init,
     ResultType extends Record<string, any> = Record<string, any>,
-    LifecycleEvents extends string = A_Command_Event
+    LifecycleEvents extends string = keyof typeof A_CommandEvent
 > = (command?: A_Command<InvokeType, ResultType, LifecycleEvents>) => void;
 
 

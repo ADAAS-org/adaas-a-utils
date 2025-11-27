@@ -1,6 +1,6 @@
 import { A_Command } from '@adaas/a-utils/lib/A-Command/A-Command.entity';
 import { A_CommandError } from '@adaas/a-utils/lib/A-Command/A-Command.error';
-import { A_Command_Status, A_CommandFeatures } from '@adaas/a-utils/lib/A-Command/A-Command.constants';
+import { A_Command_Status, A_CommandEvent, A_CommandFeatures } from '@adaas/a-utils/lib/A-Command/A-Command.constants';
 import { A_TYPES__Command_Serialized } from '@adaas/a-utils/lib/A-Command/A-Command.types';
 import { A_StateMachine } from '@adaas/a-utils/lib/A-StateMachine/A-StateMachine.component';
 import { A_Memory } from '@adaas/a-utils/lib/A-Memory/A-Memory.component';
@@ -73,8 +73,8 @@ describe('A-Command tests', () => {
             const command = new TestCommand({ userId: '123', action: 'create' });
             const listener = jest.fn();
 
-            command.on(A_CommandFeatures.onComplete, listener);
-            command.emit(A_CommandFeatures.onComplete);
+            command.on('onComplete', listener);
+            command.emit(A_CommandEvent.onComplete);
 
             expect(listener).toHaveBeenCalledWith(command);
         });
@@ -83,9 +83,9 @@ describe('A-Command tests', () => {
             const command = new TestCommand({ userId: '123', action: 'create' });
             const listener = jest.fn();
 
-            command.on(A_CommandFeatures.onComplete, listener);
-            command.off(A_CommandFeatures.onComplete, listener);
-            command.emit(A_CommandFeatures.onComplete);
+            command.on(A_CommandEvent.onComplete, listener);
+            command.off(A_CommandEvent.onComplete, listener);
+            command.emit(A_CommandEvent.onComplete);
 
             expect(listener).not.toHaveBeenCalled();
         });

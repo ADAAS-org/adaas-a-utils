@@ -6,9 +6,9 @@ import {
 } from "./A-Command.types";
 import {
     A_CommandFeatures,
-    A_Command_Event,
     A_Command_Status,
-    A_CommandTransitions
+    A_CommandTransitions,
+    A_CommandEvent
 } from "./A-Command.constants";
 import {  A_Context, A_Dependency, A_Entity, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_CommandError } from "./A-Command.error";
@@ -80,7 +80,7 @@ import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
 export class A_Command<
     InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init,
     ResultType extends Record<string, any> = Record<string, any>,
-    LifecycleEvents extends string | A_Command_Event = A_Command_Event,
+    LifecycleEvents extends string | keyof typeof A_CommandEvent = keyof typeof A_CommandEvent,
 > extends A_Entity<InvokeType, A_TYPES__Command_Serialized<InvokeType, ResultType>> {
 
     // ====================================================================
@@ -119,7 +119,7 @@ export class A_Command<
 
     /** Map of event listeners organized by event name */
     protected _listeners: Map<
-        LifecycleEvents | A_Command_Event,
+        LifecycleEvents | keyof typeof A_CommandEvent,
         Set<A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>>
     > = new Map();
 
@@ -332,7 +332,7 @@ export class A_Command<
         this._createdAt = new Date();
         this._status = A_Command_Status.INITIALIZED;
 
-        this.emit(A_CommandFeatures.onInit);
+        this.emit(A_CommandEvent.onInit);
     }
 
     @A_Feature.Extend()
@@ -349,7 +349,7 @@ export class A_Command<
         this._startTime = new Date();
         this._status = A_Command_Status.EXECUTING;
 
-        this.emit(A_CommandFeatures.onExecute);
+        this.emit(A_CommandEvent.onExecute);
     }
 
     @A_Feature.Extend()
@@ -365,7 +365,7 @@ export class A_Command<
         this._endTime = new Date();
         this._status = A_Command_Status.COMPLETED;
 
-        this.emit(A_CommandFeatures.onComplete);
+        this.emit(A_CommandEvent.onComplete);
     }
 
     @A_Feature.Extend()
@@ -383,7 +383,7 @@ export class A_Command<
 
         this._status = A_Command_Status.FAILED;
 
-        this.emit(A_CommandFeatures.onFail);
+        this.emit(A_CommandEvent.onFail);
     }
 
 
@@ -500,7 +500,7 @@ export class A_Command<
 
 
 
-                    this.on(A_CommandFeatures.onComplete, () => {
+                    this.on(A_CommandEvent.onComplete, () => {
 
                         onBeforeExecuteFeature.interrupt();
                         onExecuteFeature.interrupt();
@@ -596,7 +596,7 @@ export class A_Command<
      * @param event 
      * @param listener 
      */
-    on(event: LifecycleEvents | A_Command_Event, listener: A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>) {
+    on(event: LifecycleEvents | A_CommandEvent, listener: A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>) {
         if (!this._listeners.has(event)) {
             this._listeners.set(event, new Set());
         }
@@ -608,7 +608,7 @@ export class A_Command<
      * @param event 
      * @param listener 
      */
-    off(event: LifecycleEvents | A_Command_Event, listener: A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>) {
+    off(event: LifecycleEvents | A_CommandEvent, listener: A_TYPES__Command_Listener<InvokeType, ResultType, LifecycleEvents>) {
         this._listeners.get(event)?.delete(listener);
     }
     /**
@@ -616,7 +616,7 @@ export class A_Command<
      * 
      * @param event 
      */
-    emit(event: LifecycleEvents | A_Command_Event) {
+    emit(event: LifecycleEvents | keyof typeof A_CommandEvent) {
         this._listeners.get(event)?.forEach(async listener => {
             listener(this);
         });

@@ -4,46 +4,46 @@ export enum A_MemoryFeatures {
     /**
      * Allows to extend initialization logic and behavior
      */
-    onInit = 'onInit',
+    onInit = '_A_Memory_onInit',
 
     /**
      * Allows to extend destruction logic and behavior
      */
-    onDestroy = 'onDestroy',
+    onDestroy = '_A_Memory_onDestroy',
 
     /**
      * Allows to extend expiration logic and behavior
      */
-    onExpire = 'onExpire',
+    onExpire = '_A_Memory_onExpire',
 
     /**
      * Allows to extend error handling logic and behavior
      */
-    onError = 'onError',
+    onError = '_A_Memory_onError',
 
     /**
      * Allows to extend serialization logic and behavior
      */
-    onSerialize = 'onSerialize',
+    onSerialize = '_A_Memory_onSerialize',
 
     /**
      * Allows to extend set operation logic and behavior
      */
-    onSet = 'onSet',
+    onSet = '_A_Memory_onSet',
     /**
      * Allows to extend get operation logic and behavior
      */
-    onGet = 'onGet',
+    onGet = '_A_Memory_onGet',
     /**
      * Allows to extend drop operation logic and behavior
      */
-    onDrop = 'onDrop',
+    onDrop = '_A_Memory_onDrop',
     /**
      * Allows to extend clear operation logic and behavior
      */
-    onClear = 'onClear',
+    onClear = '_A_Memory_onClear',
     /**
      * Allows to extend has operation logic and behavior
      */
-    onHas = 'onHas',
+    onHas = '_A_Memory_onHas',
 }
