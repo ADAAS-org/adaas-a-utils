@@ -478,8 +478,6 @@ export class A_Command<
             await new Promise<void>(async (resolve, reject) => {
 
                 try {
-
-
                     const onBeforeExecuteFeature = new A_Feature({
                         name: A_CommandFeatures.onBeforeExecute,
                         component: this,
@@ -507,6 +505,15 @@ export class A_Command<
                         onAfterExecuteFeature.interrupt();
 
                         resolve();
+                    });
+
+                    this.on(A_CommandEvent.onFail, () => {
+
+                        onBeforeExecuteFeature.interrupt();
+                        onExecuteFeature.interrupt();
+                        onAfterExecuteFeature.interrupt();
+
+                        reject(this.error);
                     });
 
 
