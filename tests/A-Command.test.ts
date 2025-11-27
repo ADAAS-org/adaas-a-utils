@@ -612,6 +612,71 @@ describe('A-Command tests', () => {
             expect([A_Command_Status.COMPLETED, A_Command_Status.FAILED])
                 .toContain(command.status);
         });
+
+        it('Should stop command execution in case of error', async () => {
+
+            class FailingProcessor extends A_Component {
+
+                @A_Feature.Extend({
+                    name: A_CommandFeatures.onExecute
+                })
+                async step1(
+                    @A_Inject(A_Caller) command: ErrorTestCommand
+                ) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    testExecutionLog.push('Step 1 executed');
+                }
+
+                @A_Feature.Extend({
+                    name: A_CommandFeatures.onExecute
+                })
+                async step2(
+                    @A_Inject(A_Caller) command: ErrorTestCommand
+                ) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    testExecutionLog.push('Step 2 executed');
+                    throw new Error('Simulated error in step 2');
+                }
+
+                @A_Feature.Extend({
+                    name: A_CommandFeatures.onExecute
+                })
+                async step3(
+                    @A_Inject(A_Caller) command: ErrorTestCommand
+                ) {
+                    testExecutionLog.push('Step 3 executed');
+                }
+            }
+
+            const container = new A_Container({
+                name: 'Error Stop Test Container',
+                components: [
+                    FailingProcessor,
+                    A_StateMachine
+                ],
+                entities: [ErrorTestCommand]
+            });
+
+            const concept = new A_Concept({
+                containers: [container]
+            });
+
+            await concept.load();
+
+            const command = new ErrorTestCommand({ shouldFail: true });
+            container.scope.register(command);
+
+            await command.execute();
+
+            expect(command.status).toBe(A_Command_Status.FAILED);
+            expect(command.error).toBeDefined();
+            expect(command.isProcessed).toBe(true);
+            expect(testExecutionLog).toEqual([
+                'Step 1 executed',
+                'Step 2 executed'
+            ]); // Step 3 should not be executed
+        });
     });
 
     // =============================================================================
