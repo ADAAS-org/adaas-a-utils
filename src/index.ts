@@ -72,6 +72,13 @@ export { A_OperationContext } from './lib/A-Operation/A-Operation.context';
 export * from './lib/A-Operation/A-Operation.types';
 
 // ============================================================================
+// A-Service Container
+// ============================================================================ 
+export { A_Service } from './lib/A-Service/A-Service.container';
+// export * from './lib/A-Service/A-Service.types';
+export * from './lib/A-Service/A-Service.constants';
+
+// ============================================================================
 // A-Polyfill Components
 // ============================================================================
 export { A_Polyfill } from './lib/A-Polyfill/A-Polyfill.component';

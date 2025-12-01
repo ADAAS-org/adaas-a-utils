@@ -2309,6 +2309,39 @@ declare class A_MemoryError extends A_Error {
     static readonly MemorySerializeError = "Memory toJSON operation failed";
 }
 
+declare enum A_ServiceFeatures {
+    onBeforeLoad = "_A_Service_onBeforeLoad",
+    onLoad = "_A_Service_onLoad",
+    onAfterLoad = "_A_Service_onAfterLoad",
+    onBeforeStart = "_A_Service_onBeforeStart",
+    onStart = "_A_Service_onStart",
+    onAfterStart = "_A_Service_onAfterStart",
+    onBeforeStop = "_A_Service_onBeforeStop",
+    onStop = "_A_Service_onStop",
+    onAfterStop = "_A_Service_onAfterStop",
+    onError = "_A_Service_onError"
+}
+
+/**
+ * A-Service is a container that can run different types of services, such as HTTP servers, workers, etc.
+ * Depending on the provided config and configuration, it will load the necessary components and start the service.
+ *
+ */
+declare class A_Service extends A_Container {
+    start(): Promise<void>;
+    stop(): Promise<void>;
+    protected [A_ServiceFeatures.onBeforeLoad](polyfill: A_Polyfill): Promise<void>;
+    protected [A_ServiceFeatures.onLoad](...args: any[]): Promise<void>;
+    protected [A_ServiceFeatures.onAfterLoad](...args: any[]): Promise<void>;
+    protected [A_ServiceFeatures.onBeforeStart](...args: any[]): Promise<void>;
+    protected [A_ServiceFeatures.onStart](...args: any[]): Promise<void>;
+    protected [A_ServiceFeatures.onAfterStart](...args: any[]): Promise<void>;
+    protected [A_ServiceFeatures.onBeforeStop](...args: any[]): Promise<void>;
+    protected [A_ServiceFeatures.onStop](...args: any[]): Promise<void>;
+    protected [A_ServiceFeatures.onAfterStop](...args: any[]): Promise<void>;
+    protected [A_ServiceFeatures.onError](error: A_Error, logger?: A_Logger, ...args: any[]): Promise<void>;
+}
+
 type A_UTILS_TYPES__ScheduleObjectConfig = {
     /**
      * If the timeout is cleared, should the promise resolve or reject?
@@ -2422,4 +2455,4 @@ declare class A_StateMachineError extends A_Error {
     static readonly TransitionError = "A-StateMachine Transition Error";
 }
 
-export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Schedule, A_ScheduleObject, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Schedule, A_ScheduleObject, A_Service, A_ServiceFeatures, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
