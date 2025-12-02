@@ -16,6 +16,48 @@ import { A_Service_Error } from "./A-Service.error";
 export class A_Service extends A_Container {
 
 
+    @A_Concept.Load()
+    /**
+     * Load the service
+     */
+    async load() {
+        try {
+            await this.call(A_ServiceFeatures.onBeforeLoad);
+
+            await this.call(A_ServiceFeatures.onLoad);
+
+            await this.call(A_ServiceFeatures.onAfterLoad);
+
+        } catch (error) {
+
+            let wrappedError;
+
+            switch (true) {
+                case error instanceof A_Service_Error:
+                    wrappedError = error;
+                    break;
+
+                case error instanceof A_Error && error.originalError instanceof A_Service_Error:
+                    wrappedError = error.originalError;
+                    break;
+
+                default:
+                    wrappedError = new A_Service_Error({
+                        title: A_Service_Error.ServiceLoadError,
+                        description: 'An error occurred while processing the request.',
+                        originalError: error
+                    })
+                    break;
+            }
+
+            this.scope.register(wrappedError);
+
+            await this.call(A_ServiceFeatures.onError);
+        }
+
+    }
+
+
     @A_Concept.Start()
     /**
      * Start the server
@@ -97,6 +139,9 @@ export class A_Service extends A_Container {
         }
     }
 
+
+
+
     // ======================================================================================
     // ============================= A-Service Lifecycle =================================
     // ======================================================================================
@@ -104,6 +149,7 @@ export class A_Service extends A_Container {
     @A_Feature.Extend()
     protected async [A_ServiceFeatures.onBeforeLoad](
         @A_Inject(A_Polyfill) polyfill: A_Polyfill,
+        ...args: any[]
     ): Promise<void> {
         // Initialize Polyfill
         if (!polyfill) {
@@ -147,7 +193,8 @@ export class A_Service extends A_Container {
     protected async [A_ServiceFeatures.onError](
         @A_Inject(A_Error) error: A_Error,
         @A_Inject(A_Logger) logger?: A_Logger,
-        ...args: any[]) {
+        ...args: any[]
+    ) {
         logger?.error(error);
     }
 

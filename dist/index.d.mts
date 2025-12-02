@@ -2328,9 +2328,10 @@ declare enum A_ServiceFeatures {
  *
  */
 declare class A_Service extends A_Container {
+    load(): Promise<void>;
     start(): Promise<void>;
     stop(): Promise<void>;
-    protected [A_ServiceFeatures.onBeforeLoad](polyfill: A_Polyfill): Promise<void>;
+    protected [A_ServiceFeatures.onBeforeLoad](polyfill: A_Polyfill, ...args: any[]): Promise<void>;
     protected [A_ServiceFeatures.onLoad](...args: any[]): Promise<void>;
     protected [A_ServiceFeatures.onAfterLoad](...args: any[]): Promise<void>;
     protected [A_ServiceFeatures.onBeforeStart](...args: any[]): Promise<void>;
