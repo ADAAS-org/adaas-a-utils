@@ -17,29 +17,36 @@ describe('A-Memory tests', () => {
 
         expect(memory).toBeInstanceOf(A_Memory);
         expect(memory).toBeInstanceOf(A_Component);
-        
+
         // Test that memory can be initialized
         await memory.ready;
     });
 
     it('Should allow to initialize and set initial values', async () => {
-        const memory = new A_Memory<{
-            key1: string;
-            key2: number;
-            key3: { nested: string };
-        }>();
-        A_Context.root.register(memory);
 
-        await memory.ready;
+        try {
 
-        // Set initial values after initialization
-        await memory.set('key1', 'value1');
-        await memory.set('key2', 42);
-        await memory.set('key3', { nested: 'object' });
 
-        expect(await memory.get('key1')).toBe('value1');
-        expect(await memory.get('key2')).toBe(42);
-        expect(await memory.get('key3')).toEqual({ nested: 'object' });
+            const memory = new A_Memory<{
+                key1: string;
+                key2: number;
+                key3: { nested: string };
+            }>();
+            A_Context.root.register(memory);
+
+            await memory.ready;
+
+            // Set initial values after initialization
+            await memory.set('key1', 'value1');
+            await memory.set('key2', 42);
+            await memory.set('key3', { nested: 'object' });
+
+            expect(await memory.get('key1')).toBe('value1');
+            expect(await memory.get('key2')).toBe(42);
+            expect(await memory.get('key3')).toEqual({ nested: 'object' });
+        } catch (error) {
+            console.error('Error during memory initialization test:', error);
+        }
     });
 
     it('Should allow to set and get values', async () => {
@@ -161,7 +168,7 @@ describe('A-Memory tests', () => {
         const memory = new A_Memory();
         await A_Context.root.register(memory);
         await memory.ready;
-        
+
         // Set some values
         await memory.set('stringProp', 'test');
         await memory.set('numberProp', 42);

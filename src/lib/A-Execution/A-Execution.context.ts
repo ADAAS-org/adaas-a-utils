@@ -33,11 +33,11 @@ export class A_ExecutionContext<
     }
 
 
-    get(key: keyof _MetaType): _MetaType[keyof _MetaType] | undefined {
+    get<K extends keyof _MetaType>(key: K): _MetaType[K] | undefined {
         return this._meta.get(key);
     }
 
-    set(key: keyof _MetaType, value: _MetaType[keyof _MetaType]): void {
+    set<K extends keyof _MetaType>(key: K, value: _MetaType[K]): void {
         this._meta.set(key, value);
     }
 

@@ -100,8 +100,12 @@ export class A_Memory<
         @A_Dependency.Required()
         @A_Inject(A_OperationContext) operation: A_MemoryOperationContext,
         @A_Inject(A_MemoryContext) context: A_MemoryContext<_StorageType>,
+        @A_Inject(A_Scope) scope: A_Scope,
         ...args: any[]
     ): Promise<void> {
+        console.log('A_Memory onSet called with key:', scope.name);
+        console.log('A_Memory onSet called with key:', scope.parent?.name);
+
         // Handle set operation
         context.set(operation.params.key, operation.params.value);
     }
@@ -222,7 +226,8 @@ export class A_Memory<
         const scope = new A_Scope({
             name: 'A-Memory-Get-Operation-Scope',
             fragments: [operation]
-        });
+        })
+            .inherit(A_Context.scope(this));
 
         try {
 
@@ -261,7 +266,8 @@ export class A_Memory<
         const scope = new A_Scope({
             name: 'A-Memory-Has-Operation-Scope',
             fragments: [operation]
-        });
+        })
+            .inherit(A_Context.scope(this));
 
         try {
 
@@ -309,7 +315,8 @@ export class A_Memory<
         const scope = new A_Scope({
             name: 'A-Memory-Set-Operation-Scope',
             fragments: [operation]
-        });
+        })
+            .inherit(A_Context.scope(this));
 
         try {
 
@@ -345,7 +352,8 @@ export class A_Memory<
         const scope = new A_Scope({
             name: 'A-Memory-Drop-Operation-Scope',
             fragments: [operation]
-        });
+        })
+            .inherit(A_Context.scope(this));
 
         try {
 
@@ -377,7 +385,8 @@ export class A_Memory<
         const scope = new A_Scope({
             name: 'A-Memory-Clear-Operation-Scope',
             fragments: [operation]
-        });
+        })
+            .inherit(A_Context.scope(this));
 
         try {
 
@@ -412,7 +421,8 @@ export class A_Memory<
         const scope = new A_Scope({
             name: 'A-Memory-Serialize-Operation-Scope',
             fragments: [operation]
-        });
+        })
+            .inherit(A_Context.scope(this));
 
         try {
 

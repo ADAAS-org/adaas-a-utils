@@ -42,8 +42,8 @@ declare class A_ExecutionContext<_MetaType extends Record<string, any> = Record<
     constructor(name: string, defaults?: Partial<_MetaType>);
     [Symbol.iterator](): Iterator<[keyof _MetaType, _MetaType[keyof _MetaType]]>;
     get meta(): A_Meta<_MetaType>;
-    get(key: keyof _MetaType): _MetaType[keyof _MetaType] | undefined;
-    set(key: keyof _MetaType, value: _MetaType[keyof _MetaType]): void;
+    get<K extends keyof _MetaType>(key: K): _MetaType[K] | undefined;
+    set<K extends keyof _MetaType>(key: K, value: _MetaType[K]): void;
     has(key: keyof _MetaType): boolean;
     drop(key: keyof _MetaType): void;
     clear(): void;
@@ -2233,7 +2233,7 @@ declare class A_Memory<_StorageType extends Record<string, any> = Record<string,
     [A_MemoryFeatures.onDestroy](context: A_MemoryContext<_StorageType>, ...args: any[]): Promise<void>;
     [A_MemoryFeatures.onGet](operation: A_MemoryOperationContext, context: A_MemoryContext<_StorageType>, ...args: any[]): Promise<void>;
     [A_MemoryFeatures.onHas](operation: A_MemoryOperationContext<boolean>, context: A_MemoryContext<_StorageType>, ...args: any[]): Promise<void>;
-    [A_MemoryFeatures.onSet](operation: A_MemoryOperationContext, context: A_MemoryContext<_StorageType>, ...args: any[]): Promise<void>;
+    [A_MemoryFeatures.onSet](operation: A_MemoryOperationContext, context: A_MemoryContext<_StorageType>, scope: A_Scope, ...args: any[]): Promise<void>;
     [A_MemoryFeatures.onDrop](operation: A_MemoryOperationContext, context: A_MemoryContext<_StorageType>, ...args: any[]): Promise<void>;
     [A_MemoryFeatures.onClear](operation: A_MemoryOperationContext, context: A_MemoryContext<_StorageType>, ...args: any[]): Promise<void>;
     /**

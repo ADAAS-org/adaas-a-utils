@@ -398,7 +398,8 @@ export class A_Channel extends A_Component {
         // Create isolated scope for this request
         const requestScope = new A_Scope({
             name: `a-channel@scope:request:${A_IdentityHelper.generateTimeId()}`
-        });
+        })
+            .inherit(A_Context.scope(this));
 
         // Create request context
         const context = new A_ChannelRequest<_ParamsType, _ResultType>(params);
@@ -487,7 +488,9 @@ export class A_Channel extends A_Component {
         // Create isolated scope for this send operation
         const requestScope = new A_Scope({
             name: `a-channel@scope:send:${A_IdentityHelper.generateTimeId()}`
-        });
+        })
+            .inherit(A_Context.scope(this));
+
 
         // Create request context for the message
         const context = new A_OperationContext('send', message);
@@ -533,7 +536,9 @@ export class A_Channel extends A_Component {
 
         this._processing = true;
 
-        const requestScope = new A_Scope({ name: `a-channel@scope:consume:${A_IdentityHelper.generateTimeId()}` });
+        const requestScope = new A_Scope({ name: `a-channel@scope:consume:${A_IdentityHelper.generateTimeId()}` })
+            .inherit(A_Context.scope(this));
+
 
         const context = new A_OperationContext('consume', {} as T);
 

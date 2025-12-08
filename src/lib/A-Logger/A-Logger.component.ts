@@ -1,4 +1,4 @@
-import { A_Component, A_Error, A_Inject, A_Scope } from "@adaas/a-concept";
+import { A_Component, A_Context, A_Error, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_Config } from "../A-Config/A-Config.context";
 import { A_LoggerEnvVariablesType } from "./A-Logger.env";
 import { A_LoggerLevel } from "./A-Logger.types";
@@ -111,15 +111,15 @@ export class A_Logger extends A_Component {
         super();
         this.COLORS = A_LOGGER_COLORS;
         this.STANDARD_SCOPE_LENGTH = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_LENGTH) || A_LOGGER_DEFAULT_SCOPE_LENGTH;
-        
+
         // Get colors from config or generate deterministic colors based on scope name
         const configScopeColor = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_COLOR) as keyof typeof A_LOGGER_COLORS;
         const configLogColor = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_LOG_COLOR) as keyof typeof A_LOGGER_COLORS;
-        
+
         if (configScopeColor || configLogColor) {
             // If any color is configured, use config values or fallback to scope-based selection
             this.DEFAULT_SCOPE_COLOR = configScopeColor || this.generateColorFromScopeName(this.scope.name);
-            this.DEFAULT_LOG_COLOR = configLogColor || this.generateColorFromScopeName(this.scope.name );
+            this.DEFAULT_LOG_COLOR = configLogColor || this.generateColorFromScopeName(this.scope.name);
         } else {
             // If no colors configured, generate complementary pair based on scope name
             const complementaryColors = this.generateComplementaryColorsFromScope(this.scope.name);
@@ -184,7 +184,7 @@ export class A_Logger extends A_Component {
             { scopeColor: 'cornflower' as const, logColor: 'powder' as const },
             { scopeColor: 'slate' as const, logColor: 'smoke' as const },
         ];
-        
+
         const hash = this.simpleHash(scopeName);
         const pairIndex = hash % colorPairs.length;
         return colorPairs[pairIndex];
@@ -219,17 +219,17 @@ export class A_Logger extends A_Component {
     get formattedScope(): string {
         const scopeName = this.scope.name;
         const totalLength = this.STANDARD_SCOPE_LENGTH;
-        
+
         // If scope name is longer than standard length, truncate it
         if (scopeName.length >= totalLength) {
             return scopeName.substring(0, totalLength);
         }
-        
+
         // Calculate padding for centering
         const totalPadding = totalLength - scopeName.length;
         const leftPadding = Math.floor(totalPadding / 2);
         const rightPadding = totalPadding - leftPadding;
-        
+
         return ' '.repeat(leftPadding) + scopeName + ' '.repeat(rightPadding);
     }
 
@@ -301,6 +301,11 @@ export class A_Logger extends A_Component {
      * @returns Formatted object string
      */
     private formatObject(obj: any, shouldAddNewline: boolean, scopePadding: string): string {
+
+        //  in case it's browser, just return the object as is to use native console object rendering
+        if (A_Context.environment === 'browser')
+            return obj;
+
         let jsonString: string;
         try {
             jsonString = JSON.stringify(obj, null, 2);
