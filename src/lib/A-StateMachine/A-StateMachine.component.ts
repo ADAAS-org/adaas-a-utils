@@ -223,7 +223,8 @@ export class A_StateMachine<
         const scope = new A_Scope({
             name: `A-StateMachine-Transition-Scope-${transitionName}`,
             fragments: [transition]
-        });
+        })
+            .inherit(A_Context.scope(this));
 
         try {
 
