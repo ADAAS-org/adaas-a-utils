@@ -16,9 +16,12 @@ The A_Logger component provides comprehensive logging capabilities with:
 ## Features
 
 ### 🎨 Visual Output
-- **Terminal Colors**: Support for 9 different colors (green, blue, red, yellow, gray, magenta, cyan, white, pink)
+- **Extended Color Palette**: Support for 25+ colors including basic colors (red, green, blue) and extended palette (indigo, violet, cornflower, etc.)
+- **Color Enum Support**: Type-safe color specification using A_LoggerColorName enum
 - **Consistent Alignment**: All log messages align properly regardless of scope name length
 - **Structured Formatting**: Multi-line messages with proper indentation and separators
+- **Terminal Width Detection**: Automatic detection of terminal width for optimal formatting
+- **Responsive Text Wrapping**: Intelligent text wrapping based on terminal size
 
 ### 📊 Data Types Support
 - **Strings**: Simple text messages with optional color coding
@@ -31,6 +34,8 @@ The A_Logger component provides comprehensive logging capabilities with:
 - **Log Levels**: debug, info, warn, error, all
 - **Environment Variables**: Configurable via A_LOGGER_LEVEL environment variable
 - **Scope Integration**: Seamless integration with A_Scope for context
+- **Terminal Adaptation**: Automatic adaptation to different terminal widths and environments
+- **Browser Compatibility**: Optimized formatting for both terminal and browser console environments
 
 ### ⚡ Performance
 - **Efficient Formatting**: Optimized for large objects and rapid logging
@@ -56,10 +61,18 @@ const scope = new A_Scope({ name: 'MyService' });
 const logger = new A_Logger(scope);
 
 // Basic logging
-logger.log('Application started');
-logger.log('green', 'Operation successful');
+logger.info('Application started');
+logger.info('green', 'Operation successful');
 logger.warning('Resource usage high');
 logger.error('Database connection failed');
+
+// Enhanced color support with type safety
+import { A_LoggerColorName } from "@adaas/a-utils";
+
+logger.info('brightBlue', 'Enhanced blue message');
+logger.info('indigo', 'Deep indigo notification');
+logger.info('cornflower', 'Cornflower blue status');
+logger.debug('gray', 'Debug information');
 ```
 
 ### Object Logging
@@ -75,10 +88,10 @@ const user = {
     }
 };
 
-logger.log('blue', 'User data:', user);
+logger.info('deepBlue', 'User data:', user);
 
 // Multi-argument logging
-logger.log('green', 
+logger.info('green', 
     'Processing complete:',
     'Records:', 150,
     'Errors:', 2,
@@ -124,11 +137,11 @@ class UserService extends A_Component {
     }
 
     async createUser(userData: any) {
-        this.logger.log('green', 'Creating user:', userData);
+        this.logger.info('brightBlue', 'Creating user:', userData);
         
         try {
             // User creation logic
-            this.logger.log('User created successfully');
+            this.logger.info('green', 'User created successfully');
         } catch (error) {
             this.logger.error('User creation failed:', error);
             throw error;
@@ -169,7 +182,7 @@ const services = [
 ];
 
 services.forEach(logger => {
-    logger.log('green', 'Service initialized');
+    logger.info('green', 'Service initialized');
     logger.warning('Configuration check needed');
 });
 
@@ -180,11 +193,85 @@ services.forEach(logger => {
 // [A                   ] |15:42:126| Service initialized
 ```
 
+### Terminal Width and Text Wrapping
+
+The A_Logger automatically detects your terminal width and wraps long messages for optimal readability:
+
+```typescript
+// Long messages are automatically wrapped
+logger.info('cyan', 
+    'This is a very long message that will be automatically wrapped based on your terminal width to ensure optimal readability while maintaining proper formatting and indentation throughout the entire message.'
+);
+
+// Multi-argument messages maintain proper indentation
+logger.info('purple',
+    'First argument that is quite long and demonstrates wrapping behavior',
+    'Second argument with continued proper indentation',
+    {
+        configuration: {
+            terminalWidth: 'auto-detected',
+            wrapping: 'intelligent',
+            fallbacks: ['80 chars', 'browser: 120 chars']
+        }
+    }
+);
+
+// Terminal information logging
+logger.info('steelBlue', 'Terminal info:', {
+    columns: process.stdout?.columns || 'Not detected',
+    environment: process.stdout?.isTTY ? 'TTY' : 'Non-TTY',
+    platform: process.platform
+});
+```
+
+**Terminal Width Features:**
+- **Auto-detection**: Automatically detects terminal width using `process.stdout.columns`
+- **Smart Wrapping**: Wraps text at word boundaries when possible
+- **Consistent Indentation**: Maintains proper indentation for wrapped lines
+- **Environment Aware**: Different defaults for Node.js terminal vs browser console
+- **Fallback Support**: Uses sensible defaults when width cannot be detected
+
 ## Color Reference
 
+### Basic Colors
 | Color   | Use Case | Code |
 |---------|----------|------|
+| `red` | Errors, critical issues | 31 |
+| `yellow` | Warnings, cautions | 33 |
 | `green` | Success, completion | 32 |
+| `blue` | Information, general | 34 |
+| `cyan` | Headers, highlights | 36 |
+| `magenta` | Special emphasis | 35 |
+| `gray` | Debug, less important | 90 |
+
+### Extended Color Palette
+| Color   | Description | Code |
+|---------|-------------|------|
+| `brightBlue` | Enhanced blue variant | 94 |
+| `brightCyan` | Enhanced cyan variant | 96 |
+| `brightMagenta` | Enhanced magenta variant | 95 |
+| `indigo` | Deep indigo | 38;5;54 |
+| `violet` | Violet | 38;5;93 |
+| `purple` | Purple | 38;5;129 |
+| `lavender` | Lavender | 38;5;183 |
+| `skyBlue` | Sky blue | 38;5;117 |
+| `steelBlue` | Steel blue | 38;5;67 |
+| `slateBlue` | Slate blue | 38;5;62 |
+| `deepBlue` | Deep blue | 38;5;18 |
+| `lightBlue` | Light blue | 38;5;153 |
+| `periwinkle` | Periwinkle | 38;5;111 |
+| `cornflower` | Cornflower blue | 38;5;69 |
+| `powder` | Powder blue | 38;5;152 |
+
+### Grayscale Colors
+| Color   | Description | Code |
+|---------|-------------|------|
+| `darkGray` | Dark gray | 30 |
+| `lightGray` | Light gray | 37 |
+| `charcoal` | Charcoal | 38;5;236 |
+| `silver` | Silver | 38;5;250 |
+| `smoke` | Smoke gray | 38;5;244 |
+| `slate` | Slate gray | 38;5;240 |
 | `blue` | Info, general messages | 34 |
 | `red` | Errors, critical issues | 31 |
 | `yellow` | Warnings, caution | 33 |
@@ -318,15 +405,15 @@ Padded scope name for consistent alignment.
 
 ### 1. Use Appropriate Colors
 ```typescript
-logger.log('green', 'Operation successful');    // Success
-logger.log('blue', 'Processing data...');       // Info
+logger.info('green', 'Operation successful');    // Success
+logger.info('brightBlue', 'Processing data...');       // Info
 logger.warning('Resource usage high');          // Warning  
 logger.error('Operation failed');               // Error
 ```
 
 ### 2. Provide Context
 ```typescript
-logger.log('blue', 'User operation:', {
+logger.info('steelBlue', 'User operation:', {
     userId: user.id,
     operation: 'profile-update',
     timestamp: new Date().toISOString()
@@ -344,12 +431,23 @@ A_LOGGER_LEVEL=warn
 
 ### 4. Structure Multi-argument Logs
 ```typescript
-logger.log('green',
+logger.info('green',
     'Operation completed:',
     'Duration:', `${duration}ms`,
     'Records processed:', count,
     'Status:', 'success'
 );
+```
+
+### 5. Leverage Terminal Width Awareness
+```typescript
+// Long messages are automatically wrapped
+logger.info('cyan', 'Very long status message that will automatically wrap based on terminal width while maintaining proper formatting');
+
+// Use appropriate colors from the extended palette
+logger.info('indigo', 'Service initialization complete');
+logger.debug('charcoal', 'Detailed debug information');
+logger.info('cornflower', 'Processing pipeline status');
 ```
 
 ## Troubleshooting
@@ -367,6 +465,12 @@ A: Ensure your terminal supports ANSI color codes. Most modern terminals do.
 
 **Q: Performance issues with large objects**
 A: The component is optimized for large objects. If issues persist, consider logging object summaries instead of full objects.
+
+**Q: Messages not wrapping correctly in terminal**
+A: The logger automatically detects terminal width via `process.stdout.columns`. If detection fails, it uses defaults (80 chars for terminal, 120 for browser).
+
+**Q: Text wrapping behavior inconsistent**
+A: Terminal width detection depends on the environment. In non-TTY environments or when columns cannot be detected, the logger falls back to default widths.
 
 ## Contributing
 

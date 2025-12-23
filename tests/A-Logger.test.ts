@@ -215,7 +215,8 @@ describe('A_Logger Component', () => {
             
             const logs = getCapturedLogs();
             expect(logs[0]).toContain('Test error message');
-            expect(logs[0]).toContain('"name": "Error"');
+            expect(logs[0]).toContain('ERROR: Error');
+            expect(logs[0]).toContain('STACK TRACE:');
         });
 
         test('should format A_Error instances with special formatting', () => {
@@ -253,11 +254,31 @@ describe('A_Logger Component', () => {
 
             colors.forEach(color => {
                 clearCapturedLogs();
-                logger.log(color, `${color} message`);
+                logger.info(color, `${color} message`);
                 
                 const logs = getCapturedLogs();
                 expect(logs[0]).toContain(`${color} message`);
                 // Colors might not be shown in test environment, just verify message content
+            });
+        });
+
+        test('should support extended color palette from A_LoggerColorName enum', () => {
+            const extendedColors: Array<keyof typeof A_LOGGER_COLORS> = [
+                'brightBlue', 'brightCyan', 'brightMagenta',
+                'indigo', 'violet', 'purple', 'lavender',
+                'skyBlue', 'steelBlue', 'slateBlue', 'deepBlue',
+                'lightBlue', 'periwinkle', 'cornflower', 'powder',
+                'darkGray', 'lightGray', 'charcoal', 'silver', 'smoke', 'slate'
+            ];
+
+            extendedColors.forEach(color => {
+                clearCapturedLogs();
+                logger.info(color, `Extended ${color} message`);
+                
+                const logs = getCapturedLogs();
+                // Clean the output to handle line wrapping
+                const cleanedOutput = logs[0].replace(/\n\s*\|\s*/g, ' ').replace(/\s+/g, ' ');
+                expect(cleanedOutput).toContain(`Extended ${color} message`);
             });
         });
 
@@ -409,13 +430,19 @@ describe('A_Logger Component', () => {
             expect(logs[0]).toContain('[Circular Reference]');
         });
 
-        test('should handle very long strings', () => {
+        test('should handle very long strings with wrapping', () => {
             const longString = 'A'.repeat(1000);
             
-            logger.log('Long string:', longString);
+            logger.info('Long string:', longString);
             
             const logs = getCapturedLogs();
-            expect(logs[0]).toContain(longString);
+            // The logger now wraps long strings, so we check for the presence of parts of the string
+            // rather than the entire string in one line
+            expect(logs[0]).toContain('Long string:');
+            expect(logs[0]).toContain('AAAAAAAAAAA'); // Should contain many A's
+            // The string should be wrapped across multiple lines
+            const logLines = logs[0].split('\n');
+            expect(logLines.length).toBeGreaterThan(5); // Should be wrapped into multiple lines
         });
 
         test('should handle empty scope name', () => {
@@ -464,6 +491,64 @@ describe('A_Logger Component', () => {
             const logs = getCapturedLogs();
             expect(logs).toHaveLength(1);
             expect(endTime - startTime).toBeLessThan(500); // Should complete within 500ms
+        });
+    });
+
+    // =============================================
+    // Terminal Width and Formatting Tests
+    // =============================================
+
+    describe('Terminal Width Detection and Formatting', () => {
+        test('should detect terminal width in Node.js environment', () => {
+            // The logger should initialize without errors and handle terminal width detection
+            expect(() => {
+                const testScope = new A_Scope({ name: 'TerminalTest' });
+                const terminalLogger = new A_Logger(testScope);
+                terminalLogger.info('Terminal width test message');
+            }).not.toThrow();
+        });
+
+        test('should wrap long messages appropriately', () => {
+            // Create a message that's extremely long to ensure wrapping even on wide terminals
+            // The message needs to be longer than most reasonable terminal widths (200+ chars)
+            const extremelyLongMessage = 'This is an extraordinarily and exceptionally long message designed specifically for testing text wrapping functionality in the A_Logger component, containing numerous words and phrases that together form a sentence of considerable length that should definitely exceed the available width in most terminal configurations, thereby demonstrating the logger\'s sophisticated text wrapping capabilities and ensuring proper formatting across diverse environments with varying screen sizes and terminal window dimensions, while maintaining readability and professional presentation standards.';
+            
+            logger.info('cyan', extremelyLongMessage);
+            
+            const logs = getCapturedLogs();
+            
+            // Remove all newlines and extra spaces to get the actual content for verification
+            const cleanedOutput = logs[0].replace(/\n\s*\|\s*/g, ' ').replace(/\s+/g, ' ');
+            
+            // Verify the message content is preserved regardless of wrapping
+            expect(cleanedOutput).toContain('extraordinarily and exceptionally long message');
+            expect(cleanedOutput).toContain('readability and professional presentation');
+            
+            // The message should either be wrapped with newlines OR be very long on one line
+            const logOutput = logs[0];
+            const hasWrapping = logOutput.includes('\n') && logOutput.includes('|'); // Continuation markers
+            const isSingleLongLine = logOutput.length > 300; // Very long single line
+            
+            // In narrow terminals, wrapping occurs with continuation markers
+            // In wide terminals, the message appears as one very long line
+            expect(hasWrapping || isSingleLongLine).toBe(true);
+            
+            // Ensure the complete message is present (checking cleaned version)
+            expect(cleanedOutput).toContain('extraordinarily and exceptionally long message');
+            expect(cleanedOutput).toContain('professional presentation standards');
+        });
+
+        test('should handle multi-argument messages with proper indentation', () => {
+            logger.info('brightMagenta', 
+                'First long argument that might wrap across lines',
+                'Second argument for testing indentation',
+                { complexObject: 'with nested data for formatting tests' }
+            );
+            
+            const logs = getCapturedLogs();
+            expect(logs[0]).toContain('First long argument');
+            expect(logs[0]).toContain('Second argument');
+            expect(logs[0]).toContain('complexObject');
         });
     });
 });

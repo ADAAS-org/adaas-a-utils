@@ -3,10 +3,17 @@
  * 
  * This file demonstrates various usage patterns and features of the A_Logger component.
  * These examples show the logging capabilities without complex dependency injection.
+ * 
+ * New Features Demonstrated:
+ * - Terminal width detection and automatic text wrapping
+ * - Enhanced color palette with A_LoggerColorName enum support
+ * - Responsive formatting for different terminal sizes
+ * - Browser console compatibility
  */
 
 import { A_Scope, A_Error } from "@adaas/a-concept";
 import { A_Logger } from "../src/lib/A-Logger/A-Logger.component";
+import { A_LoggerColorName } from "../src/lib/A-Logger/A-Logger.types";
 
 // =============================================
 // Basic Logging Examples
@@ -21,10 +28,11 @@ function basicLogging() {
     const scope = new A_Scope({ name: 'API-Service' });
     const logger = new A_Logger(scope);
 
-    // Different log types
-    logger.log('Logger initialized successfully');
-    logger.log('green', 'This is a success message');
-    logger.log('blue', 'This is an info message');
+    // Different log types with color enum support
+    logger.info('Logger initialized successfully');
+    logger.info('green', 'This is a success message');
+    logger.info('brightBlue', 'This is a bright blue info message');
+    logger.debug('gray', 'This is a debug message (may not show depending on log level)');
     logger.warning('This is a warning message');
     logger.error('This is an error message');
 }
@@ -130,7 +138,7 @@ function errorLogging() {
 }
 
 /**
- * Example 5: Different Colors and Formatting
+ * Example 5: Color Demonstration with A_LoggerColorName Enum
  */
 function colorDemo() {
     console.log('\n=== Example 5: Color Demonstration ===\n');
@@ -138,16 +146,78 @@ function colorDemo() {
     const scope = new A_Scope({ name: 'ColorDemo' });
     const logger = new A_Logger(scope);
 
-    // All available colors
-    const colors = ['green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'] as const;
+    // Basic colors
+    const basicColors: A_LoggerColorName[] = ['green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan'];
+    console.log('Basic Colors:');
+    basicColors.forEach(color => {
+        logger.info(color, `This is a ${color} colored message`);
+    });
 
-    colors.forEach(color => {
-        logger.log(color, `This is a ${color} colored message`);
+    // Extended color palette
+    const extendedColors: A_LoggerColorName[] = [
+        'brightBlue', 'brightCyan', 'brightMagenta',
+        'indigo', 'violet', 'purple', 'lavender',
+        'skyBlue', 'steelBlue', 'slateBlue', 'deepBlue',
+        'lightBlue', 'periwinkle', 'cornflower', 'powder'
+    ];
+    console.log('\nExtended Color Palette:');
+    extendedColors.forEach(color => {
+        logger.info(color, `Extended color: ${color}`);
+    });
+
+    // Grayscale colors
+    const grayscaleColors: A_LoggerColorName[] = ['darkGray', 'lightGray', 'charcoal', 'silver', 'smoke', 'slate'];
+    console.log('\nGrayscale Colors:');
+    grayscaleColors.forEach(color => {
+        logger.info(color, `Grayscale: ${color}`);
     });
 }
 
 /**
- * Example 6: Performance Logging Simulation
+ * Example 6: Terminal Width and Text Wrapping Demonstration
+ */
+function terminalWidthDemo() {
+    console.log('\n=== Example 6: Terminal Width Demonstration ===\n');
+
+    const scope = new A_Scope({ name: 'TerminalWidth' });
+    const logger = new A_Logger(scope);
+
+    // Long single line that will wrap
+    logger.info('cyan', 'This is a very long message that demonstrates automatic text wrapping based on terminal width detection. The logger automatically detects your terminal width and wraps text appropriately to ensure readable output without manual line breaks. This feature works in both Node.js terminal environments and browser consoles with appropriate defaults.');
+
+    // Multiple long arguments
+    logger.info('purple',
+        'First argument with considerable length to demonstrate wrapping behavior across multiple arguments.',
+        'Second argument that is also quite long and will be properly formatted with consistent indentation.',
+        'Third argument to show how multiple wrapped arguments maintain visual hierarchy.'
+    );
+
+    // Object with long values
+    const configObject = {
+        databaseConnectionString: 'postgresql://user:password@localhost:5432/mydatabase?ssl=true&connection_timeout=30000&pool_min=5&pool_max=20',
+        apiEndpoint: 'https://api.example.com/v2/users/profiles/detailed-information-endpoint-with-very-long-path-name',
+        description: 'This is a configuration object with very long string values that will demonstrate how the logger handles wrapping within JSON formatted output',
+        features: {
+            enableAutoWrapping: true,
+            terminalWidthDetection: 'automatic',
+            fallbackWidth: 80,
+            browserConsoleWidth: 120
+        }
+    };
+
+    logger.info('brightMagenta', 'Configuration loaded:', configObject);
+
+    // Show current terminal info
+    logger.info('steelBlue', 'Terminal environment info:', {
+        environment: process?.stdout?.isTTY ? 'TTY Terminal' : 'Non-TTY Environment',
+        columns: process?.stdout?.columns || 'Not Available',
+        rows: process?.stdout?.rows || 'Not Available',
+        platform: process?.platform || 'Browser'
+    });
+}
+
+/**
+ * Example 7: Performance Logging Simulation
  */
 async function performanceLogging() {
     console.log('\n=== Example 6: Performance Logging ===\n');
@@ -166,7 +236,7 @@ async function performanceLogging() {
         const duration = Date.now() - startTime;
         const status = duration < 100 ? 'green' : duration < 150 ? 'yellow' : 'red';
 
-        logger.log(status, `${operation} completed:`, {
+        logger.info(status as A_LoggerColorName, `${operation} completed:`, {
             operation,
             duration: `${duration}ms`,
             status: duration < 100 ? 'fast' : duration < 150 ? 'normal' : 'slow',
@@ -176,10 +246,10 @@ async function performanceLogging() {
 }
 
 /**
- * Example 7: Real-world Service Logging
+ * Example 8: Real-world Service Logging
  */
 async function serviceLogging() {
-    console.log('\n=== Example 7: Service Logging Simulation ===\n');
+    console.log('\n=== Example 8: Service Logging Simulation ===\n');
 
     // Create different service loggers
     const services = {
@@ -192,25 +262,25 @@ async function serviceLogging() {
     // Simulate user registration flow
     const userId = 'user-' + Math.random().toString(36).substr(2, 9);
 
-    services.api.log('green', 'Registration request received:', {
+    services.api.info('brightBlue', 'Registration request received:', {
         endpoint: '/api/auth/register',
         userId,
         timestamp: new Date().toISOString()
     });
 
-    services.auth.log('blue', 'Validating user credentials...');
+    services.auth.info('indigo', 'Validating user credentials...');
     await new Promise(resolve => setTimeout(resolve, 50));
-    services.auth.log('green', 'Credentials validated successfully');
+    services.auth.info('green', 'Credentials validated successfully');
 
-    services.db.log('blue', 'Creating user record...');
+    services.db.info('violet', 'Creating user record...');
     await new Promise(resolve => setTimeout(resolve, 100));
-    services.db.log('green', 'User record created:', { userId, table: 'users' });
+    services.db.info('green', 'User record created:', { userId, table: 'users' });
 
-    services.cache.log('blue', 'Caching user session...');
+    services.cache.info('cornflower', 'Caching user session...');
     await new Promise(resolve => setTimeout(resolve, 30));
-    services.cache.log('green', 'Session cached:', { userId, ttl: 3600 });
+    services.cache.info('green', 'Session cached:', { userId, ttl: 3600 });
 
-    services.api.log('green', 'Registration completed successfully:', {
+    services.api.info('green', 'Registration completed successfully:', {
         userId,
         totalTime: '180ms',
         status: 'success'
@@ -218,10 +288,10 @@ async function serviceLogging() {
 }
 
 /**
- * Example 8: Complex Object Logging
+ * Example 9: Complex Object Logging with Enhanced Formatting
  */
 function complexObjectLogging() {
-    console.log('\n=== Example 8: Complex Object Logging ===\n');
+    console.log('\n=== Example 9: Complex Object Logging ===\n');
 
     const scope = new A_Scope({ name: 'ComplexLogger' });
     const logger = new A_Logger(scope);
@@ -258,7 +328,12 @@ function complexObjectLogging() {
         }
     };
 
-    logger.log('blue', 'API Request Complete:', complexObject);
+    logger.info('deepBlue', 'API Request Complete:', complexObject);
+
+    // Demonstrate terminal width with a very long single-line log
+    const longMessage = 'This demonstrates how the logger handles extremely long single messages that exceed normal terminal width. The message will be automatically wrapped while maintaining proper indentation and visual hierarchy. This feature ensures readability across different terminal sizes and environments, from narrow mobile terminals to wide desktop displays.';
+    
+    logger.info('lavender', 'Long message demonstration:', longMessage);
 }
 
 // =============================================
@@ -278,6 +353,7 @@ async function runAllExamples() {
         objectLogging();
         errorLogging();
         colorDemo();
+        terminalWidthDemo();
         await performanceLogging();
         await serviceLogging();
         complexObjectLogging();
@@ -296,6 +372,7 @@ export {
     objectLogging,
     errorLogging,
     colorDemo,
+    terminalWidthDemo,
     performanceLogging,
     serviceLogging,
     complexObjectLogging,

@@ -84,6 +84,22 @@ export * from './lib/A-Service/A-Service.constants';
 export { A_Polyfill } from './lib/A-Polyfill/A-Polyfill.component';
 export * from './lib/A-Polyfill/A-Polyfill.types';
 
+// ============================================================================
+// A-Route Components
+// ============================================================================
+export { A_Route } from './lib/A-Route/A-Route.entity';
+// export * from './lib/A-Route/A-Route.types';
+
+// ============================================================================
+// A-Signal Components
+// ============================================================================
+export { A_Signal } from './lib/A-Signal/entities/A-Signal.entity';
+export { A_SignalVector } from './lib/A-Signal/entities/A-SignalVector.entity';
+export { A_SignalBus } from './lib/A-Signal/components/A-SignalBus.component';
+export { A_SignalConfig } from './lib/A-Signal/context/A-SignalConfig.context';
+export { A_SignalState } from './lib/A-Signal/context/A-SignalState.context';
+export * from './lib/A-Signal/A-Signal.types';
+export * from './lib/A-Signal/A-Signal.constants';  
 
 // ============================================================================
 // A-Schedule Components

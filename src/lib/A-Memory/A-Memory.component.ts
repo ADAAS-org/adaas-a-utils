@@ -103,9 +103,6 @@ export class A_Memory<
         @A_Inject(A_Scope) scope: A_Scope,
         ...args: any[]
     ): Promise<void> {
-        console.log('A_Memory onSet called with key:', scope.name);
-        console.log('A_Memory onSet called with key:', scope.parent?.name);
-
         // Handle set operation
         context.set(operation.params.key, operation.params.value);
     }

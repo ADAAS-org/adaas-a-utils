@@ -1045,6 +1045,13 @@ declare const A_LoggerEnvVariables: {
 declare const A_LoggerEnvVariablesArray: readonly ["A_LOGGER_LEVEL", "A_LOGGER_DEFAULT_SCOPE_LENGTH", "A_LOGGER_DEFAULT_SCOPE_COLOR", "A_LOGGER_DEFAULT_LOG_COLOR"];
 type A_LoggerEnvVariablesType = (typeof A_LoggerEnvVariables)[keyof typeof A_LoggerEnvVariables][];
 
+type A_LoggerLevel = 'debug' | 'info' | 'warn' | 'error' | 'all';
+/**
+ * Available color names for the logger
+ * Can be used as first parameter in logging methods to specify message color
+ */
+type A_LoggerColorName = 'red' | 'yellow' | 'green' | 'blue' | 'cyan' | 'magenta' | 'gray' | 'brightBlue' | 'brightCyan' | 'brightMagenta' | 'darkGray' | 'lightGray' | 'indigo' | 'violet' | 'purple' | 'lavender' | 'skyBlue' | 'steelBlue' | 'slateBlue' | 'deepBlue' | 'lightBlue' | 'periwinkle' | 'cornflower' | 'powder' | 'charcoal' | 'silver' | 'smoke' | 'slate';
+
 /**
  * A_Logger - Advanced Logging Component with Scope-based Output Formatting
  *
@@ -1073,7 +1080,15 @@ type A_LoggerEnvVariablesType = (typeof A_LoggerEnvVariables)[keyof typeof A_Log
  *   doSomething() {
  *     this.logger.info('Processing started'); // Uses scope-name-based colors, always shows
  *     this.logger.debug('Debug information'); // Only shows when debug level enabled
- *     this.logger.info('green', 'Custom message color'); // Green message, scope stays default
+ *
+ *     // Color overload methods with enum support
+ *     this.logger.info('green', 'Success message'); // Green message, scope stays default
+ *     this.logger.debug('gray', 'Verbose debug info'); // Gray message for less important info
+ *     this.logger.info('brightBlue', 'Important notification');
+ *
+ *     // Terminal width aware formatting - automatically wraps long lines
+ *     this.logger.info('This is a very long message that will be automatically wrapped to fit within the terminal width while maintaining proper indentation and formatting');
+ *
  *     this.logger.warning('Something might be wrong');
  *     this.logger.error(new Error('Something failed'));
  *   }
@@ -1082,6 +1097,13 @@ type A_LoggerEnvVariablesType = (typeof A_LoggerEnvVariables)[keyof typeof A_Log
  * // Same scope names will always get the same colors automatically
  * const logger1 = new A_Logger(new A_Scope({name: 'UserService'})); // Gets consistent colors
  * const logger2 = new A_Logger(new A_Scope({name: 'UserService'})); // Gets same colors as logger1
+ *
+ * // Available color names (A_LoggerColorName enum):
+ * // 'red', 'yellow', 'green', 'blue', 'cyan', 'magenta', 'gray',
+ * // 'brightBlue', 'brightCyan', 'brightMagenta', 'darkGray', 'lightGray',
+ * // 'indigo', 'violet', 'purple', 'lavender', 'skyBlue', 'steelBlue',
+ * // 'slateBlue', 'deepBlue', 'lightBlue', 'periwinkle', 'cornflower',
+ * // 'powder', 'charcoal', 'silver', 'smoke', 'slate'
  *
  * // Configuration via environment variables or A_Config (overrides automatic selection)
  * process.env.A_LOGGER_DEFAULT_SCOPE_COLOR = 'magenta';
@@ -1120,6 +1142,16 @@ declare class A_Logger extends A_Component {
      */
     private readonly DEFAULT_LOG_COLOR;
     /**
+     * Current terminal width for responsive formatting
+     * Automatically detected or falls back to default values
+     */
+    private readonly TERMINAL_WIDTH;
+    /**
+     * Maximum content width based on terminal size
+     * Used for word wrapping and line length calculations
+     */
+    private readonly MAX_CONTENT_WIDTH;
+    /**
      * Initialize A_Logger with dependency injection
      * Colors are configured through A_Config or generated randomly if not provided
      *
@@ -1152,6 +1184,34 @@ declare class A_Logger extends A_Component {
      */
     private generateComplementaryColorsFromScope;
     /**
+     * Detect current terminal width based on environment
+     *
+     * Returns appropriate width for different environments:
+     * - Node.js: Uses process.stdout.columns if available
+     * - Browser: Returns browser default width
+     * - Fallback: Returns default terminal width
+     *
+     * @returns Terminal width in characters
+     */
+    private detectTerminalWidth;
+    /**
+     * Wrap text to fit within terminal width while preserving formatting
+     *
+     * @param text - Text to wrap
+     * @param scopePadding - The scope padding string for alignment
+     * @param isFirstLine - Whether this is the first line (affects available width calculation)
+     * @returns Array of wrapped lines with proper indentation
+     */
+    private wrapText;
+    /**
+     * Split a long word that doesn't fit on a single line
+     *
+     * @param word - Word to split
+     * @param maxLength - Maximum length per chunk
+     * @returns Array of word chunks
+     */
+    private splitLongWord;
+    /**
      * Get the formatted scope length for consistent message alignment
      * Uses a standard length to ensure all messages align properly regardless of scope name
      *
@@ -1176,20 +1236,28 @@ declare class A_Logger extends A_Component {
      *
      * @param messageColor - The color key to apply to the message content
      * @param args - Variable arguments to format and display
-     * @returns Array of formatted strings ready for console output
+     * @returns Array of formatted strings and/or objects ready for console output
      */
-    compile(messageColor: keyof typeof this.COLORS, ...args: any[]): Array<string>;
+    compile(messageColor: keyof typeof this.COLORS, ...args: any[]): Array<any>;
     /**
-     * Format an object for display with proper JSON indentation
+     * Format an object for display with proper JSON indentation and terminal width awareness
      *
      * @param obj - The object to format
      * @param shouldAddNewline - Whether to add a newline prefix
      * @param scopePadding - The padding string for consistent alignment
-     * @returns Formatted object string
+     * @returns Formatted object string or the object itself for browser environments
      */
     private formatObject;
     /**
-     * Format a string for display with proper indentation
+     * Wrap a long JSON string value while preserving readability
+     *
+     * @param value - The string value to wrap
+     * @param maxWidth - Maximum width for the value
+     * @returns Wrapped string value
+     */
+    private wrapJsonStringValue;
+    /**
+     * Format a string for display with proper indentation and terminal width wrapping
      *
      * @param str - The string to format
      * @param shouldAddNewline - Whether to add a newline prefix
@@ -1222,7 +1290,7 @@ declare class A_Logger extends A_Component {
      * Note: The scope color always remains the instance's default scope color,
      * only the message content color changes when explicitly specified.
      *
-     * @param color - Optional color key or the first message argument
+     * @param color - Optional color name from A_LoggerColorName enum or the first message argument
      * @param args - Additional arguments to log
      *
      * @example
@@ -1232,7 +1300,7 @@ declare class A_Logger extends A_Component {
      * logger.debug('Processing user:', { id: 1, name: 'John' });
      * ```
      */
-    debug(color: keyof typeof this.COLORS, ...args: any[]): void;
+    debug(color: A_LoggerColorName, ...args: any[]): void;
     debug(...args: any[]): void;
     /**
      * Info logging method with optional color specification
@@ -1245,7 +1313,7 @@ declare class A_Logger extends A_Component {
      * Note: The scope color always remains the instance's default scope color,
      * only the message content color changes when explicitly specified.
      *
-     * @param color - Optional color key or the first message argument
+     * @param color - Optional color name from A_LoggerColorName enum or the first message argument
      * @param args - Additional arguments to log
      *
      * @example
@@ -1255,16 +1323,16 @@ declare class A_Logger extends A_Component {
      * logger.info('Processing user:', { id: 1, name: 'John' });
      * ```
      */
-    info(color: keyof typeof this.COLORS, ...args: any[]): void;
+    info(color: A_LoggerColorName, ...args: any[]): void;
     info(...args: any[]): void;
     /**
      * Legacy log method (kept for backward compatibility)
      * @deprecated Use info() method instead
      *
-     * @param color - Optional color key or the first message argument
+     * @param color - Optional color name from A_LoggerColorName enum or the first message argument
      * @param args - Additional arguments to log
      */
-    log(color: keyof typeof this.COLORS, ...args: any[]): void;
+    log(color: A_LoggerColorName, ...args: any[]): void;
     log(...args: any[]): void;
     /**
      * Log warning messages with yellow color coding
@@ -1307,21 +1375,32 @@ declare class A_Logger extends A_Component {
     /**
      * Format A_Error instances for inline display within compiled messages
      *
-     * Provides detailed formatting for A_Error objects including:
-     * - Error code and message
-     * - Description and stack trace
-     * - Original error information (if wrapped)
+     * Provides detailed formatting for A_Error objects with:
+     * - Error code, message, and description
+     * - Original error information FIRST (better UX for debugging)
+     * - Stack traces with terminal width awareness
      * - Documentation links (if available)
+     * - Consistent formatting with rest of logger
      *
      * @param error - The A_Error instance to format
      * @returns Formatted string ready for display
      */
     protected compile_A_Error(error: A_Error): string;
     /**
+     * Format stack trace with proper terminal width wrapping and indentation
+     *
+     * @param stack - The stack trace string
+     * @param baseIndent - Base indentation for continuation lines
+     * @returns Array of formatted stack trace lines
+     */
+    private formatStackTrace;
+    /**
      * Format standard Error instances for inline display within compiled messages
      *
-     * Converts standard JavaScript Error objects into a readable JSON format
-     * with proper indentation and stack trace formatting
+     * Provides clean, readable formatting for standard JavaScript errors with:
+     * - Terminal width aware message wrapping
+     * - Properly formatted stack traces
+     * - Consistent indentation with rest of logger
      *
      * @param error - The Error instance to format
      * @returns Formatted string ready for display
@@ -1954,8 +2033,6 @@ declare class FileConfigReader extends ConfigReader {
     read<T extends string>(variables?: Array<T>): Promise<Record<T, any>>;
 }
 
-type A_LoggerLevel = 'debug' | 'info' | 'warn' | 'error' | 'all';
-
 /**
  * A-Logger Constants
  *
@@ -2035,6 +2112,18 @@ declare const A_LOGGER_FORMAT: {
     readonly SEPARATOR: "-------------------------------";
     readonly INDENT_BASE: 3;
     readonly PIPE: "| ";
+};
+/**
+ * Environment variable keys
+ */
+/**
+ * Terminal width configuration
+ */
+declare const A_LOGGER_TERMINAL: {
+    readonly DEFAULT_WIDTH: 80;
+    readonly MIN_WIDTH: 40;
+    readonly MAX_LINE_LENGTH_RATIO: 0.8;
+    readonly BROWSER_DEFAULT_WIDTH: 120;
 };
 /**
  * Environment variable keys
@@ -2343,6 +2432,298 @@ declare class A_Service extends A_Container {
     protected [A_ServiceFeatures.onError](error: A_Error, logger?: A_Logger, ...args: any[]): Promise<void>;
 }
 
+declare class A_Route<_TParams extends Record<string, any> = Record<string, any>, _TQuery extends Record<string, any> = Record<string, any>> extends A_Fragment {
+    url: string;
+    constructor(url: string | RegExp);
+    /**
+     * Returns path only without query and hash
+     */
+    get path(): string;
+    /**
+     * Returns array of parameter names in the route path
+     */
+    get params(): string[];
+    /**
+     * Returns protocol based on URL scheme
+     */
+    get protocol(): string;
+    extractParams(url: string): _TParams;
+    extractQuery(url: string): _TQuery;
+    toString(): string;
+    toRegExp(): RegExp;
+    toAFeatureExtension(extensionScope?: Array<string>): RegExp;
+}
+
+type A_SignalConfig_Init = {
+    /**
+     * An array defining the structure of the signal vector.
+     *
+     * Each entry corresponds to a signal component constructor.
+     */
+    structure?: Array<A_TYPES__Entity_Constructor<A_Signal>>;
+    /**
+     * A string representation of the structure for easier DI resolution.
+     * Each signal's constructor name is used to form this string.
+     * e.g. "['A_RouterWatcher', 'A_ScopeWatcher', 'A_LoggerWatcher']"
+     * OR "A_RouterWatcher,A_ScopeWatcher,A_LoggerWatcher"
+     */
+    stringStructure?: string;
+};
+type A_SignalVector_Init<TSignalData extends Record<string, any> = Record<string, any>> = {
+    structure: Array<A_TYPES__Entity_Constructor<A_Signal>>;
+    values: TSignalData[];
+};
+type A_SignalVector_Serialized = A_TYPES__Entity_Serialized & {
+    structure: string[];
+    values: Array<Record<string, any>>;
+} & A_TYPES__Entity_Serialized;
+type A_Signal_Init<T extends Record<string, any> = Record<string, any>> = {
+    /**
+     * The signal name
+     */
+    name?: string;
+    /**
+     * The signal data
+     */
+    data: T;
+};
+
+/**
+ * A Signal Entity is an individual signal instance that carries data.
+ * Signals is a event types that uses for vectors of signals to be used for further processing.
+ *
+ * Comparing to standard events, signals should be used in case when the event impacts some "state"
+ * and the state should be used instead of the event itself.
+ *
+ * For example, a signal can represent the current status of a user (online/offline/away),
+ * while an event would represent a single action (user logged in/logged out).
+ *
+ * Signals are typically used in scenarios where the current state is more important than individual events,
+ * such as monitoring systems, real-time dashboards, or stateful applications.
+ */
+declare class A_Signal extends A_Entity<A_Signal_Init> {
+    data: Record<string, any>;
+    fromNew(newEntity: A_Signal_Init): void;
+    /**
+     * Emits this signal within the provided scope.
+     *
+     * Scope is mandatory since signal itself should not be registered in the scope,
+     * but should use particular scope context to use proper set of components
+     *
+     * @param scope
+     */
+    emit(scope: A_Scope): Promise<void>;
+}
+
+/**
+ * A Signal Vector Entity is a collection of signals structured in a specific way.
+ * It allows grouping multiple signals together for batch processing or transmission.
+ *
+ * Signal Vectors are useful in scenarios where multiple related signals need to be handled together,
+ * as a state of the system or a snapshot of various parameters at a given time.
+ */
+declare class A_SignalVector extends A_Entity<A_SignalVector_Init, A_SignalVector_Serialized> {
+    /**
+     * The structure of the signal vector, defining the types of signals it contains.
+     *
+     * For example:
+     * [UserSignInSignal, UserStatusSignal, UserActivitySignal]
+     */
+    structure: Array<A_TYPES__Entity_Constructor<A_Signal>>;
+    /**
+     * The values of the signals in the vector.
+     * Each entry corresponds to the data of a signal in the structure.
+     *
+     * For example:
+     * [
+     *   { userId: '123', timestamp: '2023-10-01T12:00:00Z' }, // UserSignInSignal data
+     *   { userId: '123', status: 'online' },                 // UserStatusSignal data
+     *   { userId: '123', activity: 'browsing' }              // UserActivitySignal data
+     * ]
+     *
+     *
+     * [!] For further processing it's recommended to convert any objects to plain text
+     */
+    values: Array<Record<string, any>>;
+    fromNew(newEntity: A_SignalVector_Init): void;
+    /**
+     * Converts to Array of values of signals in the vector
+     *
+     * @returns
+     */
+    toVector(): Array<Record<string, any>>;
+    /**
+     * Converts to Object with signal names as keys and their corresponding values
+     *
+     * @returns
+     */
+    toObject(): Record<string, any>;
+    /**
+     * Serializes the Signal Vector to a JSON-compatible format.
+     *
+     *
+     * @returns
+     */
+    toJSON(): A_SignalVector_Serialized;
+}
+
+declare enum A_SignalFeatures {
+    Emit = "_A_SignalFeatures_Emit"
+}
+declare enum A_SignalBusFeatures {
+    Emit = "_A_SignalBusFeatures_Emit"
+}
+
+/**
+ * A_SignalState manages the latest state of all signals within a given scope.
+ *
+ * This class maintains a mapping between signal constructors and their most recently emitted values,
+ * providing a centralized state store for signal management within an application context.
+ *
+ * @template TSignalData - Union type of all possible signal data types that can be stored (must extend Record<string, any>)
+ *
+ * The generic ensures type safety by maintaining correspondence between:
+ * - Signal constructor types and their data types
+ * - Signal instances and their emitted value types
+ * - Vector structure and the data it contains
+ */
+declare class A_SignalState<TSignalData extends Record<string, any> = Record<string, any>> extends A_Fragment {
+    /**
+     * Internal map storing the relationship between signal constructors and their latest values
+     * Key: Signal constructor function
+     * Value: Latest emitted data from that signal type
+     */
+    protected _state: Map<A_TYPES__Component_Constructor<A_Signal>, TSignalData | undefined>;
+    /**
+     * Optional structure defining the ordered list of signal constructors
+     * Used for vector operations and initialization
+     */
+    protected _structure: Array<A_TYPES__Component_Constructor<A_Signal>>;
+    /**
+     * Gets the ordered structure of signal constructors
+     * @returns Array of signal constructors in their defined order
+     */
+    get structure(): Array<A_TYPES__Component_Constructor<A_Signal>>;
+    /**
+     * Creates a new A_SignalState instance
+     *
+     * @param structure - Optional array defining the ordered structure of signal constructors
+     *                   This structure is used for vector operations and determines the order
+     *                   in which signals are processed and serialized
+     */
+    constructor(structure: A_TYPES__Component_Constructor<A_Signal>[]);
+    /**
+     * Sets the latest value for a specific signal type
+     *
+     * @param signal - The signal constructor to associate the value with
+     * @param value - The data value emitted by the signal
+     */
+    set(signal: A_Signal, value: TSignalData): void;
+    set(signal: A_TYPES__Component_Constructor<A_Signal>, value: TSignalData): void;
+    /**
+     * Retrieves the latest value for a specific signal type
+     *
+     * @param signal - The signal constructor to get the value for
+     * @returns The latest data value or undefined if no value has been set
+     */
+    get(signal: A_Signal): TSignalData | undefined;
+    get(signal: A_TYPES__Component_Constructor<A_Signal>): TSignalData | undefined;
+    /**
+     * Checks if a signal type has been registered in the state
+     *
+     * @param signal - The signal constructor to check for
+     * @returns True if the signal type exists in the state map
+     */
+    has(signal: A_Signal): boolean;
+    has(signal: A_TYPES__Component_Constructor<A_Signal>): boolean;
+    /**
+     * Removes a signal type and its associated value from the state
+     *
+     * @param signal - The signal constructor to remove
+     * @returns True if the signal was successfully deleted, false if it didn't exist
+     */
+    delete(signal: A_Signal): boolean;
+    delete(signal: A_TYPES__Component_Constructor<A_Signal>): boolean;
+    /**
+     * Converts the current state to a vector (ordered array) format
+     *
+     * The order is determined by the structure array provided during construction.
+     * Each position in the vector corresponds to a specific signal type's latest value.
+     *
+     * @returns Array of signal values in the order defined by the structure
+     * @throws Error if structure is not defined or if any signal value is undefined
+     */
+    toVector(): A_SignalVector;
+    /**
+     * Converts the current state to an object with signal constructor names as keys
+     *
+     * This provides a more readable representation of the state where each signal
+     * type is identified by its constructor name.
+     *
+     * @returns Object mapping signal constructor names to their latest values
+     * @throws Error if any signal value is undefined
+     */
+    toObject(): Record<string, TSignalData>;
+}
+
+/**
+ * This component should dictate a structure of the vector for all signals within a given scope.
+ * so if there're multiple signals it should say what type at what position should be expected.
+ *
+ * e.g. [A_RouterWatcher, A_ScopeWatcher, A_LoggerWatcher]
+ * This structure then should be used for any further processing of signals within the scope.
+ */
+declare class A_SignalConfig extends A_Fragment {
+    protected _structure?: Array<A_TYPES__Entity_Constructor<A_Signal>>;
+    protected _config: A_SignalConfig_Init;
+    protected _ready?: Promise<void>;
+    get structure(): Array<A_TYPES__Entity_Constructor<A_Signal>>;
+    /**
+     * Uses for synchronization to ensure the config is initialized.
+     *
+     * @returns True if the configuration has been initialized.
+     */
+    get ready(): Promise<void> | undefined;
+    constructor(params: A_SignalConfig_Init);
+    /**
+     * Initializes the signal configuration if not already initialized.
+     *
+     * @returns
+     */
+    initialize(): Promise<void>;
+    /**
+     * Initializes the signal configuration by processing the provided structure or string representation.
+     * This method sets up the internal structure of signal constructors based on the configuration.
+     */
+    protected _initialize(): Promise<void>;
+}
+
+/**
+ * This component should listen for all available signal watchers components in this and all parent scopes.
+ * When a signal is emitted, it should forward the signal to all registered watchers.
+ *
+ * A_SignalBus should always return the same vector structure of the signals, and that's why it should store the state of the latest behavior.
+ * For example if there are 3 watchers registered, the bus should always return a vector of 3 elements, based on the A_SignalConfig structure.
+ *
+ *
+ * The component itself is stateless and all methods uses only parameters (context) is provided with.
+ */
+declare class A_SignalBus extends A_Component {
+    /**
+     * This methods extends A-Signal Emit feature to handle signal emission within the bus.
+     *
+     * It updates the signal state and emits the updated signal vector.
+     *
+     * @param signal
+     * @param globalConfig
+     * @param logger
+     * @param state
+     * @param config
+     * @returns
+     */ u: any;
+    [A_SignalFeatures.Emit](signal: A_Signal, globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>, logger?: A_Logger, state?: A_SignalState, config?: A_SignalConfig): Promise<void>;
+}
+
 type A_UTILS_TYPES__ScheduleObjectConfig = {
     /**
      * If the timeout is cleared, should the promise resolve or reject?
@@ -2456,4 +2837,4 @@ declare class A_StateMachineError extends A_Error {
     static readonly TransitionError = "A-StateMachine Transition Error";
 }
 
-export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Schedule, A_ScheduleObject, A_Service, A_ServiceFeatures, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT, A_Logger, type A_LoggerColorName, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Route, A_Schedule, A_ScheduleObject, A_Service, A_ServiceFeatures, A_Signal, A_SignalBus, A_SignalBusFeatures, A_SignalConfig, type A_SignalConfig_Init, A_SignalFeatures, A_SignalState, A_SignalVector, type A_SignalVector_Init, type A_SignalVector_Serialized, type A_Signal_Init, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };

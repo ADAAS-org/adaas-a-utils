@@ -1,7 +1,7 @@
 import { A_Component, A_Context, A_Error, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_Config } from "../A-Config/A-Config.context";
 import { A_LoggerEnvVariablesType } from "./A-Logger.env";
-import { A_LoggerLevel } from "./A-Logger.types";
+import { A_LoggerLevel, A_LoggerColorName } from "./A-Logger.types";
 import {
     A_LOGGER_DEFAULT_SCOPE_LENGTH,
     A_LOGGER_COLORS,
@@ -9,7 +9,8 @@ import {
     A_LOGGER_TIME_FORMAT,
     A_LOGGER_FORMAT,
     A_LOGGER_ENV_KEYS,
-    A_LOGGER_SAFE_RANDOM_COLORS
+    A_LOGGER_SAFE_RANDOM_COLORS,
+    A_LOGGER_TERMINAL
 } from "./A-Logger.constants";
 
 /**
@@ -40,7 +41,15 @@ import {
  *   doSomething() {
  *     this.logger.info('Processing started'); // Uses scope-name-based colors, always shows
  *     this.logger.debug('Debug information'); // Only shows when debug level enabled
- *     this.logger.info('green', 'Custom message color'); // Green message, scope stays default
+ *     
+ *     // Color overload methods with enum support
+ *     this.logger.info('green', 'Success message'); // Green message, scope stays default
+ *     this.logger.debug('gray', 'Verbose debug info'); // Gray message for less important info
+ *     this.logger.info('brightBlue', 'Important notification');
+ *     
+ *     // Terminal width aware formatting - automatically wraps long lines
+ *     this.logger.info('This is a very long message that will be automatically wrapped to fit within the terminal width while maintaining proper indentation and formatting');
+ *     
  *     this.logger.warning('Something might be wrong');
  *     this.logger.error(new Error('Something failed'));
  *   }
@@ -49,6 +58,13 @@ import {
  * // Same scope names will always get the same colors automatically
  * const logger1 = new A_Logger(new A_Scope({name: 'UserService'})); // Gets consistent colors
  * const logger2 = new A_Logger(new A_Scope({name: 'UserService'})); // Gets same colors as logger1
+ * 
+ * // Available color names (A_LoggerColorName enum):
+ * // 'red', 'yellow', 'green', 'blue', 'cyan', 'magenta', 'gray',
+ * // 'brightBlue', 'brightCyan', 'brightMagenta', 'darkGray', 'lightGray',
+ * // 'indigo', 'violet', 'purple', 'lavender', 'skyBlue', 'steelBlue',
+ * // 'slateBlue', 'deepBlue', 'lightBlue', 'periwinkle', 'cornflower',
+ * // 'powder', 'charcoal', 'silver', 'smoke', 'slate'
  * 
  * // Configuration via environment variables or A_Config (overrides automatic selection)
  * process.env.A_LOGGER_DEFAULT_SCOPE_COLOR = 'magenta';
@@ -93,9 +109,21 @@ export class A_Logger extends A_Component {
      */
     private readonly DEFAULT_LOG_COLOR: keyof typeof A_LOGGER_COLORS;
 
+    /**
+     * Current terminal width for responsive formatting
+     * Automatically detected or falls back to default values
+     */
+    private readonly TERMINAL_WIDTH: number;
+
+    /**
+     * Maximum content width based on terminal size
+     * Used for word wrapping and line length calculations
+     */
+    private readonly MAX_CONTENT_WIDTH: number;
+
     // =============================================
     // Constructor and Initialization
-    // =============================================
+    // =============================
 
     /**
      * Initialize A_Logger with dependency injection
@@ -126,6 +154,10 @@ export class A_Logger extends A_Component {
             this.DEFAULT_SCOPE_COLOR = complementaryColors.scopeColor;
             this.DEFAULT_LOG_COLOR = complementaryColors.logColor;
         }
+
+        // Initialize terminal width detection
+        this.TERMINAL_WIDTH = this.detectTerminalWidth();
+        this.MAX_CONTENT_WIDTH = Math.floor(this.TERMINAL_WIDTH * A_LOGGER_TERMINAL.MAX_LINE_LENGTH_RATIO);
     }
 
     // =============================================
@@ -191,8 +223,129 @@ export class A_Logger extends A_Component {
     }
 
     // =============================================
-    // Factory Methods
+    // Terminal Width Detection
     // =============================================
+
+    /**
+     * Detect current terminal width based on environment
+     * 
+     * Returns appropriate width for different environments:
+     * - Node.js: Uses process.stdout.columns if available
+     * - Browser: Returns browser default width
+     * - Fallback: Returns default terminal width
+     * 
+     * @returns Terminal width in characters
+     */
+    private detectTerminalWidth(): number {
+        try {
+            // Browser environment
+            if (A_Context.environment === 'browser') {
+                return A_LOGGER_TERMINAL.BROWSER_DEFAULT_WIDTH;
+            }
+
+            // Node.js environment - try to get actual terminal width
+            if (typeof process !== 'undefined' && process.stdout && process.stdout.columns) {
+                const cols = process.stdout.columns;
+                // Ensure minimum width for readability
+                return Math.max(cols, A_LOGGER_TERMINAL.MIN_WIDTH);
+            }
+
+            // Fallback to default width
+            return A_LOGGER_TERMINAL.DEFAULT_WIDTH;
+        } catch (error) {
+            // If any error occurs, fall back to default width
+            return A_LOGGER_TERMINAL.DEFAULT_WIDTH;
+        }
+    }
+
+    /**
+     * Wrap text to fit within terminal width while preserving formatting
+     * 
+     * @param text - Text to wrap
+     * @param scopePadding - The scope padding string for alignment
+     * @param isFirstLine - Whether this is the first line (affects available width calculation)
+     * @returns Array of wrapped lines with proper indentation
+     */
+    private wrapText(text: string, scopePadding: string, isFirstLine: boolean = true): string[] {
+        if (A_Context.environment === 'browser') {
+            // In browser, don't wrap - let browser console handle it
+            return [text];
+        }
+
+        // Calculate available width for text content
+        // First line: terminal_width - scope_header_length (includes [scope] |time| part)
+        // Continuation lines: terminal_width - scope_padding - pipe_length
+        const scopeHeaderLength = this.formattedScope.length + 4 + this.getTime().length + 4; // [scope] |time| 
+        const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
+        
+        const firstLineMaxWidth = Math.max(this.TERMINAL_WIDTH - scopeHeaderLength - 1, 20); // -1 for space
+        const continuationMaxWidth = Math.max(this.TERMINAL_WIDTH - continuationIndent.length, 20);
+        
+        // If text fits on first line, return as is
+        if (isFirstLine && text.length <= firstLineMaxWidth) {
+            return [text];
+        }
+
+        const lines: string[] = [];
+        const words = text.split(' ');
+        let currentLine = '';
+        let currentMaxWidth = isFirstLine ? firstLineMaxWidth : continuationMaxWidth;
+        let isCurrentLineFirst = isFirstLine;
+
+        for (const word of words) {
+            const spaceNeeded = currentLine ? 1 : 0; // Space before word
+            const totalLength = currentLine.length + spaceNeeded + word.length;
+
+            // If adding this word would exceed current line's max width
+            if (totalLength > currentMaxWidth) {
+                if (currentLine) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                    // After first line, all subsequent lines use continuation width
+                    currentMaxWidth = continuationMaxWidth;
+                    isCurrentLineFirst = false;
+                } else {
+                    // Word itself is too long, split it
+                    if (word.length > currentMaxWidth) {
+                        const chunks = this.splitLongWord(word, currentMaxWidth);
+                        lines.push(...chunks.slice(0, -1));
+                        currentLine = chunks[chunks.length - 1];
+                    } else {
+                        currentLine = word;
+                    }
+                    currentMaxWidth = continuationMaxWidth;
+                    isCurrentLineFirst = false;
+                }
+            } else {
+                currentLine += (currentLine ? ' ' : '') + word;
+            }
+        }
+
+        if (currentLine) {
+            lines.push(currentLine);
+        }
+
+        return lines.length ? lines : [text];
+    }
+
+    /**
+     * Split a long word that doesn't fit on a single line
+     * 
+     * @param word - Word to split
+     * @param maxLength - Maximum length per chunk
+     * @returns Array of word chunks
+     */
+    private splitLongWord(word: string, maxLength: number): string[] {
+        const chunks: string[] = [];
+        for (let i = 0; i < word.length; i += maxLength) {
+            chunks.push(word.slice(i, i + maxLength));
+        }
+        return chunks;
+    }
+
+    // =============================================
+    // Factory Methods
+    // =============================
 
 
 
@@ -249,14 +402,16 @@ export class A_Logger extends A_Component {
      * 
      * @param messageColor - The color key to apply to the message content
      * @param args - Variable arguments to format and display
-     * @returns Array of formatted strings ready for console output
+     * @returns Array of formatted strings and/or objects ready for console output
      */
     compile(
         messageColor: keyof typeof this.COLORS,
         ...args: any[]
-    ): Array<string> {
+    ): Array<any> {
         const timeString = this.getTime();
-        const scopePadding = ' '.repeat(this.scopeLength + 3);
+        // Calculate padding based on actual displayed scope width (STANDARD_SCOPE_LENGTH)
+        // Plus 3 for the brackets and space: [scope] 
+        const scopePadding = ' '.repeat(this.STANDARD_SCOPE_LENGTH + 3);
         const isMultiArg = args.length > 1;
 
         return [
@@ -293,41 +448,100 @@ export class A_Logger extends A_Component {
     }
 
     /**
-     * Format an object for display with proper JSON indentation
+     * Format an object for display with proper JSON indentation and terminal width awareness
      * 
      * @param obj - The object to format
      * @param shouldAddNewline - Whether to add a newline prefix
      * @param scopePadding - The padding string for consistent alignment
-     * @returns Formatted object string
+     * @returns Formatted object string or the object itself for browser environments
      */
-    private formatObject(obj: any, shouldAddNewline: boolean, scopePadding: string): string {
+    private formatObject(obj: any, shouldAddNewline: boolean, scopePadding: string): any {
 
-        //  in case it's browser, just return the object as is to use native console object rendering
-        if (A_Context.environment === 'browser')
+        // In case it's browser, return the object as is to use native console object rendering
+        // This allows the browser console to display objects with its native interactive features
+        if (A_Context.environment === 'browser') {
             return obj;
+        }
+
+        // Handle null and undefined values
+        if (obj === null) {
+            return shouldAddNewline ? `\n${scopePadding}${A_LOGGER_FORMAT.PIPE}null` : 'null';
+        }
+        if (obj === undefined) {
+            return shouldAddNewline ? `\n${scopePadding}${A_LOGGER_FORMAT.PIPE}undefined` : 'undefined';
+        }
 
         let jsonString: string;
         try {
             jsonString = JSON.stringify(obj, null, 2);
         } catch (error) {
-            // Handle circular references
-            const seen = new WeakSet();
-            jsonString = JSON.stringify(obj, (key, value) => {
-                if (typeof value === 'object' && value !== null) {
-                    if (seen.has(value)) {
-                        return '[Circular Reference]';
+            // Handle circular references and other JSON errors
+            try {
+                const seen = new WeakSet();
+                jsonString = JSON.stringify(obj, (key, value) => {
+                    if (typeof value === 'object' && value !== null) {
+                        if (seen.has(value)) {
+                            return '[Circular Reference]';
+                        }
+                        seen.add(value);
                     }
-                    seen.add(value);
-                }
-                return value;
-            }, 2);
+                    return value;
+                }, 2);
+            } catch (fallbackError) {
+                // If all else fails, convert to string
+                jsonString = String(obj);
+            }
         }
-        const formatted = jsonString.replace(/\n/g, '\n' + `${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
-        return shouldAddNewline ? '\n' + `${scopePadding}${A_LOGGER_FORMAT.PIPE}` + formatted : formatted;
+
+        // Apply terminal width wrapping to long JSON string values
+        const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
+        const maxJsonLineWidth = this.TERMINAL_WIDTH - continuationIndent.length - 4; // -4 for JSON indentation
+        
+        // Split into lines and wrap long string values
+        const lines = jsonString.split('\n').map(line => {
+            // Check if this line contains a long string value
+            const stringValueMatch = line.match(/^(\s*"[^"]+":\s*")([^"]+)(".*)?$/);
+            if (stringValueMatch && stringValueMatch[2].length > maxJsonLineWidth - stringValueMatch[1].length - (stringValueMatch[3] || '').length) {
+                const [, prefix, value, suffix = ''] = stringValueMatch;
+                
+                // Wrap the string value if it's too long
+                if (value.length > maxJsonLineWidth - prefix.length - suffix.length) {
+                    const wrappedValue = this.wrapJsonStringValue(value, maxJsonLineWidth - prefix.length - suffix.length);
+                    return prefix + wrappedValue + suffix;
+                }
+            }
+            return line;
+        });
+
+        const formatted = lines.join('\n' + continuationIndent);
+        return shouldAddNewline ? '\n' + continuationIndent + formatted : formatted;
     }
 
     /**
-     * Format a string for display with proper indentation
+     * Wrap a long JSON string value while preserving readability
+     * 
+     * @param value - The string value to wrap
+     * @param maxWidth - Maximum width for the value
+     * @returns Wrapped string value
+     */
+    private wrapJsonStringValue(value: string, maxWidth: number): string {
+        if (value.length <= maxWidth) {
+            return value;
+        }
+        
+        // For JSON string values, truncate with ellipsis to maintain JSON validity
+        // This prevents the JSON from becoming unreadable due to excessive wrapping
+        // while still showing the most important part of the string
+        if (maxWidth > 6) { // Ensure we have room for ellipsis
+            return value.substring(0, maxWidth - 3) + '...';
+        } else {
+            // If maxWidth is very small, just return truncated value
+            return value.substring(0, Math.max(1, maxWidth));
+        }
+    }
+
+    /**
+     * Format a string for display with proper indentation and terminal width wrapping
      * 
      * @param str - The string to format
      * @param shouldAddNewline - Whether to add a newline prefix
@@ -335,8 +549,32 @@ export class A_Logger extends A_Component {
      * @returns Formatted string
      */
     private formatString(str: string, shouldAddNewline: boolean, scopePadding: string): string {
-        const prefix = shouldAddNewline ? '\n' : '';
-        return (prefix + str).replace(/\n/g, '\n' + `${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
+        // In browser environment, keep simple formatting
+        if (A_Context.environment === 'browser') {
+            const prefix = shouldAddNewline ? '\n' : '';
+            return (prefix + str).replace(/\n/g, '\n' + `${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
+        }
+
+        // For terminal, apply intelligent text wrapping
+        const wrappedLines = this.wrapText(str, scopePadding, !shouldAddNewline);
+        const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
+        
+        // Format the wrapped lines with proper indentation
+        const formattedLines = wrappedLines.map((line, index) => {
+            if (index === 0 && !shouldAddNewline) {
+                // First line in inline mode (no newline prefix)
+                return line;
+            } else {
+                // Continuation lines or first line with newline prefix
+                return `${continuationIndent}${line}`;
+            }
+        });
+        
+        if (shouldAddNewline) {
+            return '\n' + formattedLines.join('\n');
+        } else {
+            return formattedLines.join('\n');
+        }
     }
 
     // =============================================
@@ -391,7 +629,7 @@ export class A_Logger extends A_Component {
      * Note: The scope color always remains the instance's default scope color,
      * only the message content color changes when explicitly specified.
      * 
-     * @param color - Optional color key or the first message argument
+     * @param color - Optional color name from A_LoggerColorName enum or the first message argument
      * @param args - Additional arguments to log
      * 
      * @example
@@ -401,7 +639,7 @@ export class A_Logger extends A_Component {
      * logger.debug('Processing user:', { id: 1, name: 'John' });
      * ```
      */
-    debug(color: keyof typeof this.COLORS, ...args: any[]): void;
+    debug(color: A_LoggerColorName, ...args: any[]): void;
     debug(...args: any[]): void;
     debug(param1: any, ...args: any[]): void {
         if (!this.shouldLog('debug')) return;
@@ -426,7 +664,7 @@ export class A_Logger extends A_Component {
      * Note: The scope color always remains the instance's default scope color,
      * only the message content color changes when explicitly specified.
      * 
-     * @param color - Optional color key or the first message argument
+     * @param color - Optional color name from A_LoggerColorName enum or the first message argument
      * @param args - Additional arguments to log
      * 
      * @example
@@ -436,7 +674,7 @@ export class A_Logger extends A_Component {
      * logger.info('Processing user:', { id: 1, name: 'John' });
      * ```
      */
-    info(color: keyof typeof this.COLORS, ...args: any[]): void;
+    info(color: A_LoggerColorName, ...args: any[]): void;
     info(...args: any[]): void;
     info(param1: any, ...args: any[]): void {
         if (!this.shouldLog('info')) return;
@@ -454,10 +692,10 @@ export class A_Logger extends A_Component {
      * Legacy log method (kept for backward compatibility)
      * @deprecated Use info() method instead
      * 
-     * @param color - Optional color key or the first message argument
+     * @param color - Optional color name from A_LoggerColorName enum or the first message argument
      * @param args - Additional arguments to log
      */
-    log(color: keyof typeof this.COLORS, ...args: any[]): void;
+    log(color: A_LoggerColorName, ...args: any[]): void;
     log(...args: any[]): void;
     log(param1: any, ...args: any[]): void {
         // Delegate to info method for backward compatibility
@@ -515,7 +753,7 @@ export class A_Logger extends A_Component {
      */
     protected log_A_Error(error: A_Error): void {
         const time = this.getTime();
-        const scopePadding = ' '.repeat(this.scopeLength + 3);
+        const scopePadding = ' '.repeat(this.STANDARD_SCOPE_LENGTH + 3);
 
         console.log(`\x1b[31m[${this.formattedScope}] |${time}| ERROR ${error.code}
 ${scopePadding}| ${error.message}
@@ -537,59 +775,136 @@ ${scopePadding}|-------------------------------
     /**
      * Format A_Error instances for inline display within compiled messages
      * 
-     * Provides detailed formatting for A_Error objects including:
-     * - Error code and message
-     * - Description and stack trace
-     * - Original error information (if wrapped)
+     * Provides detailed formatting for A_Error objects with:
+     * - Error code, message, and description
+     * - Original error information FIRST (better UX for debugging)
+     * - Stack traces with terminal width awareness
      * - Documentation links (if available)
+     * - Consistent formatting with rest of logger
      * 
      * @param error - The A_Error instance to format
      * @returns Formatted string ready for display
      */
     protected compile_A_Error(error: A_Error): string {
-        const scopePadding = ' '.repeat(this.scopeLength + 3);
+        const continuationIndent = `${' '.repeat(this.STANDARD_SCOPE_LENGTH + 3)}${A_LOGGER_FORMAT.PIPE}`;
+        const separator = `${continuationIndent}-------------------------------`;
+        const lines: string[] = [];
 
-        return '\n' +
-            `${scopePadding}|-------------------------------` +
-            '\n' +
-            `${scopePadding}|  Error:  | ${error.code}
-${scopePadding}|-------------------------------
-${scopePadding}|${' '.repeat(10)}| ${error.message}
-${scopePadding}|${' '.repeat(10)}| ${error.description} 
-${scopePadding}|-------------------------------
-${scopePadding}| ${error.stack?.split('\n').map((line, index) => index === 0 ? line : `${scopePadding}| ${line}`).join('\n') || 'No stack trace'}
-${scopePadding}|-------------------------------`
-            +
-            (error.originalError ? `${scopePadding}| Wrapped From  ${error.originalError.message}
-${scopePadding}|-------------------------------
-${scopePadding}| ${error.originalError.stack?.split('\n').map((line, index) => index === 0 ? line : `${scopePadding}| ${line}`).join('\n') || 'No stack trace'}
-${scopePadding}|-------------------------------` : '')
-            +
-            (error.link ? `${scopePadding}| Read in docs: ${error.link}
-${scopePadding}|-------------------------------` : '');
+        // Add error header
+        lines.push('');
+        lines.push(separator);
+        lines.push(`${continuationIndent}A_ERROR: ${error.code}`);
+        lines.push(separator);
+        
+        // Format and wrap error message and description
+        const errorMessage = this.wrapText(`Message: ${error.message}`, continuationIndent, false);
+        const errorDescription = this.wrapText(`Description: ${error.description}`, continuationIndent, false);
+        
+        lines.push(...errorMessage.map(line => `${continuationIndent}${line}`));
+        lines.push(...errorDescription.map(line => `${continuationIndent}${line}`));
+        
+        // Show original error FIRST (more important for debugging)
+        if (error.originalError) {
+            lines.push(separator);
+            lines.push(`${continuationIndent}ORIGINAL ERROR:`);
+            lines.push(separator);
+            
+            const originalMessage = this.wrapText(`${error.originalError.name}: ${error.originalError.message}`, continuationIndent, false);
+            lines.push(...originalMessage.map(line => `${continuationIndent}${line}`));
+            
+            if (error.originalError.stack) {
+                lines.push(`${continuationIndent}Stack trace:`);
+                const stackLines = this.formatStackTrace(error.originalError.stack, continuationIndent);
+                lines.push(...stackLines);
+            }
+        }
+        
+        // Then show A_Error stack trace
+        if (error.stack) {
+            lines.push(separator);
+            lines.push(`${continuationIndent}A_ERROR STACK:`);
+            lines.push(separator);
+            const stackLines = this.formatStackTrace(error.stack, continuationIndent);
+            lines.push(...stackLines);
+        }
+        
+        // Documentation link at the end
+        if (error.link) {
+            lines.push(separator);
+            const linkText = this.wrapText(`Documentation: ${error.link}`, continuationIndent, false);
+            lines.push(...linkText.map(line => `${continuationIndent}${line}`));
+        }
+        
+        lines.push(separator);
+        
+        return lines.join('\n');
+    }
+
+    /**
+     * Format stack trace with proper terminal width wrapping and indentation
+     * 
+     * @param stack - The stack trace string
+     * @param baseIndent - Base indentation for continuation lines
+     * @returns Array of formatted stack trace lines
+     */
+    private formatStackTrace(stack: string, baseIndent: string): string[] {
+        const stackLines = stack.split('\n');
+        const formatted: string[] = [];
+        
+        stackLines.forEach((line, index) => {
+            if (line.trim()) {
+                // Add extra indentation for stack trace lines
+                const stackIndent = index === 0 ? baseIndent : `${baseIndent}  `;
+                const wrappedLines = this.wrapText(line.trim(), stackIndent, false);
+                formatted.push(...wrappedLines.map(wrappedLine => 
+                    index === 0 && wrappedLine === wrappedLines[0] 
+                        ? `${baseIndent}${wrappedLine}`
+                        : `${baseIndent}  ${wrappedLine}`
+                ));
+            }
+        });
+        
+        return formatted;
     }
 
     /**
      * Format standard Error instances for inline display within compiled messages
      * 
-     * Converts standard JavaScript Error objects into a readable JSON format
-     * with proper indentation and stack trace formatting
+     * Provides clean, readable formatting for standard JavaScript errors with:
+     * - Terminal width aware message wrapping
+     * - Properly formatted stack traces
+     * - Consistent indentation with rest of logger
      * 
      * @param error - The Error instance to format
      * @returns Formatted string ready for display
      */
     protected compile_Error(error: Error): string {
-        const scopePadding = ' '.repeat(this.scopeLength + 3);
+        const continuationIndent = `${' '.repeat(this.STANDARD_SCOPE_LENGTH + 3)}${A_LOGGER_FORMAT.PIPE}`;
+        const separator = `${continuationIndent}-------------------------------`;
+        const lines: string[] = [];
 
-        return JSON.stringify({
-            name: error.name,
-            message: error.message,
-            stack: error.stack?.split('\n')
-                .map((line, index) => index === 0 ? line : `${scopePadding}| ${line}`)
-                .join('\n')
-        }, null, 2)
-            .replace(/\n/g, '\n' + `${scopePadding}| `)
-            .replace(/\\n/g, '\n');
+        // Add error header
+        lines.push('');
+        lines.push(separator);
+        lines.push(`${continuationIndent}ERROR: ${error.name}`);
+        lines.push(separator);
+        
+        // Format and wrap error message
+        const errorMessage = this.wrapText(`Message: ${error.message}`, continuationIndent, false);
+        lines.push(...errorMessage.map(line => `${continuationIndent}${line}`));
+        
+        // Format stack trace if available
+        if (error.stack) {
+            lines.push(separator);
+            lines.push(`${continuationIndent}STACK TRACE:`);
+            lines.push(separator);
+            const stackLines = this.formatStackTrace(error.stack, continuationIndent);
+            lines.push(...stackLines);
+        }
+        
+        lines.push(separator);
+        
+        return lines.join('\n');
     }
 
     // =============================================

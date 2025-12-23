@@ -1,0 +1,103 @@
+import { A_Caller, A_Component, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
+import { A_SignalBusFeatures, A_SignalFeatures } from "../A-Signal.constants";
+import { A_SignalState } from "../context/A-SignalState.context";
+import { A_SignalConfig } from "../context/A-SignalConfig.context";
+import { A_Config } from "../../A-Config/A-Config.context";
+import { A_Logger } from "../../A-Logger/A-Logger.component";
+import { A_Signal } from "../entities/A-Signal.entity";
+
+
+
+/**
+ * This component should listen for all available signal watchers components in this and all parent scopes. 
+ * When a signal is emitted, it should forward the signal to all registered watchers.
+ * 
+ * A_SignalBus should always return the same vector structure of the signals, and that's why it should store the state of the latest behavior. 
+ * For example if there are 3 watchers registered, the bus should always return a vector of 3 elements, based on the A_SignalConfig structure.
+ * 
+ * 
+ * The component itself is stateless and all methods uses only parameters (context) is provided with.
+ */
+export class A_SignalBus extends A_Component {
+
+
+    /**
+     * This methods extends A-Signal Emit feature to handle signal emission within the bus.
+     * 
+     * It updates the signal state and emits the updated signal vector.
+     * 
+     * @param signal 
+     * @param globalConfig 
+     * @param logger 
+     * @param state 
+     * @param config 
+     * @returns 
+     */u
+    @A_Feature.Extend({
+        scope: [A_Signal]
+    })
+    async [A_SignalFeatures.Emit](
+        @A_Inject(A_Caller) signal: A_Signal,
+
+        @A_Inject(A_Config) globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>,
+        @A_Inject(A_Logger) logger?: A_Logger,
+        @A_Inject(A_SignalState) state?: A_SignalState,
+        @A_Inject(A_SignalConfig) config?: A_SignalConfig,
+    ) {
+
+        /**
+         * We need a context where component is registered, to prevent any duplicate registrations
+         */
+        const componentContext = A_Context.scope(this)
+
+        if (!config) {
+            config = new A_SignalConfig({
+                stringStructure: globalConfig?.get('A_SIGNAL_VECTOR_STRUCTURE') || undefined
+            });
+
+            componentContext.register(config);
+        }
+
+        if (!config.ready)
+            await config.initialize();
+
+        if (!state) {
+            state = new A_SignalState(config.structure);
+            componentContext.register(state);
+        }
+
+        if (!state.has(signal))
+            return;
+
+        //  ------------------------------------------------------------------
+        //  And finally if all checks are passed, we can update the state
+        //  ------------------------------------------------------------------
+
+        logger?.debug(`A_SignalBus: Updating state for signal '${signal.constructor.name}' with data:`, signal.data);
+
+        state.set(signal, signal.data);
+
+        const vector = state.toVector();
+
+        const nextScope = new A_Scope({
+            name: `A_SignalBus_Next_Scope_of_${this.constructor.name}`,
+            entities: [vector]
+        })
+            .inherit(A_Context.scope(this));
+
+
+        try {
+
+            await this.call(A_SignalBusFeatures.Emit, nextScope);
+
+            nextScope.destroy();
+
+        } catch (error) {
+
+            nextScope.destroy();
+
+            throw error;
+        }
+    }
+
+}

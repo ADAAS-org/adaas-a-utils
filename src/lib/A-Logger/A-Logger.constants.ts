@@ -101,6 +101,19 @@ export const A_LOGGER_FORMAT = {
 /**
  * Environment variable keys
  */
+/**
+ * Terminal width configuration
+ */
+export const A_LOGGER_TERMINAL = {
+    DEFAULT_WIDTH: 80,        // Default terminal width when can't be detected
+    MIN_WIDTH: 40,           // Minimum width for formatted output
+    MAX_LINE_LENGTH_RATIO: 0.8, // Use 80% of terminal width for content
+    BROWSER_DEFAULT_WIDTH: 120  // Default width for browser console
+} as const;
+
+/**
+ * Environment variable keys
+ */
 export const A_LOGGER_ENV_KEYS = {
     LOG_LEVEL: 'A_LOGGER_LEVEL',
     DEFAULT_SCOPE_LENGTH: 'A_LOGGER_DEFAULT_SCOPE_LENGTH',
