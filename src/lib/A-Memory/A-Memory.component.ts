@@ -64,10 +64,10 @@ export class A_Memory<
         context.clear();
     }
 
-    @A_Feature.Extend()
     /**
      * Handles the 'get' operation for retrieving a value from memory
      */
+    @A_Feature.Extend()
     async [A_MemoryFeatures.onGet](
         @A_Dependency.Required()
         @A_Inject(A_OperationContext) operation: A_MemoryOperationContext,

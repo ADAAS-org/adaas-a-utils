@@ -1,5 +1,5 @@
 import { A_Entity, A_Scope } from "@adaas/a-concept";
-import { A_Signal_Init } from "../A-Signal.types";
+import { A_Signal_Init, A_Signal_Serialized } from "../A-Signal.types";
 import { A_SignalFeatures } from "../A-Signal.constants";
 
 /**
@@ -15,14 +15,33 @@ import { A_SignalFeatures } from "../A-Signal.constants";
  * Signals are typically used in scenarios where the current state is more important than individual events, 
  * such as monitoring systems, real-time dashboards, or stateful applications.
  */
-export class A_Signal extends A_Entity<A_Signal_Init> {
+export class A_Signal<
+    _TSignalDataType extends Record<string, any> = Record<string, any>
+> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalDataType>> {
 
-    data!: Record<string, any>;
+    data!: _TSignalDataType;
+
+
+    /**
+     * Allows to define default data for the signal.
+     * 
+     * If no data is provided during initialization, the default data will be used.
+     * 
+     * @returns 
+     */
+    static async default(): Promise<A_Signal | undefined> {
+        return undefined;
+    }
 
 
 
+    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalDataType>): void {
+        super.fromJSON(serializedEntity);
+        this.data = serializedEntity.data;
+    }
 
-    fromNew(newEntity: A_Signal_Init): void {
+
+    fromNew(newEntity: A_Signal_Init<_TSignalDataType>): void {
         this.aseid = this.generateASEID({ entity: newEntity.name });
         this.data = newEntity.data;
     }
@@ -37,6 +56,14 @@ export class A_Signal extends A_Entity<A_Signal_Init> {
      */
     async emit(scope: A_Scope) {
         await this.call(A_SignalFeatures.Emit, scope);
+    }
+
+
+    toJSON(): A_Signal_Serialized<_TSignalDataType> {
+        return {
+            ...super.toJSON(),
+            data: this.data
+        };
     }
 
 }

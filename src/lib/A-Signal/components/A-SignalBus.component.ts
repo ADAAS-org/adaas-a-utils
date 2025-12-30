@@ -32,7 +32,7 @@ export class A_SignalBus extends A_Component {
      * @param state 
      * @param config 
      * @returns 
-     */u
+     */
     @A_Feature.Extend({
         scope: [A_Signal]
     })
@@ -45,10 +45,18 @@ export class A_SignalBus extends A_Component {
         @A_Inject(A_SignalConfig) config?: A_SignalConfig,
     ) {
 
+        /*
+        1) create a signal when it occurs via new A_Signal('somedata')
+        2) emit a signal when needed via signal.emit(scope)
+        3) the bus should listen for all emitted signals within the scope
+        4) when a signal is emitted, the bus should store a signal in some place (probably it's memory)
+        */
+
         /**
          * We need a context where component is registered, to prevent any duplicate registrations
          */
-        const componentContext = A_Context.scope(this)
+        const componentContext = A_Context.scope(this);
+
 
         if (!config) {
             config = new A_SignalConfig({
@@ -66,8 +74,10 @@ export class A_SignalBus extends A_Component {
             componentContext.register(state);
         }
 
+
         if (!state.has(signal))
             return;
+
 
         //  ------------------------------------------------------------------
         //  And finally if all checks are passed, we can update the state
@@ -75,9 +85,11 @@ export class A_SignalBus extends A_Component {
 
         logger?.debug(`A_SignalBus: Updating state for signal '${signal.constructor.name}' with data:`, signal.data);
 
-        state.set(signal, signal.data);
+        state.set(signal);
 
         const vector = state.toVector();
+
+
 
         const nextScope = new A_Scope({
             name: `A_SignalBus_Next_Scope_of_${this.constructor.name}`,
@@ -99,5 +111,16 @@ export class A_SignalBus extends A_Component {
             throw error;
         }
     }
+
+
+
+
+    getState(){
+
+    }
+
+
+
+    
 
 }

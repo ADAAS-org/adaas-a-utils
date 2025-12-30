@@ -1,4 +1,4 @@
-import { A_Context, A_Fragment, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
+import { A_CommonHelper, A_Context, A_Fragment, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
 import { A_SignalConfig_Init } from "../A-Signal.types";
 import { A_Signal } from "../entities/A-Signal.entity";
 
@@ -25,12 +25,14 @@ export class A_SignalConfig extends A_Fragment {
         }
 
         const scope = A_Context.scope(this);
-        const signalConfigs = scope.allowedEntities;
 
         //  just sort by constructor name to have consistent order
-        return [...scope.allowedEntities]
-            .sort((a, b) => a.constructor.name.localeCompare(b.constructor.name))
-            .map(s => scope.resolveConstructor<A_Signal>(s.constructor.name));
+        const constructors = [...scope.allowedEntities]
+            .filter(e => A_CommonHelper.isInheritedFrom(e, A_Signal))
+            .sort((a, b) => a.constructor.name.localeCompare(b.name))
+            .map(s => scope.resolveConstructor<A_Signal>(s.name));
+
+        return constructors.filter(s => s) as Array<A_TYPES__Entity_Constructor<A_Signal>>;
     }
 
     /**

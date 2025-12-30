@@ -10,9 +10,9 @@ import { A_SignalVector } from "@adaas/a-utils/lib/A-Signal/entities/A-SignalVec
 jest.retryTimes(0);
 
 describe('A-Signal tests', () => {
-    it('Should Allow to create a config object', async () => {
+    it('Should Allow to emit basic signal structure', async () => {
 
-        let result;
+        let result: A_SignalVector | undefined = undefined;
 
         class UserIntentionListener extends A_Component {
             @A_Concept.Start()
@@ -27,9 +27,6 @@ describe('A-Signal tests', () => {
                         buttonId: 'submit-order'
                     }
                 })
-
-                console.log(A_Context.featureTemplate(A_SignalFeatures.Emit, signal, scope))
-
                 await signal.emit(scope)
             }
 
@@ -59,8 +56,78 @@ describe('A-Signal tests', () => {
         await concept.start();
 
         expect(result).toBeDefined();
-        expect(result.values.length).toBe(1);
-        expect(result.values[0].buttonId).toBe('submit-order');
+        expect(result).toBeInstanceOf(A_SignalVector);
+        expect(result!.length).toBe(1);
+        expect((await result!.toDataVector())[0]?.buttonId).toBe('submit-order');
+
+    });
+    it('Should Allow to work with custom Signals', async () => {
+
+        class UserIntentionSignal extends A_Signal<{ buttonId: string }> { }
+
+        class UserMousePositionSignal extends A_Signal<{ x: number, y: number }> {
+            static async default(): Promise<A_Signal | undefined> {
+                return Promise.resolve(new UserMousePositionSignal({
+                    data: { x: 0, y: 0 }
+                }));
+            }
+        }
+        class UserElementHoverSignal extends A_Signal<{ elementId: string }> { }
+
+
+
+        let result: A_SignalVector | undefined = undefined;
+
+        class UserIntentionListener extends A_Component {
+            @A_Concept.Start()
+            async start(
+                @A_Inject(A_Scope) scope: A_Scope,
+                @A_Inject(A_SignalBus) bus: A_SignalBus
+            ) {
+
+                const signal = new UserIntentionSignal({
+                    data: {
+                        buttonId: 'submit-order'
+                    }
+                })
+
+                await signal.emit(scope)
+            }
+
+
+            @A_Feature.Extend()
+            async [A_SignalBusFeatures.Emit](
+                @A_Inject(A_SignalVector) vector: A_SignalVector
+            ) {
+                result = vector;
+            }
+        }
+
+        const concept = new A_Concept({
+            name: 'test-concept',
+            containers: [new A_Container({
+                name: 'test-container',
+                components: [A_SignalBus, UserIntentionListener],
+                fragments: [
+                    new A_SignalConfig({
+                        structure: [UserIntentionSignal, UserMousePositionSignal, UserElementHoverSignal]
+                    })
+                ]
+            })]
+        });
+
+        await concept.load();
+        await concept.start();
+
+
+        expect(result).toBeDefined();
+        expect(result).toBeInstanceOf(A_SignalVector);
+        expect(result!.length).toBe(3);
+
+        expect((await result!.toDataVector())[0]?.buttonId).toBe('submit-order');
+        expect((await result!.toDataVector())[1]?.x).toBe(0);
+        expect((await result!.toDataVector())[1]?.y).toBe(0);
+        expect((await result!.toDataVector())[2]).toBeUndefined();
 
     });
 })

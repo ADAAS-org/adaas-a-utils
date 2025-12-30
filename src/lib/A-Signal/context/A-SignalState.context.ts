@@ -24,7 +24,7 @@ export class A_SignalState<
      * Key: Signal constructor function
      * Value: Latest emitted data from that signal type
      */
-    protected _state: Map<A_TYPES__Component_Constructor<A_Signal>, TSignalData | undefined> = new Map();
+    protected _state: Map<A_TYPES__Component_Constructor<A_Signal>, A_Signal> = new Map();
 
     /**
      * Optional structure defining the ordered list of signal constructors
@@ -57,9 +57,7 @@ export class A_SignalState<
 
         // Initialize the state map with undefined values for each signal in the structure
         // This ensures all expected signals have entries in the state map from the start
-        this.structure.forEach((signalConstructor) => {
-            this._state.set(signalConstructor, undefined);
-        });
+      
     }
 
 
@@ -71,18 +69,21 @@ export class A_SignalState<
      */
     set(
         signal: A_Signal,
-        value: TSignalData
+        value: A_Signal
+    ): void
+    set(
+        signal: A_Signal
     ): void
     set(
         signal: A_TYPES__Component_Constructor<A_Signal>,
-        value: TSignalData
+        value: A_Signal
     ): void
     set(
         param1: A_TYPES__Component_Constructor<A_Signal> | A_Signal,
-        param2: TSignalData
+        param2?: A_Signal
     ): void {
         const signal = param1 instanceof A_Signal ? param1.constructor as A_TYPES__Component_Constructor<A_Signal> : param1;
-        const value = param2;
+        const value = param1 instanceof A_Signal ? param1 : param2!;
 
         this._state.set(signal, value);
     }
@@ -95,13 +96,13 @@ export class A_SignalState<
      */
     get(
         signal: A_Signal
-    ): TSignalData | undefined
+    ): A_Signal | undefined
     get(
         signal: A_TYPES__Component_Constructor<A_Signal>
-    ): TSignalData | undefined
+    ): A_Signal | undefined
     get(
         param: A_TYPES__Component_Constructor<A_Signal> | A_Signal
-    ): TSignalData | undefined {
+    ): A_Signal | undefined {
         const signal = param instanceof A_Signal ? param.constructor as A_TYPES__Component_Constructor<A_Signal> : param;
         return this._state.get(signal);
     }
@@ -122,6 +123,7 @@ export class A_SignalState<
         param: A_TYPES__Component_Constructor<A_Signal> | A_Signal
     ): boolean {
         const signal = param instanceof A_Signal ? param.constructor as A_TYPES__Component_Constructor<A_Signal> : param;
+
         return this.structure.includes(signal);
     }
 
@@ -155,13 +157,9 @@ export class A_SignalState<
      * @throws Error if structure is not defined or if any signal value is undefined
      */
     toVector(): A_SignalVector {
-        const vector: TSignalData[] = [];
+        const vector: Array<A_Signal> = [];
 
-        this.structure.forEach((signalConstructor) => {
-            const value = this._state.get(signalConstructor);
-            if (value === undefined) {
-                throw new Error(`Signal ${signalConstructor.name} has no value in state`);
-            }
+        this._state.forEach((value, key) => {
             vector.push(value);
         });
 
@@ -180,8 +178,8 @@ export class A_SignalState<
      * @returns Object mapping signal constructor names to their latest values
      * @throws Error if any signal value is undefined
      */
-    toObject(): Record<string, TSignalData> {
-        const obj: Record<string, TSignalData> = {};
+    toObject(): Record<string, A_Signal> {
+        const obj: Record<string, A_Signal> = {};
 
         this.structure.forEach((signalConstructor) => {
             const value = this._state.get(signalConstructor);

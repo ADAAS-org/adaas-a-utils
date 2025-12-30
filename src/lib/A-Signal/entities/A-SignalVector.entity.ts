@@ -9,60 +9,174 @@ import { A_Signal } from "./A-Signal.entity";
  * 
  * Signal Vectors are useful in scenarios where multiple related signals need to be handled together,
  * as a state of the system or a snapshot of various parameters at a given time.
+ * 
+ * @template TSignalsConstructors - Array of signal constructor types (e.g., [typeof MySignal, typeof CustomSignal])
+ * @template TSignals - Array of signal instances derived from constructors
  */
-export class A_SignalVector extends A_Entity<A_SignalVector_Init, A_SignalVector_Serialized> {
+export class A_SignalVector<
+    TSignals extends Array<A_Signal> = Array<A_Signal>,
+    TSignalsConstructors extends Array<A_TYPES__Entity_Constructor<A_Signal>> = TSignals extends Array<infer U> ? U extends A_Signal ? A_TYPES__Entity_Constructor<U>[] : never : never
+> extends A_Entity<A_SignalVector_Init<TSignals[number][], TSignalsConstructors>, A_SignalVector_Serialized> {
 
     /**
      * The structure of the signal vector, defining the types of signals it contains.
      * 
      * For example:
      * [UserSignInSignal, UserStatusSignal, UserActivitySignal]
+     * 
+     * [!] if not provided, it will be derived from the signals values.
      */
-    structure!: Array<A_TYPES__Entity_Constructor<A_Signal>>;
+    protected _structure?: TSignalsConstructors;
     /**
-     * The values of the signals in the vector.
-     * Each entry corresponds to the data of a signal in the structure.
+     * It's actual vector Values of Signals like :
+     * [UserActionSignal, UserMousePositionSignal, ExternalDependencySignal]
+     */
+    protected _signals!: TSignals[number][]
+
+
+    fromNew(newEntity: A_SignalVector_Init<TSignals[number][], TSignalsConstructors>): void {
+        super.fromNew(newEntity);
+        this._structure = newEntity.structure;
+        this._signals = newEntity.values;
+    }
+
+    /**
+     * The structure of the signal vector, defining the types of signals it contains.
      * 
      * For example:
-     * [
-     *   { userId: '123', timestamp: '2023-10-01T12:00:00Z' }, // UserSignInSignal data
-     *   { userId: '123', status: 'online' },                 // UserStatusSignal data
-     *   { userId: '123', activity: 'browsing' }              // UserActivitySignal data
-     * ]
+     * [UserSignInSignal, UserStatusSignal, UserActivitySignal]
      * 
-     * 
-     * [!] For further processing it's recommended to convert any objects to plain text
      */
-    values!: Array<Record<string, any>>;
+    get structure(): TSignalsConstructors {
+        return this._structure || this._signals.map(s => s.constructor as A_TYPES__Entity_Constructor<A_Signal>) as TSignalsConstructors;
+    }
 
 
-    fromNew(newEntity: A_SignalVector_Init): void {
-        super.fromNew(newEntity);
-        this.structure = newEntity.structure;
-        this.values = newEntity.values;
+    get length(): number {
+        return this.structure.length;
+    }
+
+
+    /**
+     * Checks if the vector contains a signal of the specified type.
+     * 
+     * @param signal 
+     */
+    has(signal: A_Signal): boolean
+    has(signalConstructor: A_TYPES__Component_Constructor<A_Signal>): boolean
+    has(param1: A_Signal | A_TYPES__Component_Constructor<A_Signal>): boolean {
+        let signalConstructor: A_TYPES__Component_Constructor<A_Signal>;
+        if (param1 instanceof A_Entity) {
+            signalConstructor = param1.constructor as A_TYPES__Component_Constructor<A_Signal>;
+        } else {
+            signalConstructor = param1;
+        }
+        return this.structure.includes(signalConstructor);
+    }
+
+    get(signal: A_Signal): Record<string, any> | undefined
+    get(signalConstructor: A_TYPES__Component_Constructor<A_Signal>): Record<string, any> | undefined
+    get(param1: A_Signal | A_TYPES__Component_Constructor<A_Signal>): Record<string, any> | undefined {
+        let signalConstructor: A_TYPES__Component_Constructor<A_Signal>;
+
+        if (param1 instanceof A_Entity) {
+            signalConstructor = param1.constructor as A_TYPES__Component_Constructor<A_Signal>;
+        } else {
+            signalConstructor = param1;
+        }
+
+        const index = this._signals.findIndex(s => s.constructor === signalConstructor);
+        if (index === -1) {
+            return undefined;
+        }
+        return this._signals[index];
     }
 
 
     /**
      * Converts to Array of values of signals in the vector
+     * Maintains the order specified in the structure/generic type
      * 
-     * @returns 
+     * @param structure - Optional structure to override the default ordering
+     * @returns Array of signal instances in the specified order
      */
-    toVector(): Array<Record<string, any>> {
-        return this.values;
+    async toVector<
+        T extends Array<A_Signal> = TSignals,
+    >(
+        structure?: { [K in keyof T]: T[K] extends A_Signal ? A_TYPES__Entity_Constructor<T[K]> : never }
+    ): Promise<{ [K in keyof T]: T[K] }> {
+        const usedStructure = structure || this.structure;
+
+        return usedStructure.map((signalConstructor) => {
+            const signalIndex = this._signals.findIndex(s => s.constructor === signalConstructor);
+            return signalIndex !== -1 ? this._signals[signalIndex] : undefined;
+        }) as { [K in keyof T]: T[K] };
+    }
+
+
+    /**
+     * Converts to Array of data of signals in the vector
+     * Maintains the order specified in the structure/generic type
+     * 
+     * @param structure - Optional structure to override the default ordering
+     * @returns Array of serialized signal data in the specified order
+     */
+    async toDataVector<
+        T extends Array<A_Signal> = TSignals,
+    >(
+        structure?: { [K in keyof T]: T[K] extends A_Signal ? A_TYPES__Entity_Constructor<T[K]> : never }
+    ): Promise<{ [K in keyof T]: T[K] extends A_Signal<infer D> ? D | undefined : never }> {
+
+        const usedStructure = structure || this.structure;
+
+        const results: Array<any> = [];
+
+        for (const signalConstructor of usedStructure) {
+            const signalIndex = this._signals.findIndex(s => s.constructor === signalConstructor);
+            let data: any;
+            if (signalIndex === -1) {
+
+                data = await (signalConstructor as typeof A_Signal).default()
+
+            } else {
+                const signal = this._signals[signalIndex];
+                data = signal;
+            }
+
+
+            results.push(data?.toJSON().data);
+        }
+
+        return results as { [K in keyof T]: T[K] extends A_Signal<infer D> ? D | undefined : never };
     }
 
     /**
-     * Converts to Object with signal names as keys and their corresponding values
+     * Converts to Object with signal constructor names as keys and their corresponding data values
+     * Uses the structure ordering to ensure consistent key ordering
      * 
-     * @returns 
+     * @returns Object with signal constructor names as keys and signal data as values
      */
-    toObject(): Record<string, any> {
-        const obj: Record<string, any> = {};
-        this.structure.forEach((signalConstructor, index) => {
+    async toObject<
+        T extends Array<A_Signal> = TSignals,
+    >(
+        structure?: { [K in keyof T]: T[K] extends A_Signal ? A_TYPES__Entity_Constructor<T[K]> : never }
+    ): Promise<{ [key: string]: T[number] extends A_Signal<infer D> ? D | undefined : never }> {
+
+        const usedStructure = structure || this.structure;
+
+        const obj: { [key: string]: T[number] extends A_Signal<infer D> ? D | undefined : never } = {};
+        usedStructure.forEach((signalConstructor) => {
             const signalName = signalConstructor.name;
-            obj[signalName] = this.values[index];
+            const signalIndex = this._signals.findIndex(s => s.constructor === signalConstructor);
+
+            if (signalIndex !== -1) {
+                const signal = this._signals[signalIndex];
+                obj[signalName] = signal.toJSON().data as any;
+            } else {
+                obj[signalName] = undefined as any;
+            }
         });
+
         return obj;
     }
 
@@ -77,7 +191,8 @@ export class A_SignalVector extends A_Entity<A_SignalVector_Init, A_SignalVector
         return {
             ...super.toJSON(),
             structure: this.structure.map(s => s.name),
-            values: this.values
+            values: this._signals.map(s => s.toJSON())
         };
     }
 }
+

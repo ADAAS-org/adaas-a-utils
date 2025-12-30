@@ -21,10 +21,12 @@ export type A_SignalConfig_Init = {
 
 
 export type A_SignalVector_Init<
-    TSignalData extends Record<string, any> = Record<string, any>
+    _TSignals extends Array<A_Signal> = Array<A_Signal>,
+    _TVectorStructure extends Array<A_TYPES__Entity_Constructor<_TSignals[number]>> = Array<A_TYPES__Entity_Constructor<_TSignals[number]>>
+
 > = {
-    structure: Array<A_TYPES__Entity_Constructor<A_Signal>>,
-    values: TSignalData[]
+    structure: _TVectorStructure,
+    values: _TSignals
 }
 
 
@@ -45,3 +47,10 @@ export type A_Signal_Init<T extends Record<string, any> = Record<string, any>> =
      */
     data: T
 }
+
+export type A_Signal_Serialized<T extends Record<string, any> = Record<string, any>> = {
+    /**
+     * The signal data
+     */
+    data: T
+} & A_TYPES__Entity_Serialized
