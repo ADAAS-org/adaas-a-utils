@@ -2777,8 +2777,7 @@ declare class A_SignalBus extends A_Component {
      * @param config
      * @returns
      */
-    [A_SignalFeatures.Emit](signal: A_Signal, globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>, logger?: A_Logger, state?: A_SignalState, config?: A_SignalConfig): Promise<void>;
-    getState(): void;
+    [A_SignalFeatures.Emit](signal: A_Signal, scope: A_Scope, globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>, logger?: A_Logger, state?: A_SignalState, config?: A_SignalConfig): Promise<void>;
 }
 
 type A_UTILS_TYPES__ScheduleObjectConfig = {

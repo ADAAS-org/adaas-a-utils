@@ -38,6 +38,7 @@ export class A_SignalBus extends A_Component {
     })
     async [A_SignalFeatures.Emit](
         @A_Inject(A_Caller) signal: A_Signal,
+        @A_Inject(A_Scope) scope: A_Scope,
 
         @A_Inject(A_Config) globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>,
         @A_Inject(A_Logger) logger?: A_Logger,
@@ -89,14 +90,11 @@ export class A_SignalBus extends A_Component {
 
         const vector = state.toVector();
 
-
-
         const nextScope = new A_Scope({
             name: `A_SignalBus_Next_Scope_of_${this.constructor.name}`,
             entities: [vector]
         })
-            .inherit(A_Context.scope(this));
-
+            .inherit(scope);
 
         try {
 
@@ -111,16 +109,4 @@ export class A_SignalBus extends A_Component {
             throw error;
         }
     }
-
-
-
-
-    getState(){
-
-    }
-
-
-
-    
-
 }
