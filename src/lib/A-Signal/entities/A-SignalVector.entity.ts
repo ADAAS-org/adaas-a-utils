@@ -120,22 +120,22 @@ export class A_SignalVector<
      * 
      * @param signal 
      */
-    get(signal: A_Signal): Record<string, any> | undefined
-    get(signalConstructor: A_TYPES__Component_Constructor<A_Signal>): Record<string, any> | undefined
-    get(param1: A_Signal | A_TYPES__Component_Constructor<A_Signal>): Record<string, any> | undefined {
-        let signalConstructor: A_TYPES__Component_Constructor<A_Signal>;
+    get<T extends A_Signal>(signal: T): T | undefined
+    get<T extends A_Signal>(signalConstructor: A_TYPES__Entity_Constructor<T>): T | undefined
+    get<T extends A_Signal>(param1: T | A_TYPES__Entity_Constructor<T>): T | undefined {
+        let signalConstructor: A_TYPES__Entity_Constructor<A_Signal>;
 
         if (param1 instanceof A_Entity) {
-            signalConstructor = param1.constructor as A_TYPES__Component_Constructor<A_Signal>;
+            signalConstructor = param1.constructor as A_TYPES__Entity_Constructor<A_Signal>;
         } else {
-            signalConstructor = param1;
+            signalConstructor = param1 as A_TYPES__Entity_Constructor<A_Signal>;
         }
 
         const index = this._signals.findIndex(s => s.constructor === signalConstructor);
         if (index === -1) {
             return undefined;
         }
-        return this._signals[index];
+        return this._signals[index] as T;
     }
 
 
@@ -241,4 +241,3 @@ export class A_SignalVector<
         };
     }
 }
-

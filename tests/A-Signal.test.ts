@@ -1,5 +1,5 @@
 import { A_Caller, A_Component, A_Concept, A_Container, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
-import {  A_SignalVectorFeatures } from "@adaas/a-utils/lib/A-Signal/A-Signal.constants";
+import { A_SignalVectorFeatures } from "@adaas/a-utils/lib/A-Signal/A-Signal.constants";
 import { A_SignalBus } from "@adaas/a-utils/lib/A-Signal/components/A-SignalBus.component";
 import { A_SignalConfig } from "@adaas/a-utils/lib/A-Signal/context/A-SignalConfig.context";
 import { A_Signal } from "@adaas/a-utils/lib/A-Signal/entities/A-Signal.entity";
@@ -10,6 +10,60 @@ import { A_SignalVector } from "@adaas/a-utils/lib/A-Signal/entities/A-SignalVec
 jest.retryTimes(0);
 
 describe('A-Signal tests', () => {
+    it('Should Allow to create a new Signal', async () => {
+        const signal = new A_Signal<{ message: string }>({
+            data: {
+                message: 'Hello, World!'
+            }
+        });
+
+        expect(signal).toBeDefined();
+        expect(signal).toBeInstanceOf(A_Signal);
+        expect(signal.data.message).toBe('Hello, World!');
+    });
+    it('Should Allow to create a new Signal Vector', async () => {
+        class MySignalA extends A_Signal<{ buttonId: string }> { }
+        class MySignalB extends A_Signal<{ pageId: string }> { }
+
+        const vector = new A_SignalVector({
+            structure: [MySignalA, MySignalB],
+            values: [
+                new MySignalA({ data: { buttonId: 'submit-order' } }),
+                new MySignalB({ data: { pageId: 'home-page' } })
+            ]
+        });
+
+        expect(vector).toBeDefined();
+        expect(vector).toBeInstanceOf(A_SignalVector);
+        expect(vector.length).toBe(2);
+        expect((await vector.toDataVector())[0]?.buttonId).toBe('submit-order');
+        expect((await vector.toDataVector())[1]?.pageId).toBe('home-page');
+    });
+    it('Should Allow to get signals fro Signal Vector', async () => {
+        class MySignalA extends A_Signal<{ buttonId: string }> { }
+        class MySignalB extends A_Signal<{ pageId: string }> { }
+        class MySignalC extends A_Signal<{ userId: string }> { }
+
+        const vector = new A_SignalVector({
+            structure: [MySignalA, MySignalB],
+            values: [
+                new MySignalA({ data: { buttonId: 'submit-order' } }),
+                new MySignalB({ data: { pageId: 'home-page' } })
+            ]
+        });
+
+        const signalA = vector.get(MySignalA);
+        const signalB = vector.get(MySignalB);
+        const signalC = vector.get(MySignalC);
+
+        expect(signalA).toBeDefined();
+        expect(signalA).toBeInstanceOf(MySignalA);
+        expect(signalA?.data.buttonId).toBe('submit-order');
+        expect(signalB).toBeDefined();
+        expect(signalB).toBeInstanceOf(MySignalB);
+        expect(signalB?.data.pageId).toBe('home-page');
+        expect(signalC).toBeUndefined();
+    });
     it('Should Allow to emit basic signal structure', async () => {
 
         let result: A_SignalVector | undefined = undefined;
@@ -130,4 +184,5 @@ describe('A-Signal tests', () => {
         expect((await result!.toDataVector())[2]).toBeUndefined();
 
     });
+
 })

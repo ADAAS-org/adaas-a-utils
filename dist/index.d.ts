@@ -2594,8 +2594,8 @@ declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>,
      *
      * @param signal
      */
-    get(signal: A_Signal): Record<string, any> | undefined;
-    get(signalConstructor: A_TYPES__Component_Constructor<A_Signal>): Record<string, any> | undefined;
+    get<T extends A_Signal>(signal: T): T | undefined;
+    get<T extends A_Signal>(signalConstructor: A_TYPES__Entity_Constructor<T>): T | undefined;
     /**
      * Converts to Array of values of signals in the vector
      * Maintains the order specified in the structure/generic type
