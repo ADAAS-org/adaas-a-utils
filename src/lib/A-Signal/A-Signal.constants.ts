@@ -1,10 +1,10 @@
 
 export enum A_SignalFeatures {
-    Emit = '_A_SignalFeatures_Emit',
+    Next = '_A_SignalFeatures_Next',
 }
 
 
 
-export enum A_SignalBusFeatures {
-    Emit = '_A_SignalBusFeatures_Emit',
+export enum A_SignalVectorFeatures {
+    Next = '_A_SignalVectorFeatures_Next',
 }

@@ -1,5 +1,5 @@
-import { A_Component, A_Concept, A_Container, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
-import { A_SignalBusFeatures, A_SignalFeatures } from "@adaas/a-utils/lib/A-Signal/A-Signal.constants";
+import { A_Caller, A_Component, A_Concept, A_Container, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
+import {  A_SignalVectorFeatures } from "@adaas/a-utils/lib/A-Signal/A-Signal.constants";
 import { A_SignalBus } from "@adaas/a-utils/lib/A-Signal/components/A-SignalBus.component";
 import { A_SignalConfig } from "@adaas/a-utils/lib/A-Signal/context/A-SignalConfig.context";
 import { A_Signal } from "@adaas/a-utils/lib/A-Signal/entities/A-Signal.entity";
@@ -27,13 +27,13 @@ describe('A-Signal tests', () => {
                         buttonId: 'submit-order'
                     }
                 })
-                await signal.emit(scope)
+                await signal.next(scope)
             }
 
 
             @A_Feature.Extend()
-            async [A_SignalBusFeatures.Emit](
-                @A_Inject(A_SignalVector) vector: A_SignalVector
+            async [A_SignalVectorFeatures.Next](
+                @A_Inject(A_Caller) vector: A_SignalVector
             ) {
                 result = vector;
             }
@@ -91,13 +91,13 @@ describe('A-Signal tests', () => {
                     }
                 })
 
-                await signal.emit(scope)
+                await signal.next(scope)
             }
 
 
             @A_Feature.Extend()
-            async [A_SignalBusFeatures.Emit](
-                @A_Inject(A_SignalVector) vector: A_SignalVector
+            async [A_SignalVectorFeatures.Next](
+                @A_Inject(A_Caller) vector: A_SignalVector
             ) {
                 result = vector;
             }

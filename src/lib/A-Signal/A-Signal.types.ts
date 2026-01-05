@@ -16,6 +16,9 @@ export type A_SignalConfig_Init = {
      * OR "A_RouterWatcher,A_ScopeWatcher,A_LoggerWatcher"
      */
     stringStructure?: string
+
+
+    propagateSignals?: boolean
 }
 
 

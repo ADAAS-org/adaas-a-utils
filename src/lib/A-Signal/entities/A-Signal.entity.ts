@@ -54,8 +54,8 @@ export class A_Signal<
      * 
      * @param scope 
      */
-    async emit(scope: A_Scope) {
-        await this.call(A_SignalFeatures.Emit, scope);
+    async next(scope: A_Scope) {
+        await this.call(A_SignalFeatures.Next, scope);
     }
 
 

@@ -1,5 +1,5 @@
 import { A_Caller, A_Component, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
-import { A_SignalBusFeatures, A_SignalFeatures } from "../A-Signal.constants";
+import { A_SignalFeatures } from "../A-Signal.constants";
 import { A_SignalState } from "../context/A-SignalState.context";
 import { A_SignalConfig } from "../context/A-SignalConfig.context";
 import { A_Config } from "../../A-Config/A-Config.context";
@@ -36,7 +36,7 @@ export class A_SignalBus extends A_Component {
     @A_Feature.Extend({
         scope: [A_Signal]
     })
-    async [A_SignalFeatures.Emit](
+    async [A_SignalFeatures.Next](
         @A_Inject(A_Caller) signal: A_Signal,
         @A_Inject(A_Scope) scope: A_Scope,
 
@@ -90,23 +90,6 @@ export class A_SignalBus extends A_Component {
 
         const vector = state.toVector();
 
-        const nextScope = new A_Scope({
-            name: `A_SignalBus_Next_Scope_of_${this.constructor.name}`,
-            entities: [vector]
-        })
-            .inherit(scope);
-
-        try {
-
-            await this.call(A_SignalBusFeatures.Emit, nextScope);
-
-            nextScope.destroy();
-
-        } catch (error) {
-
-            nextScope.destroy();
-
-            throw error;
-        }
+        await vector.next(scope);
     }
 }

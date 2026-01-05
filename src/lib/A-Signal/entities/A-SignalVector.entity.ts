@@ -1,6 +1,7 @@
-import { A_Entity, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
+import { A_Entity, A_Scope, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
 import { A_SignalVector_Serialized, A_SignalVector_Init } from "../A-Signal.types";
 import { A_Signal } from "./A-Signal.entity";
+import { A_SignalVectorFeatures } from "../A-Signal.constants";
 
 
 /**
@@ -58,6 +59,46 @@ export class A_SignalVector<
 
 
     /**
+     * Enables iteration over the signals in the vector.
+     * 
+     * @returns 
+     */
+    [Symbol.iterator](): Iterator<TSignals[number]> {
+        let pointer = 0;
+        const signals = this.structure.map((signalConstructor) => {
+            const signalIndex = this._signals.findIndex(s => s.constructor === signalConstructor);
+            return signalIndex !== -1 ? this._signals[signalIndex] : undefined;
+        }) as TSignals[number][];
+
+        return {
+            next(): IteratorResult<TSignals[number]> {
+                if (pointer < signals.length) {
+                    return {
+                        done: false,
+                        value: signals[pointer++]
+                    };
+                } else {
+                    return {
+                        done: true,
+                        value: undefined as any
+                    };
+                }
+            }
+        };
+    }
+
+
+    /**
+     * Emits the signal vector to the specified scope.
+     * 
+     * @param scope
+     */
+    async next(scope: A_Scope): Promise<void> {
+        return await this.call(A_SignalVectorFeatures.Next, scope);
+    }
+
+    
+    /**
      * Checks if the vector contains a signal of the specified type.
      * 
      * @param signal 
@@ -74,6 +115,11 @@ export class A_SignalVector<
         return this.structure.includes(signalConstructor);
     }
 
+    /**
+     * Retrieves the signal of the specified type from the vector.
+     * 
+     * @param signal 
+     */
     get(signal: A_Signal): Record<string, any> | undefined
     get(signalConstructor: A_TYPES__Component_Constructor<A_Signal>): Record<string, any> | undefined
     get(param1: A_Signal | A_TYPES__Component_Constructor<A_Signal>): Record<string, any> | undefined {
