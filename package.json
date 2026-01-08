@@ -1,6 +1,6 @@
 {
   "name": "@adaas/a-utils",
-  "version": "0.1.36",
+  "version": "0.1.37",
   "description": "A-Utils is a set of utilities that are used across the ADAAS ecosystem. This package is designed to be a collection of utilities that are used across the ADAAS ecosystem.",
   "license": "Apache-2.0",
   "main": "./dist/index.cjs",
