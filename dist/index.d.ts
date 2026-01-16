@@ -43,10 +43,10 @@ declare class A_ExecutionContext<_MetaType extends Record<string, any> = Record<
     [Symbol.iterator](): Iterator<[keyof _MetaType, _MetaType[keyof _MetaType]]>;
     get meta(): A_Meta<_MetaType>;
     get<K extends keyof _MetaType>(key: K): _MetaType[K] | undefined;
-    set<K extends keyof _MetaType>(key: K, value: _MetaType[K]): void;
+    set<K extends keyof _MetaType>(key: K, value: _MetaType[K]): this;
     has(key: keyof _MetaType): boolean;
     drop(key: keyof _MetaType): void;
-    clear(): void;
+    clear(): this;
     toRaw(): _SerializedType;
     toJSON(): A_TYPES__Fragment_Serialized;
 }

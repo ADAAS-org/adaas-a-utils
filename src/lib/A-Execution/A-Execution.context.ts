@@ -37,8 +37,9 @@ export class A_ExecutionContext<
         return this._meta.get(key);
     }
 
-    set<K extends keyof _MetaType>(key: K, value: _MetaType[K]): void {
+    set<K extends keyof _MetaType>(key: K, value: _MetaType[K]): this {
         this._meta.set(key, value);
+        return this;
     }
 
     has(key: keyof _MetaType): boolean {
@@ -49,8 +50,9 @@ export class A_ExecutionContext<
         this._meta.delete(key);
     }
 
-    clear(): void {
+    clear(): this {
         this._meta.clear();
+        return this;
     }
 
 
