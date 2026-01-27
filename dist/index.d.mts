@@ -1432,7 +1432,13 @@ type A_StateMachineTransitionStorage<_ResultType extends any = any, _ParamsType 
 
 declare class A_StateMachineTransition<_ParamsType = any, _ResultType = any> extends A_OperationContext<'a-state-machine-transition', A_StateMachineTransitionParams<_ParamsType>, _ResultType, A_StateMachineTransitionStorage<_ResultType, _ParamsType>> {
     constructor(params: A_StateMachineTransitionParams<_ParamsType>);
+    /**
+     * The state to transition from
+     */
     get from(): string;
+    /**
+     * The state to transition to
+     */
     get to(): string;
 }
 
