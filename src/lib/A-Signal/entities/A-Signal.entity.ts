@@ -1,6 +1,7 @@
 import { A_Entity, A_Scope } from "@adaas/a-concept";
 import { A_Signal_Init, A_Signal_Serialized } from "../A-Signal.types";
 import { A_SignalFeatures } from "../A-Signal.constants";
+import { A_Frame } from "@adaas/a-frame";
 
 /**
  * A Signal Entity is an individual signal instance that carries data.
@@ -15,6 +16,11 @@ import { A_SignalFeatures } from "../A-Signal.constants";
  * Signals are typically used in scenarios where the current state is more important than individual events, 
  * such as monitoring systems, real-time dashboards, or stateful applications.
  */
+@A_Frame.Entity({
+    namespace: 'A-Utils',
+    name: 'A-Signal',
+    description: 'A Signal Entity represents an individual signal instance that carries data, used for managing state within an application context. Signals are designed to reflect the current state rather than individual events, making them suitable for scenarios where state monitoring and real-time updates are essential.'
+})
 export class A_Signal<
     _TSignalDataType extends Record<string, any> = Record<string, any>
 > extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalDataType>> {

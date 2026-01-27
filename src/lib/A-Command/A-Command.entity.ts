@@ -10,13 +10,14 @@ import {
     A_CommandTransitions,
     A_CommandEvent
 } from "./A-Command.constants";
-import {  A_Context, A_Dependency, A_Entity, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
+import { A_Context, A_Dependency, A_Entity, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_CommandError } from "./A-Command.error";
 import { A_StateMachine } from "../A-StateMachine/A-StateMachine.component";
 import { A_StateMachineFeatures } from "../A-StateMachine/A-StateMachine.constants";
 import { A_Logger } from "../A-Logger/A-Logger.component";
 import { A_StateMachineTransition } from "../A-StateMachine/A-StateMachineTransition.context";
 import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
+import { A_Frame } from "@adaas/a-frame";
 
 /**
  * A_Command - Advanced Command Pattern Implementation
@@ -77,6 +78,11 @@ import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
  * console.log('Status:', command.status);
  * ```
  */
+@A_Frame.Entity({
+    namespace: 'A-Utils',
+    name: 'A-Command',
+    description: 'Advanced Command Pattern Implementation with full lifecycle management, event handling, and state persistence. This entity allows to execute commands in distributed environment across multiple services.'
+})
 export class A_Command<
     InvokeType extends A_TYPES__Command_Init = A_TYPES__Command_Init,
     ResultType extends Record<string, any> = Record<string, any>,

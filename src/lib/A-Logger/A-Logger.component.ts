@@ -12,6 +12,7 @@ import {
     A_LOGGER_SAFE_RANDOM_COLORS,
     A_LOGGER_TERMINAL
 } from "./A-Logger.constants";
+import { A_Frame } from "@adaas/a-frame";
 
 /**
  * A_Logger - Advanced Logging Component with Scope-based Output Formatting
@@ -78,6 +79,11 @@ import {
  * const logger = new A_Logger(scope, config);
  * ```
  */
+@A_Frame.Component({
+    namespace: 'A-Utils',
+    name: 'A_Logger',
+    description: 'Advanced Logging Component with Scope-based Output Formatting that provides color-coded console output, multi-type support, and configurable log levels for enhanced debugging and monitoring.'
+})
 export class A_Logger extends A_Component {
 
     // =============================================
@@ -277,10 +283,10 @@ export class A_Logger extends A_Component {
         // Continuation lines: terminal_width - scope_padding - pipe_length
         const scopeHeaderLength = this.formattedScope.length + 4 + this.getTime().length + 4; // [scope] |time| 
         const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
-        
+
         const firstLineMaxWidth = Math.max(this.TERMINAL_WIDTH - scopeHeaderLength - 1, 20); // -1 for space
         const continuationMaxWidth = Math.max(this.TERMINAL_WIDTH - continuationIndent.length, 20);
-        
+
         // If text fits on first line, return as is
         if (isFirstLine && text.length <= firstLineMaxWidth) {
             return [text];
@@ -496,14 +502,14 @@ export class A_Logger extends A_Component {
         // Apply terminal width wrapping to long JSON string values
         const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
         const maxJsonLineWidth = this.TERMINAL_WIDTH - continuationIndent.length - 4; // -4 for JSON indentation
-        
+
         // Split into lines and wrap long string values
         const lines = jsonString.split('\n').map(line => {
             // Check if this line contains a long string value
             const stringValueMatch = line.match(/^(\s*"[^"]+":\s*")([^"]+)(".*)?$/);
             if (stringValueMatch && stringValueMatch[2].length > maxJsonLineWidth - stringValueMatch[1].length - (stringValueMatch[3] || '').length) {
                 const [, prefix, value, suffix = ''] = stringValueMatch;
-                
+
                 // Wrap the string value if it's too long
                 if (value.length > maxJsonLineWidth - prefix.length - suffix.length) {
                     const wrappedValue = this.wrapJsonStringValue(value, maxJsonLineWidth - prefix.length - suffix.length);
@@ -528,7 +534,7 @@ export class A_Logger extends A_Component {
         if (value.length <= maxWidth) {
             return value;
         }
-        
+
         // For JSON string values, truncate with ellipsis to maintain JSON validity
         // This prevents the JSON from becoming unreadable due to excessive wrapping
         // while still showing the most important part of the string
@@ -558,7 +564,7 @@ export class A_Logger extends A_Component {
         // For terminal, apply intelligent text wrapping
         const wrappedLines = this.wrapText(str, scopePadding, !shouldAddNewline);
         const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
-        
+
         // Format the wrapped lines with proper indentation
         const formattedLines = wrappedLines.map((line, index) => {
             if (index === 0 && !shouldAddNewline) {
@@ -569,7 +575,7 @@ export class A_Logger extends A_Component {
                 return `${continuationIndent}${line}`;
             }
         });
-        
+
         if (shouldAddNewline) {
             return '\n' + formattedLines.join('\n');
         } else {
@@ -795,30 +801,30 @@ ${scopePadding}|-------------------------------
         lines.push(separator);
         lines.push(`${continuationIndent}A_ERROR: ${error.code}`);
         lines.push(separator);
-        
+
         // Format and wrap error message and description
         const errorMessage = this.wrapText(`Message: ${error.message}`, continuationIndent, false);
         const errorDescription = this.wrapText(`Description: ${error.description}`, continuationIndent, false);
-        
+
         lines.push(...errorMessage.map(line => `${continuationIndent}${line}`));
         lines.push(...errorDescription.map(line => `${continuationIndent}${line}`));
-        
+
         // Show original error FIRST (more important for debugging)
         if (error.originalError) {
             lines.push(separator);
             lines.push(`${continuationIndent}ORIGINAL ERROR:`);
             lines.push(separator);
-            
+
             const originalMessage = this.wrapText(`${error.originalError.name}: ${error.originalError.message}`, continuationIndent, false);
             lines.push(...originalMessage.map(line => `${continuationIndent}${line}`));
-            
+
             if (error.originalError.stack) {
                 lines.push(`${continuationIndent}Stack trace:`);
                 const stackLines = this.formatStackTrace(error.originalError.stack, continuationIndent);
                 lines.push(...stackLines);
             }
         }
-        
+
         // Then show A_Error stack trace
         if (error.stack) {
             lines.push(separator);
@@ -827,16 +833,16 @@ ${scopePadding}|-------------------------------
             const stackLines = this.formatStackTrace(error.stack, continuationIndent);
             lines.push(...stackLines);
         }
-        
+
         // Documentation link at the end
         if (error.link) {
             lines.push(separator);
             const linkText = this.wrapText(`Documentation: ${error.link}`, continuationIndent, false);
             lines.push(...linkText.map(line => `${continuationIndent}${line}`));
         }
-        
+
         lines.push(separator);
-        
+
         return lines.join('\n');
     }
 
@@ -850,20 +856,20 @@ ${scopePadding}|-------------------------------
     private formatStackTrace(stack: string, baseIndent: string): string[] {
         const stackLines = stack.split('\n');
         const formatted: string[] = [];
-        
+
         stackLines.forEach((line, index) => {
             if (line.trim()) {
                 // Add extra indentation for stack trace lines
                 const stackIndent = index === 0 ? baseIndent : `${baseIndent}  `;
                 const wrappedLines = this.wrapText(line.trim(), stackIndent, false);
-                formatted.push(...wrappedLines.map(wrappedLine => 
-                    index === 0 && wrappedLine === wrappedLines[0] 
+                formatted.push(...wrappedLines.map(wrappedLine =>
+                    index === 0 && wrappedLine === wrappedLines[0]
                         ? `${baseIndent}${wrappedLine}`
                         : `${baseIndent}  ${wrappedLine}`
                 ));
             }
         });
-        
+
         return formatted;
     }
 
@@ -888,11 +894,11 @@ ${scopePadding}|-------------------------------
         lines.push(separator);
         lines.push(`${continuationIndent}ERROR: ${error.name}`);
         lines.push(separator);
-        
+
         // Format and wrap error message
         const errorMessage = this.wrapText(`Message: ${error.message}`, continuationIndent, false);
         lines.push(...errorMessage.map(line => `${continuationIndent}${line}`));
-        
+
         // Format stack trace if available
         if (error.stack) {
             lines.push(separator);
@@ -901,9 +907,9 @@ ${scopePadding}|-------------------------------
             const stackLines = this.formatStackTrace(error.stack, continuationIndent);
             lines.push(...stackLines);
         }
-        
+
         lines.push(separator);
-        
+
         return lines.join('\n');
     }
 

@@ -2,6 +2,7 @@ import { A_Entity, A_Scope, A_TYPES__Component_Constructor, A_TYPES__Entity_Cons
 import { A_SignalVector_Serialized, A_SignalVector_Init } from "../A-Signal.types";
 import { A_Signal } from "./A-Signal.entity";
 import { A_SignalVectorFeatures } from "../A-Signal.constants";
+import { A_Frame } from "@adaas/a-frame";
 
 
 /**
@@ -14,6 +15,11 @@ import { A_SignalVectorFeatures } from "../A-Signal.constants";
  * @template TSignalsConstructors - Array of signal constructor types (e.g., [typeof MySignal, typeof CustomSignal])
  * @template TSignals - Array of signal instances derived from constructors
  */
+@A_Frame.Entity({
+    namespace: 'A-Utils',
+    name: 'A-SignalVector',
+    description: 'A Signal Vector Entity represents a collection of signals structured in a specific way, allowing for batch processing and transmission of related signals as a unified state representation.'
+})
 export class A_SignalVector<
     TSignals extends Array<A_Signal> = Array<A_Signal>,
     TSignalsConstructors extends Array<A_TYPES__Entity_Constructor<A_Signal>> = TSignals extends Array<infer U> ? U extends A_Signal ? A_TYPES__Entity_Constructor<U>[] : never : never

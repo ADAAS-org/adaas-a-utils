@@ -1,7 +1,14 @@
 import { A_Fragment } from '@adaas/a-concept';
+import { A_Frame } from '@adaas/a-frame';
 
 
 
+
+@A_Frame.Fragment({
+    namespace: 'A-Utils',
+    name: 'A-Route',
+    description: 'Route fragment that defines URL patterns for routing purposes. It supports dynamic parameters and query extraction, allowing for flexible route definitions. This fragment can be used in routing systems to match incoming URLs against defined routes and extract relevant parameters and query strings.'
+})
 export class A_Route<
     _TParams extends Record<string, any> = Record<string, any>,
     _TQuery extends Record<string, any> = Record<string, any>

@@ -1,8 +1,13 @@
+import { A_Frame } from "@adaas/a-frame";
 import { A_OperationContext } from "../A-Operation/A-Operation.context";
 import { A_StateMachineTransitionParams, A_StateMachineTransitionStorage } from "./A-StateMachine.types";
 
 
 
+@A_Frame.Fragment({
+    name: 'A-StateMachineTransition',
+    description: 'Context for managing state machine transitions.'
+})
 export class A_StateMachineTransition<
     _ParamsType = any,
     _ResultType = any
@@ -12,7 +17,6 @@ export class A_StateMachineTransition<
     _ResultType,
     A_StateMachineTransitionStorage<_ResultType, _ParamsType>
 > {
-
 
     constructor(
         params: A_StateMachineTransitionParams<_ParamsType>
@@ -26,14 +30,16 @@ export class A_StateMachineTransition<
         this._meta.set('to', params.to);
     }
 
-
-
+    /**
+     * The state to transition from
+     */
     get from(): string {
         return this._meta.get('from')!;
     }
 
-
-
+    /**
+     * The state to transition to
+     */
     get to(): string {
         return this._meta.get('to')!;
     }

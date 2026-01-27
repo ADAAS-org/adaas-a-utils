@@ -5,6 +5,7 @@ import { A_SignalConfig } from "../context/A-SignalConfig.context";
 import { A_Config } from "../../A-Config/A-Config.context";
 import { A_Logger } from "../../A-Logger/A-Logger.component";
 import { A_Signal } from "../entities/A-Signal.entity";
+import { A_Frame } from "@adaas/a-frame";
 
 
 
@@ -18,6 +19,11 @@ import { A_Signal } from "../entities/A-Signal.entity";
  * 
  * The component itself is stateless and all methods uses only parameters (context) is provided with.
  */
+@A_Frame.Component({
+    namespace: 'A-Utils',
+    name: 'A-SignalBus',
+    description: 'Signal bus component that manages the emission and state of signals within a given scope. It listens for emitted signals, updates their state, and forwards them to registered watchers. The bus ensures a consistent signal vector structure based on the defined configuration, facilitating signal management across multiple components.'
+})
 export class A_SignalBus extends A_Component {
 
 

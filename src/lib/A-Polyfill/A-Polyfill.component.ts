@@ -8,7 +8,16 @@ import { A_PathPolyfillClass } from "./classes/A-Path-Polyfill.class";
 import { A_UrlPolyfillClass } from "./classes/A-Url-Polyfill.class";
 import { A_BufferPolyfillClass } from "./classes/A-Buffer-Polyfill.class";
 import { A_ProcessPolyfillClass } from "./classes/A-Process-Polyfill.class";
+import { A_Frame } from "@adaas/a-frame";
 
+
+
+
+@A_Frame.Component({
+    namespace: 'A-Utils',
+    name: 'A-Polyfill',
+    description: 'Polyfill component that provides cross-environment compatibility for Node.js core modules such as fs, crypto, http, https, path, url, buffer, and process. It dynamically loads appropriate polyfills based on the execution environment (Node.js or browser), enabling seamless usage of these modules in different contexts.'
+})
 export class A_Polyfill extends A_Component {
 
     protected _fsPolyfill!: A_FSPolyfillClass;

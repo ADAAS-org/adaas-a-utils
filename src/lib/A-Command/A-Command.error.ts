@@ -8,7 +8,6 @@ export class A_CommandError extends A_Error {
 
     static readonly ExecutionError = 'A-Command Execution Error';
 
-
     static readonly ResultProcessingError = 'A-Command Result Processing Error';
 
 

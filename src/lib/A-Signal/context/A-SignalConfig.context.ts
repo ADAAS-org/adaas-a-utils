@@ -1,6 +1,7 @@
 import { A_CommonHelper, A_Context, A_Fragment, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
 import { A_SignalConfig_Init } from "../A-Signal.types";
 import { A_Signal } from "../entities/A-Signal.entity";
+import { A_Frame } from "@adaas/a-frame";
 
 
 
@@ -11,6 +12,11 @@ import { A_Signal } from "../entities/A-Signal.entity";
  * e.g. [A_RouterWatcher, A_ScopeWatcher, A_LoggerWatcher]
  * This structure then should be used for any further processing of signals within the scope.
  */
+@A_Frame.Fragment({
+    namespace: 'A-Utils',
+    name: 'A-SignalConfig',
+    description: 'Signal configuration fragment that defines the structure and types of signals within a given scope. It allows specifying the expected signal constructors and their order, facilitating consistent signal management and processing across components that emit or listen to signals.'
+})
 export class A_SignalConfig extends A_Fragment {
 
     protected _structure?: Array<A_TYPES__Entity_Constructor<A_Signal>>;

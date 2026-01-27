@@ -1,7 +1,15 @@
 import { A_Error, A_Fragment } from "@adaas/a-concept";
 import { A_Operation_Serialized, A_Operation_Storage } from "./A-Operation.types";
 import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
+import { A_Frame } from "@adaas/a-frame";
 
+
+
+@A_Frame.Fragment({
+    namespace: 'A-Utils',
+    name: 'A-OperationContext',
+    description: 'Operation execution context that encapsulates the metadata and serialized data related to a specific operation. It provides structured access to operation parameters, results, and error handling, facilitating the management of operation lifecycles within the application.'
+})
 export class A_OperationContext<
     _AllowedOperations extends string = string,
     _ParamsType extends Record<string, any> = Record<string, any>,

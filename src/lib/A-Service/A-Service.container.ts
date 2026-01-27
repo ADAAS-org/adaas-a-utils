@@ -4,6 +4,7 @@ import { A_Polyfill } from "../A-Polyfill/A-Polyfill.component";
 import { A_Config } from "../A-Config/A-Config.context";
 import { A_Logger } from "../A-Logger/A-Logger.component";
 import { A_Service_Error } from "./A-Service.error";
+import { A_Frame } from "@adaas/a-frame";
 
 
 
@@ -13,6 +14,11 @@ import { A_Service_Error } from "./A-Service.error";
  * Depending on the provided config and configuration, it will load the necessary components and start the service.
  * 
  */
+@A_Frame.Container({
+    namespace: 'A-Utils',
+    name: 'A-Service',
+    description: 'Service container that manages the lifecycle of various types of services, such as HTTP servers and workers or UI loader. It dynamically loads necessary components based on the provided configuration and orchestrates the start and stop processes, ensuring proper error handling and extensibility through feature hooks.'
+})
 export class A_Service extends A_Container {
 
 

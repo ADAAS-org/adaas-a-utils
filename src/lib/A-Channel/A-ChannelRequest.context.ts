@@ -1,6 +1,13 @@
+import { A_Frame } from "@adaas/a-frame";
 import { A_OperationContext } from "../A-Operation/A-Operation.context";
 import { A_ChannelRequestStatuses } from "./A-Channel.constants";
 
+
+
+@A_Frame.Fragment({
+    name: 'A-ChannelRequest',
+    description: 'Context for managing channel requests. It encapsulates the request parameters and the result including status and data.'
+})
 export class A_ChannelRequest<
     _ParamsType extends Record<string, any> = Record<string, any>,
     _ResultType extends Record<string, any> = Record<string, any>,

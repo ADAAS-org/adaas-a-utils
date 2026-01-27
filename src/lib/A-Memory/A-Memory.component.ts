@@ -4,8 +4,15 @@ import { A_MemoryContext } from "./A-Memory.context";
 import { A_MemoryError } from "./A-Memory.error";
 import { A_OperationContext } from "../A-Operation/A-Operation.context";
 import { A_MemoryOperationContext } from "./A-Memory.types";
+import { A_Frame } from "@adaas/a-frame";
 
 
+
+@A_Frame.Component({
+    namespace: 'A-Utils',
+    name: 'A-Memory',
+    description: 'In-memory data storage component that provides a simple key-value store with asynchronous operations. It supports basic memory operations such as get, set, has, drop, and clear, along with lifecycle management and error handling features. This components features can be extended with other components to provide ability store data across multiple storage, or extract data from multiple external sources. Good example is to store some runtime data that needs to be shared across multiple containers or concepts.'
+})
 export class A_Memory<
     _StorageType extends Record<string, any> = Record<string, any>,
     _SerializedType extends Record<string, any> = Record<string, any>

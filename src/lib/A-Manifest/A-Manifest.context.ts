@@ -2,11 +2,17 @@ import { A_Component, A_Fragment, A_TypeGuards, A_TYPES__Component_Constructor }
 import { A_UTILS_TYPES__Manifest_Init, A_UTILS_TYPES__Manifest_ComponentLevelConfig, A_UTILS_TYPES__Manifest_AllowedComponents, A_UTILS_TYPES__ManifestRule, A_UTILS_TYPES__ManifestQuery } from "./A-Manifest.types";
 import { A_ManifestError } from "./A-Manifest.error";
 import { A_ManifestChecker } from "./classes/A-ManifestChecker.class";
+import { A_Frame } from "@adaas/a-frame";
 
 
 
 
 
+@A_Frame.Fragment({
+    namespace: 'A-Utils',
+    name: 'A-Manifest',
+    description: 'A-Manifest is a configuration fragment that allows to include or exclude component application for particular methods. It provides fine-grained control over which components are applied to which targets and methods within the application, enabling flexible and dynamic behavior based on defined rules.'
+})
 export class A_Manifest extends A_Fragment {
 
     private rules: A_UTILS_TYPES__ManifestRule[] = [];

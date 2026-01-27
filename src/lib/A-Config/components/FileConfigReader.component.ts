@@ -1,6 +1,14 @@
 import { A_Context, A_FormatterHelper } from "@adaas/a-concept";
 import { ConfigReader } from "./ConfigReader.component";
+import { A_Frame } from "@adaas/a-frame";
 
+
+
+@A_Frame.Component({
+    namespace: 'A-Utils',
+    name: 'FileConfigReader',
+    description: 'Configuration reader that loads configuration data from a JSON file located in the application root directory. It reads the file named after the current concept with a .conf.json extension and parses its contents into the configuration context.'
+})
 export class FileConfigReader extends ConfigReader {
 
     private FileData: Map<string, any> = new Map<string, any>();

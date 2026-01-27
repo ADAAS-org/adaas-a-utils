@@ -6,8 +6,15 @@ import { A_ConfigError } from "./A-Config.error";
 import { FileConfigReader } from "./components/FileConfigReader.component";
 import { ENVConfigReader } from "./components/ENVConfigReader.component";
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "./A-Config.constants";
+import { A_Frame } from "@adaas/a-frame";
 
 
+
+@A_Frame.Container({
+    namespace: 'A-Utils',
+    name: 'A-ConfigLoader',
+    description: 'Container responsible for loading and initializing the A_Config component based on the environment and available configuration sources. It can be useful for application that need a separated configuration management and sharable across multiple containers.'
+})
 export class A_ConfigLoader extends A_Container {
 
     private reader!: ConfigReader

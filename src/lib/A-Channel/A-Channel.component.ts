@@ -3,6 +3,7 @@ import { A_ChannelError } from "./A-Channel.error";
 import { A_ChannelFeatures } from "./A-Channel.constants";
 import { A_OperationContext } from "../A-Operation/A-Operation.context";
 import { A_ChannelRequest } from "./A-ChannelRequest.context";
+import { A_Frame } from "@adaas/a-frame";
 
 /**
  * A-Channel - A powerful, extensible communication channel component
@@ -48,6 +49,11 @@ import { A_ChannelRequest } from "./A-ChannelRequest.context";
  * 
  * @see {@link ./README.md} For complete documentation and examples
  */
+@A_Frame.Namespace('A-Utils')
+@A_Frame.Component({
+    name: 'A-Channel',
+    description: 'Component uses as abstract channel for communication patterns. Can be inherited and extended to implement custom channels.'
+})
 export class A_Channel extends A_Component {
 
     /**

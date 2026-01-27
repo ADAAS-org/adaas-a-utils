@@ -2,8 +2,15 @@ import { A_Concept, A_Feature, A_FormatterHelper, A_Inject, A_TYPES__ConceptENVV
 import { ConfigReader } from "./ConfigReader.component";
 import { A_Config } from "../A-Config.context";
 import { A_Polyfill } from "../../A-Polyfill/A-Polyfill.component";
+import { A_Frame } from "@adaas/a-frame";
 
 
+
+@A_Frame.Component({
+    namespace: 'A-Utils',
+    name: 'ENVConfigReader',
+    description: 'Configuration reader that sources configuration data from environment variables. It supports loading variables from a .env file and maps them to the configuration context, making it suitable for applications running in diverse environments such as local development, staging, and production.'
+})
 export class ENVConfigReader extends ConfigReader {
 
 

@@ -3,10 +3,16 @@ import { A_Config } from "../A-Config.context";
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "../A-Config.constants";
 import { A_Polyfill } from "../../A-Polyfill/A-Polyfill.component";
 import { A_Memory } from "../../A-Memory/A-Memory.component";
+import { A_Frame } from "@adaas/a-frame";
 
 /**
  * Config Reader
  */
+@A_Frame.Component({
+    namespace: 'A-Utils',
+    name: 'ConfigReader',
+    description: 'Abstract component for reading configuration data from various sources such as files, environment variables, or remote services. This component can be extended to implement specific configuration reading strategies.'
+})
 export class ConfigReader extends A_Component {
 
     protected DEFAULT_ALLOWED_TO_READ_PROPERTIES = [
