@@ -1,11 +1,12 @@
-import { A_Caller, A_Component, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
-import { A_SignalFeatures } from "../A-Signal.constants";
+import { A_Caller, A_Component, A_Context, A_Dependency, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_SignalState } from "../context/A-SignalState.context";
 import { A_SignalConfig } from "../context/A-SignalConfig.context";
 import { A_Config } from "../../A-Config/A-Config.context";
 import { A_Logger } from "../../A-Logger/A-Logger.component";
 import { A_Signal } from "../entities/A-Signal.entity";
 import { A_Frame } from "@adaas/a-frame";
+import { A_SignalBusFeatures } from "./A-SignalBus.constants";
+import { A_SignalBusError } from "./A-SignalBus.error";
 
 
 
@@ -27,43 +28,81 @@ import { A_Frame } from "@adaas/a-frame";
 export class A_SignalBus extends A_Component {
 
 
-    /**
-     * This methods extends A-Signal Emit feature to handle signal emission within the bus.
-     * 
-     * It updates the signal state and emits the updated signal vector.
-     * 
-     * @param signal 
-     * @param globalConfig 
-     * @param logger 
-     * @param state 
-     * @param config 
-     * @returns 
-     */
-    @A_Feature.Extend({
-        scope: [A_Signal]
+    @A_Frame.Method({
+        description: 'Emit multiple signals through the signal bus.'
     })
-    async [A_SignalFeatures.Next](
-        @A_Inject(A_Caller) signal: A_Signal,
+    async next(...signals: A_Signal[]) {
+        const scope = new A_Scope({
+            name: `A_SignalBus-Next-Scope`,
+            entities: signals
+        })
+            .inherit(A_Context.scope(this));
+
+        try {
+            await this.call(A_SignalBusFeatures.onBeforeNext, scope);
+            await this.call(A_SignalBusFeatures.onNext, scope);
+
+            scope.destroy();
+
+        } catch (error) {
+
+            let wrappedError;
+
+            switch (true) {
+                case error instanceof A_SignalBusError:
+                    wrappedError = error;
+                    break;
+
+                case error instanceof A_Error && error.originalError instanceof A_SignalBusError:
+                    wrappedError = error.originalError;
+                    break;
+
+                default:
+                    wrappedError = new A_SignalBusError({
+                        title: A_SignalBusError.SignalProcessingError,
+                        description: `An error occurred while processing the signal.`,
+                        originalError: error
+                    })
+                    break;
+            }
+
+            scope.register(wrappedError);
+
+            await this.call(A_SignalBusFeatures.onError);
+
+            scope.destroy();
+        }
+    }
+
+
+    @A_Feature.Extend({
+        before: /.*/
+    })
+    protected async [A_SignalBusFeatures.onError](
+        @A_Inject(A_Error) error: A_Error,
+        @A_Inject(A_Logger) logger?: A_Logger,
+        ...args: any[]
+    ) {
+        logger?.error(error);
+    }
+
+    @A_Feature.Extend({
+        scope: [A_SignalBus],
+        before: /.*/
+    })
+    async [A_SignalBusFeatures.onBeforeNext](
         @A_Inject(A_Scope) scope: A_Scope,
 
         @A_Inject(A_Config) globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>,
-        @A_Inject(A_Logger) logger?: A_Logger,
         @A_Inject(A_SignalState) state?: A_SignalState,
+
+        @A_Inject(A_Logger) logger?: A_Logger,
         @A_Inject(A_SignalConfig) config?: A_SignalConfig,
     ) {
-
-        /*
-        1) create a signal when it occurs via new A_Signal('somedata')
-        2) emit a signal when needed via signal.emit(scope)
-        3) the bus should listen for all emitted signals within the scope
-        4) when a signal is emitted, the bus should store a signal in some place (probably it's memory)
-        */
-
         /**
          * We need a context where component is registered, to prevent any duplicate registrations
          */
         const componentContext = A_Context.scope(this);
-
 
         if (!config) {
             config = new A_SignalConfig({
@@ -80,22 +119,61 @@ export class A_SignalBus extends A_Component {
             state = new A_SignalState(config.structure);
             componentContext.register(state);
         }
+    }
 
+    /**
+     * This methods extends A-Signal Emit feature to handle signal emission within the bus.
+     * 
+     * It updates the signal state and emits the updated signal vector.
+     * 
+     * @param signal 
+     * @param globalConfig 
+     * @param logger 
+     * @param state 
+     * @param config 
+     * @returns 
+     */
+    @A_Feature.Extend({
+        scope: [A_SignalBus],
+        before: /.*/
+    })
+    async [A_SignalBusFeatures.onNext](
+        // @A_Dependency.All()
+        // @A_Inject(A_Signal) signal: A_Signal[],
+        @A_Inject(A_Scope) scope: A_Scope,
 
-        if (!state.has(signal))
-            return;
+        @A_Dependency.Required()
+        @A_Inject(A_SignalState) state: A_SignalState,
 
+        @A_Inject(A_Config) globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>,
+        @A_Inject(A_Logger) logger?: A_Logger,
+        @A_Inject(A_SignalConfig) config?: A_SignalConfig,
+    ) {
+        /*
+        1) create a signal when it occurs via new A_Signal('somedata')
+        2) emit a signal when needed via bus.next(signal)
+        3) the bus should listen for all emitted signals within the scope
+        4) when a signal is emitted, the bus should store a signal in some place (probably it's memory)
+        */
+        const signals = scope.resolveFlatAll<A_Signal>(A_Signal);
 
-        //  ------------------------------------------------------------------
-        //  And finally if all checks are passed, we can update the state
-        //  ------------------------------------------------------------------
+        for (const signal of signals) {
 
-        logger?.debug(`A_SignalBus: Updating state for signal '${signal.constructor.name}' with data:`, signal.data);
+            if (!state.has(signal))
+                return;
 
-        state.set(signal);
+            //  ------------------------------------------------------------------
+            //  And finally if all checks are passed, we can update the state
+            //  ------------------------------------------------------------------
 
-        const vector = state.toVector();
+            logger?.debug(`A_SignalBus: Updating state for signal '${signal.constructor.name}' with data:`, signal.data);
 
-        await vector.next(scope);
+            state.set(signal);
+
+            const vector = state.toVector();
+
+            scope.register(vector);
+
+        }
     }
 }

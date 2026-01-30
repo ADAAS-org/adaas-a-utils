@@ -1,6 +1,6 @@
-import { A_Caller, A_Component, A_Concept, A_Container, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
-import { A_SignalVectorFeatures } from "@adaas/a-utils/lib/A-Signal/A-Signal.constants";
+import { A_Component, A_Concept, A_Container, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_SignalBus } from "@adaas/a-utils/lib/A-Signal/components/A-SignalBus.component";
+import { A_SignalBusFeatures } from "@adaas/a-utils/lib/A-Signal/components/A-SignalBus.constants";
 import { A_SignalConfig } from "@adaas/a-utils/lib/A-Signal/context/A-SignalConfig.context";
 import { A_Signal } from "@adaas/a-utils/lib/A-Signal/entities/A-Signal.entity";
 import { A_SignalVector } from "@adaas/a-utils/lib/A-Signal/entities/A-SignalVector.entity";
@@ -71,23 +71,19 @@ describe('A-Signal tests', () => {
         class UserIntentionListener extends A_Component {
             @A_Concept.Start()
             async start(
-                @A_Inject(A_Scope) scope: A_Scope,
                 @A_Inject(A_SignalBus) bus: A_SignalBus
             ) {
-
-
-                const signal = new A_Signal({
+                await bus.next(new A_Signal({
                     data: {
                         buttonId: 'submit-order'
                     }
-                })
-                await signal.next(scope)
+                }))
             }
 
 
             @A_Feature.Extend()
-            async [A_SignalVectorFeatures.Next](
-                @A_Inject(A_Caller) vector: A_SignalVector
+            async [A_SignalBusFeatures.onNext](
+                @A_Inject(A_SignalVector) vector: A_SignalVector
             ) {
                 result = vector;
             }
@@ -145,13 +141,13 @@ describe('A-Signal tests', () => {
                     }
                 })
 
-                await signal.next(scope)
+                await bus.next(signal)
             }
 
 
             @A_Feature.Extend()
-            async [A_SignalVectorFeatures.Next](
-                @A_Inject(A_Caller) vector: A_SignalVector
+            async [A_SignalBusFeatures.onNext](
+                @A_Inject(A_SignalVector) vector: A_SignalVector
             ) {
                 result = vector;
             }

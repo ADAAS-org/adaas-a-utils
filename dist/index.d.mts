@@ -2529,15 +2529,6 @@ declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<str
     static default(): Promise<A_Signal | undefined>;
     fromJSON(serializedEntity: A_Signal_Serialized<_TSignalDataType>): void;
     fromNew(newEntity: A_Signal_Init<_TSignalDataType>): void;
-    /**
-     * Emits this signal within the provided scope.
-     *
-     * Scope is mandatory since signal itself should not be registered in the scope,
-     * but should use particular scope context to use proper set of components
-     *
-     * @param scope
-     */
-    next(scope: A_Scope): Promise<void>;
     toJSON(): A_Signal_Serialized<_TSignalDataType>;
 }
 
@@ -2582,12 +2573,6 @@ declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>,
      * @returns
      */
     [Symbol.iterator](): Iterator<TSignals[number]>;
-    /**
-     * Emits the signal vector to the specified scope.
-     *
-     * @param scope
-     */
-    next(scope: A_Scope): Promise<void>;
     /**
      * Checks if the vector contains a signal of the specified type.
      *
@@ -2644,13 +2629,6 @@ declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>,
      * @returns
      */
     toJSON(): A_SignalVector_Serialized;
-}
-
-declare enum A_SignalFeatures {
-    Next = "_A_SignalFeatures_Next"
-}
-declare enum A_SignalVectorFeatures {
-    Next = "_A_SignalVectorFeatures_Next"
 }
 
 /**
@@ -2778,6 +2756,12 @@ declare class A_SignalConfig extends A_Fragment {
     protected _initialize(): Promise<void>;
 }
 
+declare enum A_SignalBusFeatures {
+    onBeforeNext = "_A_SignalBusFeatures_onBeforeNext",
+    onNext = "_A_SignalBusFeatures_onNext",
+    onError = "_A_SignalBusFeatures_onError"
+}
+
 /**
  * This component should listen for all available signal watchers components in this and all parent scopes.
  * When a signal is emitted, it should forward the signal to all registered watchers.
@@ -2789,6 +2773,9 @@ declare class A_SignalConfig extends A_Fragment {
  * The component itself is stateless and all methods uses only parameters (context) is provided with.
  */
 declare class A_SignalBus extends A_Component {
+    next(...signals: A_Signal[]): Promise<void>;
+    protected [A_SignalBusFeatures.onError](error: A_Error, logger?: A_Logger, ...args: any[]): Promise<void>;
+    [A_SignalBusFeatures.onBeforeNext](scope: A_Scope, globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>, state?: A_SignalState, logger?: A_Logger, config?: A_SignalConfig): Promise<void>;
     /**
      * This methods extends A-Signal Emit feature to handle signal emission within the bus.
      *
@@ -2801,7 +2788,7 @@ declare class A_SignalBus extends A_Component {
      * @param config
      * @returns
      */
-    [A_SignalFeatures.Next](signal: A_Signal, scope: A_Scope, globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>, logger?: A_Logger, state?: A_SignalState, config?: A_SignalConfig): Promise<void>;
+    [A_SignalBusFeatures.onNext](scope: A_Scope, state: A_SignalState, globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>, logger?: A_Logger, config?: A_SignalConfig): Promise<void>;
 }
 
 type A_UTILS_TYPES__ScheduleObjectConfig = {
@@ -2917,4 +2904,4 @@ declare class A_StateMachineError extends A_Error {
     static readonly TransitionError = "A-StateMachine Transition Error";
 }
 
-export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT, A_Logger, type A_LoggerColorName, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Route, A_Schedule, A_ScheduleObject, A_Service, A_ServiceFeatures, A_Signal, A_SignalBus, A_SignalConfig, type A_SignalConfig_Init, A_SignalFeatures, A_SignalState, A_SignalVector, A_SignalVectorFeatures, type A_SignalVector_Init, type A_SignalVector_Serialized, type A_Signal_Init, type A_Signal_Serialized, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT, A_Logger, type A_LoggerColorName, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Route, A_Schedule, A_ScheduleObject, A_Service, A_ServiceFeatures, A_Signal, A_SignalBus, A_SignalConfig, type A_SignalConfig_Init, A_SignalState, A_SignalVector, type A_SignalVector_Init, type A_SignalVector_Serialized, type A_Signal_Init, type A_Signal_Serialized, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };

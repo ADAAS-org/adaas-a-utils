@@ -99,7 +99,7 @@ export { A_SignalBus } from './lib/A-Signal/components/A-SignalBus.component';
 export { A_SignalConfig } from './lib/A-Signal/context/A-SignalConfig.context';
 export { A_SignalState } from './lib/A-Signal/context/A-SignalState.context';
 export * from './lib/A-Signal/A-Signal.types';
-export * from './lib/A-Signal/A-Signal.constants';  
+// export * from './lib/A-Signal/A-Signal.constants';  
 
 // ============================================================================
 // A-Schedule Components

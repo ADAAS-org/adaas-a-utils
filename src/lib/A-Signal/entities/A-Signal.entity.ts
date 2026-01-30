@@ -1,6 +1,5 @@
 import { A_Entity, A_Scope } from "@adaas/a-concept";
 import { A_Signal_Init, A_Signal_Serialized } from "../A-Signal.types";
-import { A_SignalFeatures } from "../A-Signal.constants";
 import { A_Frame } from "@adaas/a-frame";
 
 /**
@@ -52,17 +51,6 @@ export class A_Signal<
         this.data = newEntity.data;
     }
 
-    /**
-     * Emits this signal within the provided scope.
-     * 
-     * Scope is mandatory since signal itself should not be registered in the scope, 
-     * but should use particular scope context to use proper set of components
-     * 
-     * @param scope 
-     */
-    async next(scope: A_Scope) {
-        await this.call(A_SignalFeatures.Next, scope);
-    }
 
 
     toJSON(): A_Signal_Serialized<_TSignalDataType> {

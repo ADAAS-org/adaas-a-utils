@@ -1,7 +1,6 @@
 import { A_Entity, A_Scope, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
 import { A_SignalVector_Serialized, A_SignalVector_Init } from "../A-Signal.types";
 import { A_Signal } from "./A-Signal.entity";
-import { A_SignalVectorFeatures } from "../A-Signal.constants";
 import { A_Frame } from "@adaas/a-frame";
 
 
@@ -93,15 +92,6 @@ export class A_SignalVector<
         };
     }
 
-
-    /**
-     * Emits the signal vector to the specified scope.
-     * 
-     * @param scope
-     */
-    async next(scope: A_Scope): Promise<void> {
-        return await this.call(A_SignalVectorFeatures.Next, scope);
-    }
 
     
     /**
