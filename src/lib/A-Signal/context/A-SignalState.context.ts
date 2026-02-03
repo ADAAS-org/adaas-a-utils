@@ -33,6 +33,13 @@ export class A_SignalState<
     protected _state: Map<A_TYPES__Component_Constructor<A_Signal>, A_Signal> = new Map();
 
     /**
+     * Previous state map to track changes between signal emissions
+     * Key: Signal constructor function
+     * Value: Previous emitted data from that signal type
+     */
+    protected _prevState: Map<A_TYPES__Component_Constructor<A_Signal>, A_Signal> = new Map();
+
+    /**
      * Optional structure defining the ordered list of signal constructors
      * Used for vector operations and initialization
      */
@@ -91,6 +98,7 @@ export class A_SignalState<
         const signal = param1 instanceof A_Signal ? param1.constructor as A_TYPES__Component_Constructor<A_Signal> : param1;
         const value = param1 instanceof A_Signal ? param1 : param2!;
 
+        this._prevState.set(signal, this._state.get(signal)!);
         this._state.set(signal, value);
     }
 
@@ -112,6 +120,24 @@ export class A_SignalState<
         const signal = param instanceof A_Signal ? param.constructor as A_TYPES__Component_Constructor<A_Signal> : param;
         return this._state.get(signal);
     }
+
+    /**
+     * Retrieves the previous value for a specific signal type
+     * 
+     * @param signal 
+     */
+    getPrev(
+        signal: A_Signal
+    ): A_Signal | undefined
+    getPrev(
+        signal: A_TYPES__Component_Constructor<A_Signal>
+    ): A_Signal | undefined
+    getPrev(
+        param: A_TYPES__Component_Constructor<A_Signal> | A_Signal
+    ): A_Signal | undefined {
+        const signal = param instanceof A_Signal ? param.constructor as A_TYPES__Component_Constructor<A_Signal> : param;
+        return this._prevState.get(signal);
+    }   
 
     /**
      * Checks if a signal type has been registered in the state

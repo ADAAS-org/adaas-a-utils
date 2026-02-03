@@ -7,7 +7,7 @@ import { A_Memory } from '@adaas/a-utils/lib/A-Memory/A-Memory.component';
 import { A_MemoryContext } from '@adaas/a-utils/lib/A-Memory/A-Memory.context';
 import { A_Channel } from '@adaas/a-utils/lib/A-Channel/A-Channel.component';
 import { A_ChannelRequest } from '@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context';
-import { A_Caller, A_Component, A_Concept, A_Container, A_Context, A_Error, A_Feature, A_FormatterHelper, A_Inject, A_Scope, ASEID } from '@adaas/a-concept';
+import { A_Caller, A_Component, A_Concept, A_Container, A_Context, A_Dependency, A_Error, A_Feature, A_FormatterHelper, A_Inject, A_Scope, ASEID } from '@adaas/a-concept';
 
 jest.retryTimes(0);
 
@@ -494,12 +494,12 @@ describe('A-Command tests', () => {
                 template: [
                     {
                         name: 'itemName',
-                        component: 'ItemNameHandler',
+                        dependency: new A_Dependency('ItemNameHandler'),
                         handler: 'getName'
                     },
                     {
                         name: 'itemPrice',
-                        component: 'ItemPriceHandler',
+                        dependency: new A_Dependency('ItemPriceHandler'),
                         handler: 'getPrice'
                     }
                 ]

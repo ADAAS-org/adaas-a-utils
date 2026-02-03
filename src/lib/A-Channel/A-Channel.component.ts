@@ -1,4 +1,4 @@
-import { A_Component, A_Context, A_Error, A_Feature, A_IdentityHelper, A_Inject, A_Scope, A_TYPES__InjectableConstructors, A_TYPES__InjectableTargets } from "@adaas/a-concept";
+import { A_Component, A_Context, A_Feature, A_IdentityHelper, A_Scope } from "@adaas/a-concept";
 import { A_ChannelError } from "./A-Channel.error";
 import { A_ChannelFeatures } from "./A-Channel.constants";
 import { A_OperationContext } from "../A-Operation/A-Operation.context";

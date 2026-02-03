@@ -40,6 +40,7 @@ export class A_SignalBus extends A_Component {
 
         try {
             await this.call(A_SignalBusFeatures.onBeforeNext, scope);
+
             await this.call(A_SignalBusFeatures.onNext, scope);
 
             scope.destroy();
@@ -169,11 +170,10 @@ export class A_SignalBus extends A_Component {
             logger?.debug(`A_SignalBus: Updating state for signal '${signal.constructor.name}' with data:`, signal.data);
 
             state.set(signal);
-
-            const vector = state.toVector();
-
-            scope.register(vector);
-
         }
+
+        const vector = state.toVector();
+
+        scope.register(vector);
     }
 }

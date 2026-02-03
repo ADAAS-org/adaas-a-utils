@@ -2652,6 +2652,12 @@ declare class A_SignalState<TSignalData extends Record<string, any> = Record<str
      */
     protected _state: Map<A_TYPES__Component_Constructor<A_Signal>, A_Signal>;
     /**
+     * Previous state map to track changes between signal emissions
+     * Key: Signal constructor function
+     * Value: Previous emitted data from that signal type
+     */
+    protected _prevState: Map<A_TYPES__Component_Constructor<A_Signal>, A_Signal>;
+    /**
      * Optional structure defining the ordered list of signal constructors
      * Used for vector operations and initialization
      */
@@ -2686,6 +2692,13 @@ declare class A_SignalState<TSignalData extends Record<string, any> = Record<str
      */
     get(signal: A_Signal): A_Signal | undefined;
     get(signal: A_TYPES__Component_Constructor<A_Signal>): A_Signal | undefined;
+    /**
+     * Retrieves the previous value for a specific signal type
+     *
+     * @param signal
+     */
+    getPrev(signal: A_Signal): A_Signal | undefined;
+    getPrev(signal: A_TYPES__Component_Constructor<A_Signal>): A_Signal | undefined;
     /**
      * Checks if a signal type has been registered in the state
      *
