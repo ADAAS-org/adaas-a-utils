@@ -139,8 +139,9 @@ export class A_SignalBus extends A_Component {
         before: /.*/
     })
     async [A_SignalBusFeatures.onNext](
-        // @A_Dependency.All()
-        // @A_Inject(A_Signal) signal: A_Signal[],
+        @A_Dependency.Flat()
+        @A_Dependency.All()
+        @A_Inject(A_Signal) signals: A_Signal[],
         @A_Inject(A_Scope) scope: A_Scope,
 
         @A_Dependency.Required()
@@ -156,7 +157,7 @@ export class A_SignalBus extends A_Component {
         3) the bus should listen for all emitted signals within the scope
         4) when a signal is emitted, the bus should store a signal in some place (probably it's memory)
         */
-        const signals = scope.resolveFlatAll<A_Signal>(A_Signal);
+        // const signals = scope.resolveFlatAll<A_Signal>(A_Signal);
 
         for (const signal of signals) {
 

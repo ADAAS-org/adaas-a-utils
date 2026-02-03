@@ -2801,7 +2801,7 @@ declare class A_SignalBus extends A_Component {
      * @param config
      * @returns
      */
-    [A_SignalBusFeatures.onNext](scope: A_Scope, state: A_SignalState, globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>, logger?: A_Logger, config?: A_SignalConfig): Promise<void>;
+    [A_SignalBusFeatures.onNext](signals: A_Signal[], scope: A_Scope, state: A_SignalState, globalConfig?: A_Config<['A_SIGNAL_VECTOR_STRUCTURE']>, logger?: A_Logger, config?: A_SignalConfig): Promise<void>;
 }
 
 declare class A_SignalBusError extends A_Error {
