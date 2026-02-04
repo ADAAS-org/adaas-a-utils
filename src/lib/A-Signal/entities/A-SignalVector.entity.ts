@@ -1,5 +1,5 @@
 import { A_Entity, A_Scope, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
-import { A_SignalVector_Serialized, A_SignalVector_Init } from "../A-Signal.types";
+import { A_SignalVector_Serialized, A_SignalVector_Init, A_Signal_TSignalsConstructors, A_SignalTValue, A_SignalTValueArray } from "../A-Signal.types";
 import { A_Signal } from "./A-Signal.entity";
 import { A_Frame } from "@adaas/a-frame";
 
@@ -20,9 +20,8 @@ import { A_Frame } from "@adaas/a-frame";
     description: 'A Signal Vector Entity represents a collection of signals structured in a specific way, allowing for batch processing and transmission of related signals as a unified state representation.'
 })
 export class A_SignalVector<
-    TSignals extends Array<A_Signal> = Array<A_Signal>,
-    TSignalsConstructors extends Array<A_TYPES__Entity_Constructor<A_Signal>> = TSignals extends Array<infer U> ? U extends A_Signal ? A_TYPES__Entity_Constructor<U>[] : never : never
-> extends A_Entity<A_SignalVector_Init<TSignals[number][], TSignalsConstructors>, A_SignalVector_Serialized> {
+    TSignals extends A_Signal[] = A_Signal[],
+> extends A_Entity<A_SignalVector_Init<TSignals>> {
 
     /**
      * The structure of the signal vector, defining the types of signals it contains.
@@ -32,15 +31,31 @@ export class A_SignalVector<
      * 
      * [!] if not provided, it will be derived from the signals values.
      */
-    protected _structure?: TSignalsConstructors;
+    protected _structure?: A_Signal_TSignalsConstructors<TSignals>;
     /**
      * It's actual vector Values of Signals like :
      * [UserActionSignal, UserMousePositionSignal, ExternalDependencySignal]
      */
-    protected _signals!: TSignals[number][]
+    protected _signals!: TSignals
+
+    constructor(values: TSignals, structure?: { [K in keyof TSignals]: TSignals[K] extends A_Signal ? A_TYPES__Entity_Constructor<TSignals[K]> : never })
+    constructor(serialized: A_SignalVector_Serialized)
+    constructor(param1: TSignals | A_SignalVector_Serialized, param2?: A_Signal_TSignalsConstructors<TSignals>) {
+
+        if ('aseid' in param1) {
+            // Handle serialized case
+            super(param1 as A_SignalVector_Serialized);
+        } else {
+            // Handle init case  
+            super({
+                structure: param2 ? param2 : (param1 as TSignals).map(s => s.constructor as A_TYPES__Entity_Constructor<TSignals[number]>) as A_Signal_TSignalsConstructors<TSignals>,
+                values: param1 as TSignals
+            } as A_SignalVector_Init<TSignals>);
+        }
+    }
 
 
-    fromNew(newEntity: A_SignalVector_Init<TSignals[number][], TSignalsConstructors>): void {
+    fromNew(newEntity: A_SignalVector_Init<TSignals>): void {
         super.fromNew(newEntity);
         this._structure = newEntity.structure;
         this._signals = newEntity.values;
@@ -53,8 +68,8 @@ export class A_SignalVector<
      * [UserSignInSignal, UserStatusSignal, UserActivitySignal]
      * 
      */
-    get structure(): TSignalsConstructors {
-        return this._structure || this._signals.map(s => s.constructor as A_TYPES__Entity_Constructor<A_Signal>) as TSignalsConstructors;
+    get structure(): A_Signal_TSignalsConstructors<TSignals> {
+        return this._structure || this._signals.map(s => s.constructor as A_TYPES__Entity_Constructor<TSignals[number]>) as A_Signal_TSignalsConstructors<TSignals>;
     }
 
 
@@ -93,22 +108,75 @@ export class A_SignalVector<
     }
 
 
+    /**
+     * Allows to match the current Signal Vector with another Signal Vector by comparing each signal in the structure.
+     * This method returns true if all signals in the vector match the corresponding signals in the other vector.
+     * 
+     * @param other 
+     * @returns 
+     */
+    match(other: A_SignalVector<TSignals>): boolean {
+        if (this.length !== other.length) {
+            return false;
+        }
+
+        for (let i = 0; i < this.length; i++) {
+            const thisSignalConstructor = this.structure[i];
+            const otherSignalConstructor = other.structure[i];
+
+            if (thisSignalConstructor !== otherSignalConstructor) {
+                return false;
+            }
+
+            const thisSignalIndex = this._signals.findIndex(s => s.constructor === thisSignalConstructor);
+            const otherSignalIndex = other._signals.findIndex(s => s.constructor === otherSignalConstructor);
+
+            const thisSignal = thisSignalIndex !== -1 ? this._signals[thisSignalIndex] : undefined;
+            const otherSignal = otherSignalIndex !== -1 ? other._signals[otherSignalIndex] : undefined;
+
+            if (thisSignal && otherSignal) {
+                if (!thisSignal.compare(otherSignal)) {
+                    return false;
+                }
+            } else if (thisSignal || otherSignal) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     
+    /**
+     * This method should ensure that the current Signal Vector contains all signals from the provided Signal Vector.
+     * 
+     * @param signal 
+     */
+    contains(signal: A_SignalVector): boolean{
+        for (const signalConstructor of signal.structure) {
+            const signalIndex = this._signals.findIndex(s => s.constructor === signalConstructor);
+            if (signalIndex === -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Checks if the vector contains a signal of the specified type.
      * 
      * @param signal 
      */
     has(signal: A_Signal): boolean
-    has(signalConstructor: A_TYPES__Component_Constructor<A_Signal>): boolean
-    has(param1: A_Signal | A_TYPES__Component_Constructor<A_Signal>): boolean {
-        let signalConstructor: A_TYPES__Component_Constructor<A_Signal>;
+    has(signalConstructor: A_TYPES__Entity_Constructor<A_Signal>): boolean
+    has(param1: A_Signal | A_TYPES__Entity_Constructor<A_Signal>): boolean {
+        let signalConstructor: A_TYPES__Entity_Constructor<A_Signal>;
         if (param1 instanceof A_Entity) {
-            signalConstructor = param1.constructor as A_TYPES__Component_Constructor<A_Signal>;
+            signalConstructor = param1.constructor as A_TYPES__Entity_Constructor<A_Signal>;
         } else {
             signalConstructor = param1;
         }
-        return this.structure.includes(signalConstructor);
+        return this.structure.includes(signalConstructor as any);
     }
 
     /**
@@ -145,14 +213,14 @@ export class A_SignalVector<
     async toVector<
         T extends Array<A_Signal> = TSignals,
     >(
-        structure?: { [K in keyof T]: T[K] extends A_Signal ? A_TYPES__Entity_Constructor<T[K]> : never }
-    ): Promise<{ [K in keyof T]: T[K] }> {
+        structure?: A_Signal_TSignalsConstructors<T>
+    ): Promise<T> {
         const usedStructure = structure || this.structure;
 
         return usedStructure.map((signalConstructor) => {
             const signalIndex = this._signals.findIndex(s => s.constructor === signalConstructor);
             return signalIndex !== -1 ? this._signals[signalIndex] : undefined;
-        }) as { [K in keyof T]: T[K] };
+        }) as T;
     }
 
 
@@ -164,10 +232,10 @@ export class A_SignalVector<
      * @returns Array of serialized signal data in the specified order
      */
     async toDataVector<
-        T extends Array<A_Signal> = TSignals,
+        T extends A_Signal[] = TSignals,
     >(
-        structure?: { [K in keyof T]: T[K] extends A_Signal ? A_TYPES__Entity_Constructor<T[K]> : never }
-    ): Promise<{ [K in keyof T]: T[K] extends A_Signal<infer D> ? D | undefined : never }> {
+        structure?: A_Signal_TSignalsConstructors<T>
+    ): Promise<A_SignalTValueArray<T>> {
 
         const usedStructure = structure || this.structure;
 
@@ -189,7 +257,7 @@ export class A_SignalVector<
             results.push(data?.toJSON().data);
         }
 
-        return results as { [K in keyof T]: T[K] extends A_Signal<infer D> ? D | undefined : never };
+        return results as A_SignalTValueArray<T>;
     }
 
     /**

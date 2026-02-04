@@ -2463,13 +2463,13 @@ declare class A_Route<_TParams extends Record<string, any> = Record<string, any>
     toAFeatureExtension(extensionScope?: Array<string>): RegExp;
 }
 
-type A_SignalConfig_Init = {
+type A_SignalConfig_Init<TSignals extends Array<A_Signal> = Array<A_Signal>> = {
     /**
      * An array defining the structure of the signal vector.
      *
      * Each entry corresponds to a signal component constructor.
      */
-    structure?: Array<A_TYPES__Entity_Constructor<A_Signal>>;
+    structure?: A_Signal_TSignalsConstructors<TSignals>;
     /**
      * A string representation of the structure for easier DI resolution.
      * Each signal's constructor name is used to form this string.
@@ -2479,8 +2479,13 @@ type A_SignalConfig_Init = {
     stringStructure?: string;
     propagateSignals?: boolean;
 };
-type A_SignalVector_Init<_TSignals extends Array<A_Signal> = Array<A_Signal>, _TVectorStructure extends Array<A_TYPES__Entity_Constructor<_TSignals[number]>> = Array<A_TYPES__Entity_Constructor<_TSignals[number]>>> = {
-    structure: _TVectorStructure;
+type A_Signal_TSignalsConstructors<T extends Array<A_Signal> = Array<A_Signal>> = T extends Array<infer U> ? U extends A_Signal ? A_TYPES__Entity_Constructor<U>[] : never : never;
+type A_SignalTValue<T extends A_Signal> = T extends A_Signal<infer U> ? U : never;
+type A_SignalTValueArray<T extends Array<A_Signal>> = {
+    [K in keyof T]: T[K] extends A_Signal<infer U> ? U : never;
+};
+type A_SignalVector_Init<_TSignals extends Array<A_Signal> = Array<A_Signal>> = {
+    structure: A_Signal_TSignalsConstructors<_TSignals>;
     values: _TSignals;
 };
 type A_SignalVector_Serialized = A_TYPES__Entity_Serialized & {
@@ -2488,6 +2493,12 @@ type A_SignalVector_Serialized = A_TYPES__Entity_Serialized & {
     values: Array<Record<string, any>>;
 } & A_TYPES__Entity_Serialized;
 type A_Signal_Init<T extends Record<string, any> = Record<string, any>> = {
+    /**
+     * Possible signal id
+     *
+     * [!] used for identification only, all properties will be participating in the hash calculation for deduplication
+     */
+    id?: Array<any>;
     /**
      * The signal name
      */
@@ -2518,7 +2529,6 @@ type A_Signal_Serialized<T extends Record<string, any> = Record<string, any>> = 
  * such as monitoring systems, real-time dashboards, or stateful applications.
  */
 declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<string, any>> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalDataType>> {
-    data: _TSignalDataType;
     /**
      * Allows to define default data for the signal.
      *
@@ -2527,6 +2537,38 @@ declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<str
      * @returns
      */
     static default(): Promise<A_Signal | undefined>;
+    /**
+     * The actual data carried by the signal.
+     */
+    data: _TSignalDataType;
+    /**
+      * Generates signal hash uses for comparison
+      *
+      * @param str
+      */
+    protected createHash(str?: string): string;
+    protected createHash(str?: undefined): string;
+    protected createHash(str?: Record<string, any>): string;
+    protected createHash(str?: Array<any>): string;
+    protected createHash(str?: number): string;
+    protected createHash(str?: boolean): string;
+    protected createHash(str?: null): string;
+    protected createHash(map?: Map<any, any>): string;
+    protected createHash(set?: Set<any>): string;
+    /**
+     * This method compares the current signal with another signal instance by deduplication ID
+     * this id can be configured during initialization with the "id" property.
+     *
+     * example:
+     * * const signalA = new A_Signal({ id: ['user-status', 'user123'], data: { status: 'online' } });
+     * * const signalB = new A_Signal({ id: ['user-status', 'user123'], data: { status: 'offline' } });
+     *
+     * signalA.compare(signalB) // true because both signals have the same deduplication ID
+     *
+     * @param other
+     * @returns
+     */
+    compare(other: A_Signal<_TSignalDataType>): boolean;
     fromJSON(serializedEntity: A_Signal_Serialized<_TSignalDataType>): void;
     fromNew(newEntity: A_Signal_Init<_TSignalDataType>): void;
     toJSON(): A_Signal_Serialized<_TSignalDataType>;
@@ -2542,7 +2584,7 @@ declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<str
  * @template TSignalsConstructors - Array of signal constructor types (e.g., [typeof MySignal, typeof CustomSignal])
  * @template TSignals - Array of signal instances derived from constructors
  */
-declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>, TSignalsConstructors extends Array<A_TYPES__Entity_Constructor<A_Signal>> = TSignals extends Array<infer U> ? U extends A_Signal ? A_TYPES__Entity_Constructor<U>[] : never : never> extends A_Entity<A_SignalVector_Init<TSignals[number][], TSignalsConstructors>, A_SignalVector_Serialized> {
+declare class A_SignalVector<TSignals extends A_Signal[] = A_Signal[]> extends A_Entity<A_SignalVector_Init<TSignals>> {
     /**
      * The structure of the signal vector, defining the types of signals it contains.
      *
@@ -2551,13 +2593,17 @@ declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>,
      *
      * [!] if not provided, it will be derived from the signals values.
      */
-    protected _structure?: TSignalsConstructors;
+    protected _structure?: A_Signal_TSignalsConstructors<TSignals>;
     /**
      * It's actual vector Values of Signals like :
      * [UserActionSignal, UserMousePositionSignal, ExternalDependencySignal]
      */
-    protected _signals: TSignals[number][];
-    fromNew(newEntity: A_SignalVector_Init<TSignals[number][], TSignalsConstructors>): void;
+    protected _signals: TSignals;
+    constructor(values: TSignals, structure?: {
+        [K in keyof TSignals]: TSignals[K] extends A_Signal ? A_TYPES__Entity_Constructor<TSignals[K]> : never;
+    });
+    constructor(serialized: A_SignalVector_Serialized);
+    fromNew(newEntity: A_SignalVector_Init<TSignals>): void;
     /**
      * The structure of the signal vector, defining the types of signals it contains.
      *
@@ -2565,7 +2611,7 @@ declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>,
      * [UserSignInSignal, UserStatusSignal, UserActivitySignal]
      *
      */
-    get structure(): TSignalsConstructors;
+    get structure(): A_Signal_TSignalsConstructors<TSignals>;
     get length(): number;
     /**
      * Enables iteration over the signals in the vector.
@@ -2574,12 +2620,26 @@ declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>,
      */
     [Symbol.iterator](): Iterator<TSignals[number]>;
     /**
+     * Allows to match the current Signal Vector with another Signal Vector by comparing each signal in the structure.
+     * This method returns true if all signals in the vector match the corresponding signals in the other vector.
+     *
+     * @param other
+     * @returns
+     */
+    match(other: A_SignalVector<TSignals>): boolean;
+    /**
+     * This method should ensure that the current Signal Vector contains all signals from the provided Signal Vector.
+     *
+     * @param signal
+     */
+    contains(signal: A_SignalVector): boolean;
+    /**
      * Checks if the vector contains a signal of the specified type.
      *
      * @param signal
      */
     has(signal: A_Signal): boolean;
-    has(signalConstructor: A_TYPES__Component_Constructor<A_Signal>): boolean;
+    has(signalConstructor: A_TYPES__Entity_Constructor<A_Signal>): boolean;
     /**
      * Retrieves the signal of the specified type from the vector.
      *
@@ -2594,11 +2654,7 @@ declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>,
      * @param structure - Optional structure to override the default ordering
      * @returns Array of signal instances in the specified order
      */
-    toVector<T extends Array<A_Signal> = TSignals>(structure?: {
-        [K in keyof T]: T[K] extends A_Signal ? A_TYPES__Entity_Constructor<T[K]> : never;
-    }): Promise<{
-        [K in keyof T]: T[K];
-    }>;
+    toVector<T extends Array<A_Signal> = TSignals>(structure?: A_Signal_TSignalsConstructors<T>): Promise<T>;
     /**
      * Converts to Array of data of signals in the vector
      * Maintains the order specified in the structure/generic type
@@ -2606,11 +2662,7 @@ declare class A_SignalVector<TSignals extends Array<A_Signal> = Array<A_Signal>,
      * @param structure - Optional structure to override the default ordering
      * @returns Array of serialized signal data in the specified order
      */
-    toDataVector<T extends Array<A_Signal> = TSignals>(structure?: {
-        [K in keyof T]: T[K] extends A_Signal ? A_TYPES__Entity_Constructor<T[K]> : never;
-    }): Promise<{
-        [K in keyof T]: T[K] extends A_Signal<infer D> ? D | undefined : never;
-    }>;
+    toDataVector<T extends A_Signal[] = TSignals>(structure?: A_Signal_TSignalsConstructors<T>): Promise<A_SignalTValueArray<T>>;
     /**
      * Converts to Object with signal constructor names as keys and their corresponding data values
      * Uses the structure ordering to ensure consistent key ordering
@@ -2921,4 +2973,4 @@ declare class A_StateMachineError extends A_Error {
     static readonly TransitionError = "A-StateMachine Transition Error";
 }
 
-export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT, A_Logger, type A_LoggerColorName, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Route, A_Schedule, A_ScheduleObject, A_Service, A_ServiceFeatures, A_Signal, A_SignalBus, A_SignalBusError, A_SignalBusFeatures, A_SignalConfig, type A_SignalConfig_Init, A_SignalState, A_SignalVector, type A_SignalVector_Init, type A_SignalVector_Serialized, type A_Signal_Init, type A_Signal_Serialized, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };
+export { A_CONSTANTS__CONFIG_ENV_VARIABLES, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY, A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest, A_ChannelRequestStatuses, A_Command, A_CommandError, A_CommandEvent, type A_CommandEvents, A_CommandFeatures, A_CommandTransitions, type A_Command_ExecutionContext, A_Command_Status, A_Config, A_ConfigError, A_ConfigLoader, A_Deferred, A_ExecutionContext, A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT, A_Logger, type A_LoggerColorName, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, type A_LoggerEnvVariablesType, type A_LoggerLevel, A_Manifest, A_ManifestChecker, A_ManifestError, A_Memory, A_MemoryContext, type A_MemoryContextMeta, A_MemoryError, A_MemoryFeatures, type A_MemoryOperationContext, type A_MemoryOperationContextMeta, type A_MemoryOperations, type A_Memory_Storage, A_OperationContext, type A_Operation_Serialized, type A_Operation_Storage, A_Polyfill, A_Route, A_Schedule, A_ScheduleObject, A_Service, A_ServiceFeatures, A_Signal, A_SignalBus, A_SignalBusError, A_SignalBusFeatures, A_SignalConfig, type A_SignalConfig_Init, A_SignalState, type A_SignalTValue, type A_SignalTValueArray, A_SignalVector, type A_SignalVector_Init, type A_SignalVector_Serialized, type A_Signal_Init, type A_Signal_Serialized, type A_Signal_TSignalsConstructors, A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition, type A_StateMachineTransitionParams, type A_StateMachineTransitionStorage, type A_TYPES__Command_Constructor, type A_TYPES__Command_Init, type A_TYPES__Command_Listener, type A_TYPES__Command_Serialized, type A_TYPES__ConfigContainerConstructor, type A_TYPES__ConfigENVVariables, A_TYPES__ConfigFeature, type A_UTILS_TYPES__ManifestQuery, type A_UTILS_TYPES__ManifestRule, type A_UTILS_TYPES__Manifest_AllowedComponents, type A_UTILS_TYPES__Manifest_ComponentLevelConfig, type A_UTILS_TYPES__Manifest_Init, type A_UTILS_TYPES__Manifest_MethodLevelConfig, type A_UTILS_TYPES__Manifest_Rules, type A_UTILS_TYPES__ScheduleObjectCallback, type A_UTILS_TYPES__ScheduleObjectConfig, ConfigReader, ENVConfigReader, FileConfigReader, type IbufferInterface, type IcryptoInterface, type Ifspolyfill, type IhttpInterface, type IhttpsInterface, type IpathInterface, type IprocessInterface, type IurlInterface };

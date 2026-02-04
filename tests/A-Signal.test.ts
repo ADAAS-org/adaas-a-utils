@@ -25,13 +25,10 @@ describe('A-Signal tests', () => {
         class MySignalA extends A_Signal<{ buttonId: string }> { }
         class MySignalB extends A_Signal<{ pageId: string }> { }
 
-        const vector = new A_SignalVector({
-            structure: [MySignalA, MySignalB],
-            values: [
-                new MySignalA({ data: { buttonId: 'submit-order' } }),
-                new MySignalB({ data: { pageId: 'home-page' } })
-            ]
-        });
+        const vector = new A_SignalVector<[MySignalA, MySignalB]>([
+            new MySignalA({ data: { buttonId: 'submit-order' } }),
+            new MySignalB({ data: { pageId: 'home-page' } })
+        ]);
 
         expect(vector).toBeDefined();
         expect(vector).toBeInstanceOf(A_SignalVector);
@@ -39,18 +36,59 @@ describe('A-Signal tests', () => {
         expect((await vector.toDataVector())[0]?.buttonId).toBe('submit-order');
         expect((await vector.toDataVector())[1]?.pageId).toBe('home-page');
     });
+    it('Should Allow to match Signal Vector', async () => {
+        class MySignalA extends A_Signal<{ buttonId: string }> { }
+        class MySignalB extends A_Signal<{ pageId: string }> { }
+
+        const vector = new A_SignalVector<[MySignalA, MySignalB]>([
+            new MySignalA({ data: { buttonId: 'submit-order' } }),
+            new MySignalB({ data: { pageId: 'home-page' } })
+        ]);
+        const vector2 = new A_SignalVector<[MySignalA, MySignalB]>([
+            new MySignalA({ data: { buttonId: 'submit-order2' } }),
+            new MySignalB({ data: { pageId: 'home-page' } })
+        ]);
+        const vector3 = new A_SignalVector<[MySignalA, MySignalB]>([
+            new MySignalA({ data: { buttonId: 'submit-order' } }),
+            new MySignalB({ data: { pageId: 'home-page' } })
+        ]);
+
+        expect(vector.match(vector2)).toBe(false);
+        expect(vector.match(vector3)).toBe(true);
+    });
+    it('Should Allow to check if Signal Vector contains another Signal Vector', async () => {
+
+        class MySignalA extends A_Signal<{ buttonId: string }> { }
+        class MySignalB extends A_Signal<{ pageId: string }> { }
+        class MySignalC extends A_Signal<{ userId: string }> { }
+        
+        const vector = new A_SignalVector<[MySignalA, MySignalB, MySignalC]>([
+            new MySignalA({ data: { buttonId: 'submit-order' } }),
+            new MySignalB({ data: { pageId: 'home-page' } }),
+            new MySignalC({ data: { userId: 'user123' } })
+        ]);
+        const vector2 = new A_SignalVector<[MySignalA, MySignalC]>([
+            new MySignalA({ data: { buttonId: 'submit-order' } }),
+            new MySignalC({ data: { userId: 'user123' } })
+        ]);
+        const vector3 = new A_SignalVector<[MySignalB]>([
+            new MySignalB({ data: { pageId: 'other-page' } })
+        ]);
+
+        expect(vector.contains(vector2)).toBe(true);
+        expect(vector.contains(vector3)).toBe(true);
+        expect(vector2.contains(vector)).toBe(false);
+
+    });
     it('Should Allow to get signals fro Signal Vector', async () => {
         class MySignalA extends A_Signal<{ buttonId: string }> { }
         class MySignalB extends A_Signal<{ pageId: string }> { }
         class MySignalC extends A_Signal<{ userId: string }> { }
 
-        const vector = new A_SignalVector({
-            structure: [MySignalA, MySignalB],
-            values: [
-                new MySignalA({ data: { buttonId: 'submit-order' } }),
-                new MySignalB({ data: { pageId: 'home-page' } })
-            ]
-        });
+        const vector = new A_SignalVector([
+            new MySignalA({ data: { buttonId: 'submit-order' } }),
+            new MySignalB({ data: { pageId: 'home-page' } })
+        ]);
 
         const signalA = vector.get(MySignalA);
         const signalB = vector.get(MySignalB);

@@ -195,10 +195,7 @@ export class A_SignalState<
             vector.push(value);
         });
 
-        return new A_SignalVector({
-            structure: this.structure,
-            values: vector
-        });
+        return new A_SignalVector(vector, this.structure);
     }
 
     /**
