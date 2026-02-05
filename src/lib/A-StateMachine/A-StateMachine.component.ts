@@ -61,7 +61,23 @@ export class A_StateMachine<
      */
     get ready(): Promise<void> {
         if (!this._initialized) {
-            this._initialized = this.call(A_StateMachineFeatures.onInitialize);
+            this._initialized = new Promise<void>(
+                async (resolve, reject) => {
+                    try {
+                        await this.call(A_StateMachineFeatures.onInitialize);
+
+                        resolve();
+                    } catch (error) {
+                        const wrappedError = new A_StateMachineError({
+                            title: A_StateMachineError.InitializationError,
+                            description: `An error occurred during state machine initialization.`,
+                            originalError: error
+                        });
+
+                        reject(wrappedError);
+                    }
+                }
+            );
         }
 
         return this._initialized;
