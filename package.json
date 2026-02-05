@@ -80,8 +80,8 @@
     "build": "tsup --config tsup.config.ts"
   },
   "dependencies": {
-    "@adaas/a-concept": "^0.2.7",
-    "@adaas/a-frame": "^0.0.8"
+    "@adaas/a-concept": "^0.2.8",
+    "@adaas/a-frame": "^0.0.9"
   },
   "devDependencies": {
     "@types/chai": "^4.3.14",
