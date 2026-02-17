@@ -150,14 +150,14 @@
         "import": "./dist/browser/a-polyfill.mjs"
       },
       "node": {
-        "types": "./dist/node/lib/A-Polyfill/index.d.ts",
-        "import": "./dist/node/lib/A-Polyfill/index.mjs",
-        "require": "./dist/node/lib/A-Polyfill/index.js"
+        "types": "./dist/node/lib/A-Polyfill/index.node.d.ts",
+        "import": "./dist/node/lib/A-Polyfill/index.node.mjs",
+        "require": "./dist/node/lib/A-Polyfill/index.node.js"
       },
       "default": {
-        "types": "./dist/node/lib/A-Polyfill/index.d.ts",
-        "import": "./dist/node/lib/A-Polyfill/index.mjs",
-        "require": "./dist/node/lib/A-Polyfill/index.js"
+        "types": "./dist/node/lib/A-Polyfill/index.node.d.ts",
+        "import": "./dist/node/lib/A-Polyfill/index.node.mjs",
+        "require": "./dist/node/lib/A-Polyfill/index.node.js"
       }
     },
     "./a-route": {
