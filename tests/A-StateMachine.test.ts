@@ -1,9 +1,6 @@
-import { A_StateMachine } from '@adaas/a-utils/lib/A-StateMachine/A-StateMachine.component';
-import { A_StateMachineFeatures } from '@adaas/a-utils/lib/A-StateMachine/A-StateMachine.constants';
-import { A_StateMachineError } from '@adaas/a-utils/lib/A-StateMachine/A-StateMachine.error';
 import { A_Component, A_Context, A_Dependency, A_Error, A_Feature, A_Inject, A_Scope } from '@adaas/a-concept';
-import { A_OperationContext } from '@adaas/a-utils/lib/A-Operation/A-Operation.context';
-import { A_StateMachineTransition } from '@adaas/a-utils/lib/A-StateMachine/A-StateMachineTransition.context';
+import { A_OperationContext } from '@adaas/a-utils/a-operation';
+import { A_StateMachine, A_StateMachineError, A_StateMachineFeatures, A_StateMachineTransition } from '@adaas/a-utils/a-state-machine';
 
 jest.retryTimes(0);
 

@@ -1,59 +1,41 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "outDir": "dist",
-    "strict": true,
-    "noImplicitAny": false,
-    "noFallthroughCasesInSwitch": true,
-    "downlevelIteration": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "noErrorTruncation": true,
-    "jsx": "react",
-    "target": "es2015",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "removeComments": false,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "experimentalDecorators": true,
-    "skipLibCheck": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "paths": {
-      "@adaas/a-utils/constants/*": ["src/constants/*"],
-      "@adaas/a-utils/lib/*": ["src/lib/*"],
-      "@adaas/a-utils/types/*": ["src/types/*"],
-      "@adaas/a-utils/helpers/*": ["src/helpers/*"],
-      "@adaas/a-utils/utils/*": ["src/utils/*"]
-    },
-    "lib": [
-      "dom",
-      "esnext.asynciterable",
-      "es2015",
-      "es2016",
-      "es2017.object"
-    ]
-  },
-  "include": [
-    "src/**/*",
-    "tests/**/*", 
-    "examples/**/*", 
-    "examples/*", 
-    "src/index.ts"  
-  ],
-  "exclude": [
-    "node_modules/**/*",
-    "dist/**/*",
-    "node_modules/@types/mocha/index.d.ts"
-  ]
+   "extends": "./.conf/tsconfig.base.json",
+   "compilerOptions": {
+      "isolatedModules": true,
+      "rootDir": "./",
+      "baseUrl": ".",
+      "paths": {
+         "@adaas/a-utils/a-channel": ["src/lib/A-Channel"],
+         "@adaas/a-utils/a-command": ["src/lib/A-Command"],
+         "@adaas/a-utils/a-config": ["src/lib/A-Config"],
+         "@adaas/a-utils/a-execution": ["src/lib/A-Execution"],
+         "@adaas/a-utils/a-logger": ["src/lib/A-Logger"],
+         "@adaas/a-utils/a-manifest": ["src/lib/A-Manifest"],
+         "@adaas/a-utils/a-memory": ["src/lib/A-Memory"],
+         "@adaas/a-utils/a-operation": ["src/lib/A-Operation"],
+         // Note: A-Polyfill is a special case with separate entry points for Node and browser, so we alias it directly to the Node version here. Consumers can import the browser version directly if needed.
+         "@adaas/a-utils/a-polyfill": ["src/lib/A-Polyfill/index.node"],
+         "@adaas/a-utils/a-route": ["src/lib/A-Route"],
+         "@adaas/a-utils/a-schedule": ["src/lib/A-Schedule"],
+         "@adaas/a-utils/a-service": ["src/lib/A-Service"],
+         "@adaas/a-utils/a-signal": ["src/lib/A-Signal"],
+         "@adaas/a-utils/a-state-machine": ["src/lib/A-StateMachine"]
+      },
+      "types": [
+         "node",
+         "jest",
+         "mocha"
+      ],
+   },
+
+   "include": [
+      "src/**/*",
+      "./tests/**/*",
+      "examples/**/*"
+   ],
+
+   "exclude": [
+      "node_modules",
+      "dist",
+   ]
 }

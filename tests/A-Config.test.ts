@@ -3,13 +3,10 @@ import {
     A_CONSTANTS__DEFAULT_ENV_VARIABLES,
     A_Context,
 } from '@adaas/a-concept';
+import { A_Config, A_ConfigLoader, ENVConfigReader, FileConfigReader } from '@adaas/a-utils/a-config';
+import { A_Logger } from '@adaas/a-utils/a-logger';
+import { A_Polyfill } from '@adaas/a-utils/a-polyfill';
 import fs from 'fs';
-import { A_Config } from '@adaas/a-utils/lib/A-Config/A-Config.context';
-import { A_Polyfill } from '@adaas/a-utils/lib/A-Polyfill/A-Polyfill.component';
-import { A_ConfigLoader } from '@adaas/a-utils/lib/A-Config/A-Config.container';
-import { ENVConfigReader } from '@adaas/a-utils/lib/A-Config/components/ENVConfigReader.component';
-import { FileConfigReader } from '@adaas/a-utils/lib/A-Config/components/FileConfigReader.component';
-import { A_Logger } from '@adaas/a-utils/lib/A-Logger/A-Logger.component';
 
 jest.retryTimes(0);
 
@@ -173,6 +170,10 @@ describe('A-Config tests', () => {
         expect(config.get('testVar2')).toBe('env2');
 
         // 3. delete the config file
-        fs.unlinkSync('a-concept.conf.json');
+        try {
+            fs.unlinkSync('a-concept.conf.json');
+        } catch (error) {
+
+        }
     });
 });

@@ -1,0 +1,9 @@
+'use strict';
+
+const A_CONSTANTS__CONFIG_ENV_VARIABLES = {};
+const A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY = [];
+
+exports.A_CONSTANTS__CONFIG_ENV_VARIABLES = A_CONSTANTS__CONFIG_ENV_VARIABLES;
+exports.A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY = A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY;
+//# sourceMappingURL=A-Config.constants.js.map
+//# sourceMappingURL=A-Config.constants.js.map

@@ -1,9 +1,5 @@
 import { A_Component, A_Concept, A_Container, A_Context, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
-import { A_SignalBus } from "@adaas/a-utils/lib/A-Signal/components/A-SignalBus.component";
-import { A_SignalBusFeatures } from "@adaas/a-utils/lib/A-Signal/components/A-SignalBus.constants";
-import { A_SignalConfig } from "@adaas/a-utils/lib/A-Signal/context/A-SignalConfig.context";
-import { A_Signal } from "@adaas/a-utils/lib/A-Signal/entities/A-Signal.entity";
-import { A_SignalVector } from "@adaas/a-utils/lib/A-Signal/entities/A-SignalVector.entity";
+import { A_Signal, A_SignalBus, A_SignalBusFeatures, A_SignalConfig, A_SignalVector } from "@adaas/a-utils/a-signal";
 
 
 

@@ -11,9 +11,7 @@
  */
 
 import { A_Scope, A_Error } from "@adaas/a-concept";
-import { A_Logger } from "../src/lib/A-Logger/A-Logger.component";
-import { A_Config } from "../src/lib/A-Config/A-Config.context";
-import { A_LOGGER_COLORS } from "../src/lib/A-Logger/A-Logger.constants";
+import { A_Logger, A_LOGGER_COLORS } from "@adaas/a-utils/a-logger";
 
 // Mock console methods for testing
 const originalConsoleLog = console.log;

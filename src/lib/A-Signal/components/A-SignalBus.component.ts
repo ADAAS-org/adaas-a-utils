@@ -1,9 +1,9 @@
 import { A_Caller, A_Component, A_Context, A_Dependency, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_SignalState } from "../context/A-SignalState.context";
 import { A_SignalConfig } from "../context/A-SignalConfig.context";
-import { A_Config } from "../../A-Config/A-Config.context";
-import { A_Logger } from "../../A-Logger/A-Logger.component";
 import { A_Signal } from "../entities/A-Signal.entity";
+import { A_Config } from "@adaas/a-utils/a-config";
+import { A_Logger } from "@adaas/a-utils/a-logger";
 import { A_Frame } from "@adaas/a-frame";
 import { A_SignalBusFeatures } from "./A-SignalBus.constants";
 import { A_SignalBusError } from "./A-SignalBus.error";

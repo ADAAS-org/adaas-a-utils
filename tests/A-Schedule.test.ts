@@ -1,6 +1,6 @@
+import { A_Schedule } from '@adaas/a-utils/a-schedule';
 import './jest.setup';
 import { A_Scope } from "@adaas/a-concept";
-import { A_Schedule } from "@adaas/a-utils/lib/A-Schedule/A-Schedule.component";
 
 jest.retryTimes(0);
 

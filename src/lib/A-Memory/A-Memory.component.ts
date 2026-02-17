@@ -2,7 +2,7 @@ import { A_Component, A_Inject, A_Scope, A_Feature, A_Dependency, A_Context } fr
 import { A_MemoryFeatures } from "./A-Memory.constants";
 import { A_MemoryContext } from "./A-Memory.context";
 import { A_MemoryError } from "./A-Memory.error";
-import { A_OperationContext } from "../A-Operation/A-Operation.context";
+import { A_OperationContext } from "@adaas/a-utils/a-operation";
 import { A_MemoryOperationContext } from "./A-Memory.types";
 import { A_Frame } from "@adaas/a-frame";
 

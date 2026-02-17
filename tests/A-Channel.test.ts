@@ -1,10 +1,8 @@
+import { A_Channel, A_ChannelError, A_ChannelFeatures, A_ChannelRequest } from '@adaas/a-utils/a-channel';
 import './jest.setup';
 import { A_Context, A_Component, A_Feature, A_Inject } from '@adaas/a-concept';
-import { A_Channel } from '@adaas/a-utils/lib/A-Channel/A-Channel.component';
-import { A_ChannelFeatures } from '@adaas/a-utils/lib/A-Channel/A-Channel.constants';
-import { A_ChannelRequest } from '@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context';
-import { A_ChannelError } from '@adaas/a-utils/lib/A-Channel/A-Channel.error';
-import { A_OperationContext } from '@adaas/a-utils/lib/A-Operation/A-Operation.context';
+import { A_OperationContext } from '@adaas/a-utils/a-operation';
+
 
 jest.retryTimes(0);
 

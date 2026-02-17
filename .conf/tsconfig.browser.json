@@ -1,0 +1,26 @@
+{
+   "extends": "./tsconfig.base.json",
+   "compilerOptions": {
+      "rootDir": "../",
+      "outDir": "dist/browser",
+      "baseUrl": "../",
+
+      "paths": {
+         "@adaas/a-utils/a-channel": ["src/lib/A-Channel"],
+         "@adaas/a-utils/a-command": ["src/lib/A-Command"],
+         "@adaas/a-utils/a-config": ["src/lib/A-Config"],
+         "@adaas/a-utils/a-execution": ["src/lib/A-Execution"],
+         "@adaas/a-utils/a-logger": ["src/lib/A-Logger"],
+         "@adaas/a-utils/a-manifest": ["src/lib/A-Manifest"],
+         "@adaas/a-utils/a-memory": ["src/lib/A-Memory"],
+         "@adaas/a-utils/a-operation": ["src/lib/A-Operation"],
+         // Note: A-Polyfill is a special case with separate entry points for Node and browser, so we alias it directly to the Node version here. Consumers can import the browser version directly if needed.
+         "@adaas/a-utils/a-polyfill": ["src/lib/A-Polyfill/index.browser"],
+         "@adaas/a-utils/a-route": ["src/lib/A-Route"],
+         "@adaas/a-utils/a-schedule": ["src/lib/A-Schedule"],
+         "@adaas/a-utils/a-service": ["src/lib/A-Service"],
+         "@adaas/a-utils/a-signal": ["src/lib/A-Signal"],
+         "@adaas/a-utils/a-state-machine": ["src/lib/A-StateMachine"]
+      },
+   },
+}

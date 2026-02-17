@@ -1,5 +1,5 @@
 import { A_Error } from "@adaas/a-concept"
-import { A_OperationContext } from "../A-Operation/A-Operation.context";
+import { A_OperationContext } from "@adaas/a-utils/a-operation";
 
 
 export type A_MemoryContextMeta<T extends Record<string, any> = Record<string, any>> = Omit<T, 'error'> & {

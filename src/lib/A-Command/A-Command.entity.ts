@@ -12,11 +12,9 @@ import {
 } from "./A-Command.constants";
 import { A_Context, A_Dependency, A_Entity, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 import { A_CommandError } from "./A-Command.error";
-import { A_StateMachine } from "../A-StateMachine/A-StateMachine.component";
-import { A_StateMachineFeatures } from "../A-StateMachine/A-StateMachine.constants";
-import { A_Logger } from "../A-Logger/A-Logger.component";
-import { A_StateMachineTransition } from "../A-StateMachine/A-StateMachineTransition.context";
-import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
+import { A_StateMachine, A_StateMachineFeatures, A_StateMachineTransition } from "@adaas/a-utils/a-state-machine";
+import { A_Logger } from "@adaas/a-utils/a-logger";
+import { A_ExecutionContext } from "@adaas/a-utils/a-execution";
 import { A_Frame } from "@adaas/a-frame";
 
 /**

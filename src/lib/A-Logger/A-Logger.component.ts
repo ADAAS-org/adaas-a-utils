@@ -1,5 +1,6 @@
 import { A_Component, A_Context, A_Error, A_Inject, A_Scope } from "@adaas/a-concept";
-import { A_Config } from "../A-Config/A-Config.context";
+
+import { A_Config } from "@adaas/a-utils/a-config";
 import { A_LoggerEnvVariablesType } from "./A-Logger.env";
 import { A_LoggerLevel, A_LoggerColorName } from "./A-Logger.types";
 import {
@@ -13,6 +14,7 @@ import {
     A_LOGGER_TERMINAL
 } from "./A-Logger.constants";
 import { A_Frame } from "@adaas/a-frame";
+
 
 /**
  * A_Logger - Advanced Logging Component with Scope-based Output Formatting

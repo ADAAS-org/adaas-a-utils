@@ -1,5 +1,5 @@
 import { A_Frame } from "@adaas/a-frame";
-import { A_OperationContext } from "../A-Operation/A-Operation.context";
+import { A_OperationContext } from "@adaas/a-utils/a-operation";
 import { A_ChannelRequestStatuses } from "./A-Channel.constants";
 
 

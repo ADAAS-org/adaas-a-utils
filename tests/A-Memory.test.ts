@@ -1,7 +1,5 @@
-import { A_Memory } from '@adaas/a-utils/lib/A-Memory/A-Memory.component';
-import { A_MemoryContext } from '@adaas/a-utils/lib/A-Memory/A-Memory.context';
-import { A_MemoryError } from '@adaas/a-utils/lib/A-Memory/A-Memory.error';
 import { A_Component, A_Concept, A_Container, A_Context, A_Error } from '@adaas/a-concept';
+import { A_Memory } from '@adaas/a-utils/a-memory';
 
 jest.retryTimes(0);
 

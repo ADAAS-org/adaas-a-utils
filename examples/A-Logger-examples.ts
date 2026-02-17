@@ -12,8 +12,7 @@
  */
 
 import { A_Scope, A_Error } from "@adaas/a-concept";
-import { A_Logger } from "../src/lib/A-Logger/A-Logger.component";
-import { A_LoggerColorName } from "../src/lib/A-Logger/A-Logger.types";
+import { A_Logger, A_LoggerColorName } from "@adaas/a-utils/a-logger";
 
 // =============================================
 // Basic Logging Examples

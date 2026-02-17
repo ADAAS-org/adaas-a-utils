@@ -1,6 +1,6 @@
 import { A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_FormatterHelper, A_TYPES__ConceptENVVariables } from "@adaas/a-concept";
 import { A_TYPES__ConfigContainerConstructor } from "./A-Config.types";
-import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
+import { A_ExecutionContext } from "@adaas/a-utils/a-execution";
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "./A-Config.constants";
 import { A_ConfigError } from "./A-Config.error";
 import { A_Frame } from "@adaas/a-frame";

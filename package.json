@@ -3,9 +3,6 @@
   "version": "0.2.8",
   "description": "A-Utils is a set of utilities that are used across the ADAAS ecosystem. This package is designed to be a collection of utilities that are used across the ADAAS ecosystem.",
   "license": "Apache-2.0",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "author": {
     "name": "ADAAS YAZILIM LİMİTED ŞİRKETİ",
     "email": "contact-us@adaas.org"
@@ -15,6 +12,236 @@
     "type": "git",
     "url": "git+https://github.com/ADAAS-org/adaas-a-utils.git"
   },
+  "bugs": {
+    "url": "https://github.com/ADAAS-org/adaas-a-utils/issues"
+  },
+  "exports": {
+    "./a-channel": {
+      "browser": {
+        "types": "./dist/browser/a-channel.d.ts",
+        "import": "./dist/browser/a-channel.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Channel/index.d.ts",
+        "import": "./dist/node/lib/A-Channel/index.mjs",
+        "require": "./dist/node/lib/A-Channel/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Channel/index.d.ts",
+        "import": "./dist/node/lib/A-Channel/index.mjs",
+        "require": "./dist/node/lib/A-Channel/index.js"
+      }
+    },
+    "./a-command": {
+      "browser": {
+        "types": "./dist/browser/a-command.d.ts",
+        "import": "./dist/browser/a-command.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Command/index.d.ts",
+        "import": "./dist/node/lib/A-Command/index.mjs",
+        "require": "./dist/node/lib/A-Command/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Command/index.d.ts",
+        "import": "./dist/node/lib/A-Command/index.mjs",
+        "require": "./dist/node/lib/A-Command/index.js"
+      }
+    },
+    "./a-config": {
+      "browser": {
+        "types": "./dist/browser/a-config.d.ts",
+        "import": "./dist/browser/a-config.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Config/index.d.ts",
+        "import": "./dist/node/lib/A-Config/index.mjs",
+        "require": "./dist/node/lib/A-Config/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Config/index.d.ts",
+        "import": "./dist/node/lib/A-Config/index.mjs",
+        "require": "./dist/node/lib/A-Config/index.js"
+      }
+    },
+    "./a-execution": {
+      "browser": {
+        "types": "./dist/browser/a-execution.d.ts",
+        "import": "./dist/browser/a-execution.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Execution/index.d.ts",
+        "import": "./dist/node/lib/A-Execution/index.mjs",
+        "require": "./dist/node/lib/A-Execution/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Execution/index.d.ts",
+        "import": "./dist/node/lib/A-Execution/index.mjs",
+        "require": "./dist/node/lib/A-Execution/index.js"
+      }
+    },
+    "./a-logger": {
+      "browser": {
+        "types": "./dist/browser/a-logger.d.ts",
+        "import": "./dist/browser/a-logger.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Logger/index.d.ts",
+        "import": "./dist/node/lib/A-Logger/index.mjs",
+        "require": "./dist/node/lib/A-Logger/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Logger/index.d.ts",
+        "import": "./dist/node/lib/A-Logger/index.mjs",
+        "require": "./dist/node/lib/A-Logger/index.js"
+      }
+    },
+    "./a-manifest": {
+      "browser": {
+        "types": "./dist/browser/a-manifest.d.ts",
+        "import": "./dist/browser/a-manifest.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Manifest/index.d.ts",
+        "import": "./dist/node/lib/A-Manifest/index.mjs",
+        "require": "./dist/node/lib/A-Manifest/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Manifest/index.d.ts",
+        "import": "./dist/node/lib/A-Manifest/index.mjs",
+        "require": "./dist/node/lib/A-Manifest/index.js"
+      }
+    },
+    "./a-memory": {
+      "browser": {
+        "types": "./dist/browser/a-memory.d.ts",
+        "import": "./dist/browser/a-memory.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Memory/index.d.ts",
+        "import": "./dist/node/lib/A-Memory/index.mjs",
+        "require": "./dist/node/lib/A-Memory/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Memory/index.d.ts",
+        "import": "./dist/node/lib/A-Memory/index.mjs",
+        "require": "./dist/node/lib/A-Memory/index.js"
+      }
+    },
+    "./a-operation": {
+      "browser": {
+        "types": "./dist/browser/a-operation.d.ts",
+        "import": "./dist/browser/a-operation.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Operation/index.d.ts",
+        "import": "./dist/node/lib/A-Operation/index.mjs",
+        "require": "./dist/node/lib/A-Operation/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Operation/index.d.ts",
+        "import": "./dist/node/lib/A-Operation/index.mjs",
+        "require": "./dist/node/lib/A-Operation/index.js"
+      }
+    },
+    "./a-polyfill": {
+      "browser": {
+        "types": "./dist/browser/a-polyfill.d.ts",
+        "import": "./dist/browser/a-polyfill.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Polyfill/index.d.ts",
+        "import": "./dist/node/lib/A-Polyfill/index.mjs",
+        "require": "./dist/node/lib/A-Polyfill/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Polyfill/index.d.ts",
+        "import": "./dist/node/lib/A-Polyfill/index.mjs",
+        "require": "./dist/node/lib/A-Polyfill/index.js"
+      }
+    },
+    "./a-route": {
+      "browser": {
+        "types": "./dist/browser/a-route.d.ts",
+        "import": "./dist/browser/a-route.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Route/index.d.ts",
+        "import": "./dist/node/lib/A-Route/index.mjs",
+        "require": "./dist/node/lib/A-Route/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Route/index.d.ts",
+        "import": "./dist/node/lib/A-Route/index.mjs",
+        "require": "./dist/node/lib/A-Route/index.js"
+      }
+    },
+    "./a-schedule": {
+      "browser": {
+        "types": "./dist/browser/a-schedule.d.ts",
+        "import": "./dist/browser/a-schedule.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Schedule/index.d.ts",
+        "import": "./dist/node/lib/A-Schedule/index.mjs",
+        "require": "./dist/node/lib/A-Schedule/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Schedule/index.d.ts",
+        "import": "./dist/node/lib/A-Schedule/index.mjs",
+        "require": "./dist/node/lib/A-Schedule/index.js"
+      }
+    },
+    "./a-service": {
+      "browser": {
+        "types": "./dist/browser/a-service.d.ts",
+        "import": "./dist/browser/a-service.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Service/index.d.ts",
+        "import": "./dist/node/lib/A-Service/index.mjs",
+        "require": "./dist/node/lib/A-Service/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Service/index.d.ts",
+        "import": "./dist/node/lib/A-Service/index.mjs",
+        "require": "./dist/node/lib/A-Service/index.js"
+      }
+    },
+    "./a-signal": {
+      "browser": {
+        "types": "./dist/browser/a-signal.d.ts",
+        "import": "./dist/browser/a-signal.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Signal/index.d.ts",
+        "import": "./dist/node/lib/A-Signal/index.mjs",
+        "require": "./dist/node/lib/A-Signal/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Signal/index.d.ts",
+        "import": "./dist/node/lib/A-Signal/index.mjs",
+        "require": "./dist/node/lib/A-Signal/index.js"
+      }
+    },
+    "./a-state-machine": {
+      "browser": {
+        "types": "./dist/browser/a-state-machine.d.ts",
+        "import": "./dist/browser/a-state-machine.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-StateMachine/index.d.ts",
+        "import": "./dist/node/lib/A-StateMachine/index.mjs",
+        "require": "./dist/node/lib/A-StateMachine/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-StateMachine/index.d.ts",
+        "import": "./dist/node/lib/A-StateMachine/index.mjs",
+        "require": "./dist/node/lib/A-StateMachine/index.js"
+      }
+    }
+  },
+
   "keywords": [
     "sdk",
     "utilities",
@@ -38,16 +265,7 @@
     "lifecycle",
     "error-handling"
   ],
-  "bugs": {
-    "url": "https://github.com/ADAAS-org/adaas-a-utils/issues"
-  },
   "sideEffects": false,
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  },
   "nodemonConfig": {
     "ignore": [
       "**/*.test.ts",
@@ -80,8 +298,8 @@
     "build": "tsup --config tsup.config.ts"
   },
   "dependencies": {
-    "@adaas/a-concept": "^0.2.8",
-    "@adaas/a-frame": "^0.0.9"
+    "@adaas/a-concept": "^0.3.1",
+    "@adaas/a-frame": "^0.0.10"
   },
   "devDependencies": {
     "@types/chai": "^4.3.14",

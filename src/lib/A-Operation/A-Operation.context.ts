@@ -1,6 +1,6 @@
 import { A_Error, A_Fragment } from "@adaas/a-concept";
 import { A_Operation_Serialized, A_Operation_Storage } from "./A-Operation.types";
-import { A_ExecutionContext } from "../A-Execution/A-Execution.context";
+import { A_ExecutionContext } from "@adaas/a-utils/a-execution";
 import { A_Frame } from "@adaas/a-frame";
 
 

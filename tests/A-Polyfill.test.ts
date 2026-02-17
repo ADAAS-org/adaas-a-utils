@@ -1,7 +1,7 @@
 import './jest.setup';
 import { A_Context, A_Scope } from '@adaas/a-concept';
-import { A_Logger } from '@adaas/a-utils/lib/A-Logger/A-Logger.component';
-import { A_Polyfill } from '@adaas/a-utils/lib/A-Polyfill/A-Polyfill.component';
+import { A_Logger } from '@adaas/a-utils/a-logger';
+import { A_Polyfill } from '@adaas/a-utils/a-polyfill';
 import { config } from 'dotenv';
 config();
 jest.retryTimes(0);

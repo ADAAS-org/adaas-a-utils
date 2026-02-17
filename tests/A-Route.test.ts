@@ -1,6 +1,4 @@
-import { A_Route } from "@adaas/a-utils/lib/A-Route/A-Route.entity";
-
-
+import { A_Route } from "@adaas/a-utils/a-route";
 
 
 jest.retryTimes(0);

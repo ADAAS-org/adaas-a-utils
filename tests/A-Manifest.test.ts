@@ -1,5 +1,5 @@
 import { A_Component, A_Entity } from "@adaas/a-concept";
-import { A_Manifest } from "../src/lib/A-Manifest/A-Manifest.context";
+import { A_Manifest } from "@adaas/a-utils/a-manifest";
 
 describe('A_Manifest', () => {
     it('Should deny access to excluded components at component level', () => {

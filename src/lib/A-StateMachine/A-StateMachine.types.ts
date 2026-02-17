@@ -1,4 +1,4 @@
-import { A_Operation_Storage } from "../A-Operation/A-Operation.types";
+import { A_Operation_Storage } from "@adaas/a-utils/a-operation";
 
 
 export type A_StateMachineTransitionParams<

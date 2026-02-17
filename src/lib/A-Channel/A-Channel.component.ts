@@ -1,7 +1,7 @@
 import { A_Component, A_Context, A_Feature, A_IdentityHelper, A_Scope } from "@adaas/a-concept";
 import { A_ChannelError } from "./A-Channel.error";
 import { A_ChannelFeatures } from "./A-Channel.constants";
-import { A_OperationContext } from "../A-Operation/A-Operation.context";
+import { A_OperationContext } from "@adaas/a-utils/a-operation";
 import { A_ChannelRequest } from "./A-ChannelRequest.context";
 import { A_Frame } from "@adaas/a-frame";
 

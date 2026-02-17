@@ -1,13 +1,8 @@
-import { A_Command } from '@adaas/a-utils/lib/A-Command/A-Command.entity';
-import { A_CommandError } from '@adaas/a-utils/lib/A-Command/A-Command.error';
-import { A_Command_Status, A_CommandEvent, A_CommandFeatures } from '@adaas/a-utils/lib/A-Command/A-Command.constants';
-import { A_TYPES__Command_Serialized } from '@adaas/a-utils/lib/A-Command/A-Command.types';
-import { A_StateMachine } from '@adaas/a-utils/lib/A-StateMachine/A-StateMachine.component';
-import { A_Memory } from '@adaas/a-utils/lib/A-Memory/A-Memory.component';
-import { A_MemoryContext } from '@adaas/a-utils/lib/A-Memory/A-Memory.context';
-import { A_Channel } from '@adaas/a-utils/lib/A-Channel/A-Channel.component';
-import { A_ChannelRequest } from '@adaas/a-utils/lib/A-Channel/A-ChannelRequest.context';
 import { A_Caller, A_Component, A_Concept, A_Container, A_Context, A_Dependency, A_Error, A_Feature, A_FormatterHelper, A_Inject, A_Scope, ASEID } from '@adaas/a-concept';
+import { A_Channel, A_ChannelRequest } from '@adaas/a-utils/a-channel';
+import { A_Command, A_Command_Status, A_CommandError, A_CommandEvent, A_CommandFeatures, A_TYPES__Command_Serialized } from '@adaas/a-utils/a-command';
+import { A_Memory, A_MemoryContext } from '@adaas/a-utils/a-memory';
+import { A_StateMachine } from '@adaas/a-utils/a-state-machine';
 
 jest.retryTimes(0);
 

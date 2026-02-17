@@ -1,5 +1,5 @@
 import { A_Error, A_TypeGuards } from "@adaas/a-concept";
-import { A_OperationContext } from "../A-Operation/A-Operation.context";
+import { A_OperationContext } from "@adaas/a-utils/a-operation";
 
 
 export class A_ChannelError extends A_Error {

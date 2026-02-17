@@ -1,9 +1,13 @@
-import { A_Component, A_Concept, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_Container, A_Context, A_Dependency, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
-import { A_Config } from "../A-Config.context";
-import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "../A-Config.constants";
-import { A_Polyfill } from "../../A-Polyfill/A-Polyfill.component";
-import { A_Memory } from "../../A-Memory/A-Memory.component";
+import {
+    A_Component, A_CONCEPT_ENV,
+    A_Concept, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY,
+    A_Container, A_Dependency,
+    A_Inject, A_Scope
+} from "@adaas/a-concept";
 import { A_Frame } from "@adaas/a-frame";
+import { A_Config } from "../A-Config.context";
+import { A_Polyfill } from "@adaas/a-utils/a-polyfill";
+import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "../A-Config.constants";
 
 /**
  * Config Reader
@@ -40,10 +44,8 @@ export class ConfigReader extends A_Component {
 
             container.scope.register(config);
         }
-
-        const rootDir = await this.getProjectRoot();
-
-        config.set('A_CONCEPT_ROOT_FOLDER', rootDir);
+        
+        config.set('A_CONCEPT_ROOT_FOLDER', A_CONCEPT_ENV.A_CONCEPT_ROOT_FOLDER);
     }
 
     @A_Concept.Load()
@@ -75,18 +77,5 @@ export class ConfigReader extends A_Component {
         variables: Array<T> = []
     ): Promise<Record<T, any>> {
         return {} as Record<T, any>;
-    }
-
-
-    /**
-     * Finds the root directory of the project by locating the folder containing package.json
-     * 
-     * @param {string} startPath - The initial directory to start searching from (default is __dirname)
-     * @returns {string|null} - The path to the root directory or null if package.json is not found
-     */
-    protected async getProjectRoot(startPath = __dirname) {
-        const process = await this.polyfill.process();
-
-        return process.cwd();
     }
 }
