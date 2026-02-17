@@ -145,20 +145,12 @@
       }
     },
     "./a-polyfill": {
+      "types": "./dist/node/lib/A-Polyfill/index.node.d.ts",
       "browser": {
-        "types": "./dist/browser/a-polyfill.d.ts",
         "import": "./dist/browser/a-polyfill.mjs"
       },
-      "node": {
-        "types": "./dist/node/lib/A-Polyfill/index.node.d.ts",
-        "import": "./dist/node/lib/A-Polyfill/index.node.mjs",
-        "require": "./dist/node/lib/A-Polyfill/index.node.js"
-      },
-      "default": {
-        "types": "./dist/node/lib/A-Polyfill/index.node.d.ts",
-        "import": "./dist/node/lib/A-Polyfill/index.node.mjs",
-        "require": "./dist/node/lib/A-Polyfill/index.node.js"
-      }
+      "import": "./dist/node/lib/A-Polyfill/index.node.mjs",
+      "require": "./dist/node/lib/A-Polyfill/index.node.js"
     },
     "./a-route": {
       "browser": {
