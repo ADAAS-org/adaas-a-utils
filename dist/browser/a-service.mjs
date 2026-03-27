@@ -32,9 +32,9 @@ var A_Service = class extends A_Container {
    */
   async load() {
     try {
-      await this.call("_A_Service_onBeforeLoad" /* onBeforeLoad */);
-      await this.call("_A_Service_onLoad" /* onLoad */);
-      await this.call("_A_Service_onAfterLoad" /* onAfterLoad */);
+      await this.call("_A_Service_onBeforeLoad" /* onBeforeLoad */, this.scope);
+      await this.call("_A_Service_onLoad" /* onLoad */, this.scope);
+      await this.call("_A_Service_onAfterLoad" /* onAfterLoad */, this.scope);
     } catch (error) {
       let wrappedError;
       switch (true) {
@@ -53,7 +53,7 @@ var A_Service = class extends A_Container {
           break;
       }
       this.scope.register(wrappedError);
-      await this.call("_A_Service_onError" /* onError */);
+      await this.call("_A_Service_onError" /* onError */, this.scope);
     }
   }
   /**
@@ -61,9 +61,9 @@ var A_Service = class extends A_Container {
    */
   async start() {
     try {
-      await this.call("_A_Service_onBeforeStart" /* onBeforeStart */);
-      await this.call("_A_Service_onStart" /* onStart */);
-      await this.call("_A_Service_onAfterStart" /* onAfterStart */);
+      await this.call("_A_Service_onBeforeStart" /* onBeforeStart */, this.scope);
+      await this.call("_A_Service_onStart" /* onStart */, this.scope);
+      await this.call("_A_Service_onAfterStart" /* onAfterStart */, this.scope);
     } catch (error) {
       let wrappedError;
       switch (true) {
@@ -82,7 +82,7 @@ var A_Service = class extends A_Container {
           break;
       }
       this.scope.register(wrappedError);
-      await this.call("_A_Service_onError" /* onError */);
+      await this.call("_A_Service_onError" /* onError */, this.scope);
     }
   }
   /**
@@ -90,9 +90,9 @@ var A_Service = class extends A_Container {
    */
   async stop() {
     try {
-      await this.call("_A_Service_onBeforeStop" /* onBeforeStop */);
-      await this.call("_A_Service_onStop" /* onStop */);
-      await this.call("_A_Service_onAfterStop" /* onAfterStop */);
+      await this.call("_A_Service_onBeforeStop" /* onBeforeStop */, this.scope);
+      await this.call("_A_Service_onStop" /* onStop */, this.scope);
+      await this.call("_A_Service_onAfterStop" /* onAfterStop */, this.scope);
     } catch (error) {
       let wrappedError;
       switch (true) {
@@ -111,7 +111,7 @@ var A_Service = class extends A_Container {
           break;
       }
       this.scope.register(wrappedError);
-      await this.call("_A_Service_onError" /* onError */);
+      await this.call("_A_Service_onError" /* onError */, this.scope);
     }
   }
   async [_j = "_A_Service_onBeforeLoad" /* onBeforeLoad */](polyfill, ...args) {

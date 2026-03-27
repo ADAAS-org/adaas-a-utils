@@ -1,7 +1,7 @@
 import { A_Component, A_Error, A_Scope } from '@adaas/a-concept';
 import { A_SignalState } from '../context/A-SignalState.context.js';
 import { A_SignalConfig } from '../context/A-SignalConfig.context.js';
-import { A as A_Signal } from '../../../A-Signal.types-P5VKMKMs.js';
+import { A as A_Signal } from '../../../A-Signal.types-C0Ta5Unp.js';
 import { A_Logger } from '../../A-Logger/A-Logger.component.js';
 import { A_Config } from '../../A-Config/A-Config.context.js';
 import { A_SignalBusFeatures } from './A-SignalBus.constants.js';

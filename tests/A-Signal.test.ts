@@ -29,8 +29,8 @@ describe('A-Signal tests', () => {
         expect(vector).toBeDefined();
         expect(vector).toBeInstanceOf(A_SignalVector);
         expect(vector.length).toBe(2);
-        expect((await vector.toDataVector())[0]?.buttonId).toBe('submit-order');
-        expect((await vector.toDataVector())[1]?.pageId).toBe('home-page');
+        expect((vector.toDataVector())[0]?.buttonId).toBe('submit-order');
+        expect((vector.toDataVector())[1]?.pageId).toBe('home-page');
     });
     it('Should Allow to match Signal Vector', async () => {
         class MySignalA extends A_Signal<{ buttonId: string }> { }
@@ -57,7 +57,7 @@ describe('A-Signal tests', () => {
         class MySignalA extends A_Signal<{ buttonId: string }> { }
         class MySignalB extends A_Signal<{ pageId: string }> { }
         class MySignalC extends A_Signal<{ userId: string }> { }
-        
+
         const vector = new A_SignalVector<[MySignalA, MySignalB, MySignalC]>([
             new MySignalA({ data: { buttonId: 'submit-order' } }),
             new MySignalB({ data: { pageId: 'home-page' } }),
@@ -142,7 +142,7 @@ describe('A-Signal tests', () => {
         expect(result).toBeDefined();
         expect(result).toBeInstanceOf(A_SignalVector);
         expect(result!.length).toBe(1);
-        expect((await result!.toDataVector())[0]?.buttonId).toBe('submit-order');
+        expect((result!.toDataVector())[0]?.buttonId).toBe('submit-order');
 
     });
     it('Should Allow to work with custom Signals', async () => {
@@ -150,10 +150,10 @@ describe('A-Signal tests', () => {
         class UserIntentionSignal extends A_Signal<{ buttonId: string }> { }
 
         class UserMousePositionSignal extends A_Signal<{ x: number, y: number }> {
-            static async default(): Promise<A_Signal | undefined> {
-                return Promise.resolve(new UserMousePositionSignal({
+            static default(): A_Signal | undefined {
+                return new UserMousePositionSignal({
                     data: { x: 0, y: 0 }
-                }));
+                });
             }
         }
         class UserElementHoverSignal extends A_Signal<{ elementId: string }> { }
@@ -208,10 +208,10 @@ describe('A-Signal tests', () => {
         expect(result).toBeInstanceOf(A_SignalVector);
         expect(result!.length).toBe(3);
 
-        expect((await result!.toDataVector())[0]?.buttonId).toBe('submit-order');
-        expect((await result!.toDataVector())[1]?.x).toBe(0);
-        expect((await result!.toDataVector())[1]?.y).toBe(0);
-        expect((await result!.toDataVector())[2]).toBeUndefined();
+        expect((result!.toDataVector())[0]?.buttonId).toBe('submit-order');
+        expect((result!.toDataVector())[1]?.x).toBe(0);
+        expect((result!.toDataVector())[1]?.y).toBe(0);
+        expect((result!.toDataVector())[2]).toBeUndefined();
 
     });
 

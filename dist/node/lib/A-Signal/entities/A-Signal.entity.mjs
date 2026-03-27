@@ -13,7 +13,7 @@ let A_Signal = class extends A_Entity {
    * 
    * @returns 
    */
-  static async default() {
+  static default() {
     return void 0;
   }
   createHash(str) {

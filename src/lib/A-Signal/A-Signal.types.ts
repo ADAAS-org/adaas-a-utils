@@ -51,7 +51,7 @@ export type A_SignalVector_Serialized = A_TYPES__Entity_Serialized & {
 
 
 
-export type A_Signal_Init<T extends Record<string, any> = Record<string, any>> = {
+export type A_Signal_Init<T extends any = any> = {
     /**
      * Possible signal id
      * 
@@ -68,7 +68,7 @@ export type A_Signal_Init<T extends Record<string, any> = Record<string, any>> =
     data: T
 }
 
-export type A_Signal_Serialized<T extends Record<string, any> = Record<string, any>> = {
+export type A_Signal_Serialized<T extends any = any> = {
     /**
      * The signal data
      */

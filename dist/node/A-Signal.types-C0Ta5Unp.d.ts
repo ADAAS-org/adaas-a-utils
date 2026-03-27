@@ -13,7 +13,7 @@ import { A_Entity, A_TYPES__Entity_Serialized, A_TYPES__Entity_Constructor } fro
  * Signals are typically used in scenarios where the current state is more important than individual events,
  * such as monitoring systems, real-time dashboards, or stateful applications.
  */
-declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<string, any>> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalDataType>> {
+declare class A_Signal<_TSignalDataType extends any = any, _TSignalSerializedDataType extends any = _TSignalDataType> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalSerializedDataType>> {
     /**
      * Allows to define default data for the signal.
      *
@@ -21,7 +21,7 @@ declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<str
      *
      * @returns
      */
-    static default(): Promise<A_Signal | undefined>;
+    static default(): A_Signal | undefined;
     /**
      * The actual data carried by the signal.
      */
@@ -54,9 +54,9 @@ declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<str
      * @returns
      */
     compare(other: A_Signal<_TSignalDataType>): boolean;
-    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalDataType>): void;
+    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalSerializedDataType>): void;
     fromNew(newEntity: A_Signal_Init<_TSignalDataType>): void;
-    toJSON(): A_Signal_Serialized<_TSignalDataType>;
+    toJSON(): A_Signal_Serialized<_TSignalSerializedDataType>;
 }
 
 type A_SignalConfig_Init<TSignals extends Array<A_Signal> = Array<A_Signal>> = {
@@ -88,7 +88,7 @@ type A_SignalVector_Serialized = A_TYPES__Entity_Serialized & {
     structure: string[];
     values: Array<Record<string, any>>;
 } & A_TYPES__Entity_Serialized;
-type A_Signal_Init<T extends Record<string, any> = Record<string, any>> = {
+type A_Signal_Init<T extends any = any> = {
     /**
      * Possible signal id
      *
@@ -104,7 +104,7 @@ type A_Signal_Init<T extends Record<string, any> = Record<string, any>> = {
      */
     data: T;
 };
-type A_Signal_Serialized<T extends Record<string, any> = Record<string, any>> = {
+type A_Signal_Serialized<T extends any = any> = {
     /**
      * The signal data
      */

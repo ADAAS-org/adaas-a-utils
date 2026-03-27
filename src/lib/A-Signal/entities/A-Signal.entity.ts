@@ -21,8 +21,9 @@ import { A_Frame } from "@adaas/a-frame";
     description: 'A Signal Entity represents an individual signal instance that carries data, used for managing state within an application context. Signals are designed to reflect the current state rather than individual events, making them suitable for scenarios where state monitoring and real-time updates are essential.'
 })
 export class A_Signal<
-    _TSignalDataType extends Record<string, any> = Record<string, any>
-> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalDataType>> {
+    _TSignalDataType extends any = any,
+    _TSignalSerializedDataType extends any = _TSignalDataType,
+> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalSerializedDataType>> {
 
 
     // ========================================================================
@@ -35,7 +36,7 @@ export class A_Signal<
      * 
      * @returns 
      */
-    static async default(): Promise<A_Signal | undefined> {
+    static default(): A_Signal | undefined {
         return undefined;
     }
 
@@ -131,12 +132,12 @@ export class A_Signal<
 
         return true;
     }
-    
 
 
-    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalDataType>): void {
+
+    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalSerializedDataType>): void {
         super.fromJSON(serializedEntity);
-        this.data = serializedEntity.data;
+        this.data = serializedEntity.data as unknown as _TSignalDataType;
     }
 
 
@@ -157,10 +158,10 @@ export class A_Signal<
     }
 
 
-    toJSON(): A_Signal_Serialized<_TSignalDataType> {
+    toJSON(): A_Signal_Serialized<_TSignalSerializedDataType> {
         return {
             ...super.toJSON(),
-            data: this.data
+            data: this.data as unknown as _TSignalSerializedDataType
         };
     }
 

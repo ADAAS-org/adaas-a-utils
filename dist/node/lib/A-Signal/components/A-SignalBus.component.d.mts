@@ -1,7 +1,7 @@
 import { A_Component, A_Error, A_Scope } from '@adaas/a-concept';
 import { A_SignalState } from '../context/A-SignalState.context.mjs';
 import { A_SignalConfig } from '../context/A-SignalConfig.context.mjs';
-import { A as A_Signal } from '../../../A-Signal.types-P5VKMKMs.mjs';
+import { A as A_Signal } from '../../../A-Signal.types-C0Ta5Unp.mjs';
 import { A_Logger } from '../../A-Logger/A-Logger.component.mjs';
 import { A_Config } from '../../A-Config/A-Config.context.mjs';
 import { A_SignalBusFeatures } from './A-SignalBus.constants.mjs';

@@ -22,7 +22,7 @@ exports.A_Signal = class A_Signal extends aConcept.A_Entity {
    * 
    * @returns 
    */
-  static async default() {
+  static default() {
     return void 0;
   }
   createHash(str) {

@@ -31,7 +31,7 @@ type A_SignalVector_Serialized = A_TYPES__Entity_Serialized & {
     structure: string[];
     values: Array<Record<string, any>>;
 } & A_TYPES__Entity_Serialized;
-type A_Signal_Init<T extends Record<string, any> = Record<string, any>> = {
+type A_Signal_Init<T extends any = any> = {
     /**
      * Possible signal id
      *
@@ -47,7 +47,7 @@ type A_Signal_Init<T extends Record<string, any> = Record<string, any>> = {
      */
     data: T;
 };
-type A_Signal_Serialized<T extends Record<string, any> = Record<string, any>> = {
+type A_Signal_Serialized<T extends any = any> = {
     /**
      * The signal data
      */
@@ -67,7 +67,7 @@ type A_Signal_Serialized<T extends Record<string, any> = Record<string, any>> = 
  * Signals are typically used in scenarios where the current state is more important than individual events,
  * such as monitoring systems, real-time dashboards, or stateful applications.
  */
-declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<string, any>> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalDataType>> {
+declare class A_Signal<_TSignalDataType extends any = any, _TSignalSerializedDataType extends any = _TSignalDataType> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalSerializedDataType>> {
     /**
      * Allows to define default data for the signal.
      *
@@ -75,7 +75,7 @@ declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<str
      *
      * @returns
      */
-    static default(): Promise<A_Signal | undefined>;
+    static default(): A_Signal | undefined;
     /**
      * The actual data carried by the signal.
      */
@@ -108,9 +108,9 @@ declare class A_Signal<_TSignalDataType extends Record<string, any> = Record<str
      * @returns
      */
     compare(other: A_Signal<_TSignalDataType>): boolean;
-    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalDataType>): void;
+    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalSerializedDataType>): void;
     fromNew(newEntity: A_Signal_Init<_TSignalDataType>): void;
-    toJSON(): A_Signal_Serialized<_TSignalDataType>;
+    toJSON(): A_Signal_Serialized<_TSignalSerializedDataType>;
 }
 
 /**
@@ -159,13 +159,38 @@ declare class A_SignalVector<TSignals extends A_Signal[] = A_Signal[]> extends A
      */
     [Symbol.iterator](): Iterator<TSignals[number]>;
     /**
+     * Checks that 2 vectors are identical by types and data
+     *
+     * e.g. [UserSignInSignal, UserStatusSignal] is equal to [UserSignInSignal, UserStatusSignal] with the same data,
+     * but not equal to [UserStatusSignal, UserSignInSignal] or [UserSignInSignal, UserStatusSignal] with different data.
+     *
+     * @param other
+     * @returns
+     */
+    equals(other: A_SignalVector<TSignals>): boolean;
+    /**
      * Allows to match the current Signal Vector with another Signal Vector by comparing each signal in the structure.
-     * This method returns true if all signals in the vector match the corresponding signals in the other vector.
+     * This method returns true if all signals in the vector A match the corresponding signals in vector B, and false otherwise.
+     *
+     *
+     * e.g. [UserSignInSignal, UserStatusSignal] matches [UserStatusSignal, UserSignInSignal] with the same data,
+     *
+     * but not matches [UserSignInSignal, UserStatusSignal] with different data or [UserSignInSignal] or [UserSignInSignal, UserStatusSignal, UserActivitySignal].
+     *
      *
      * @param other
      * @returns
      */
     match(other: A_SignalVector<TSignals>): boolean;
+    /**
+     * Checks if the current Signal Vector includes all signals from another Signal Vector, regardless of order.
+     *
+     * e.g. [UserSignInSignal, UserStatusSignal] includes [UserStatusSignal] with the same data,
+     * but not includes [UserStatusSignal] with different data or [UserActivitySignal].
+     *
+     * @param other
+     */
+    includes(other: A_SignalVector<TSignals>): boolean;
     /**
      * This method should ensure that the current Signal Vector contains all signals from the provided Signal Vector.
      *
@@ -193,7 +218,7 @@ declare class A_SignalVector<TSignals extends A_Signal[] = A_Signal[]> extends A
      * @param structure - Optional structure to override the default ordering
      * @returns Array of signal instances in the specified order
      */
-    toVector<T extends Array<A_Signal> = TSignals>(structure?: A_Signal_TSignalsConstructors<T>): Promise<T>;
+    toVector<T extends Array<A_Signal> = TSignals>(structure?: A_Signal_TSignalsConstructors<T>): T;
     /**
      * Converts to Array of data of signals in the vector
      * Maintains the order specified in the structure/generic type
@@ -201,7 +226,7 @@ declare class A_SignalVector<TSignals extends A_Signal[] = A_Signal[]> extends A
      * @param structure - Optional structure to override the default ordering
      * @returns Array of serialized signal data in the specified order
      */
-    toDataVector<T extends A_Signal[] = TSignals>(structure?: A_Signal_TSignalsConstructors<T>): Promise<A_SignalTValueArray<T>>;
+    toDataVector<T extends A_Signal[] = TSignals>(structure?: A_Signal_TSignalsConstructors<T>): A_SignalTValueArray<T>;
     /**
      * Converts to Object with signal constructor names as keys and their corresponding data values
      * Uses the structure ordering to ensure consistent key ordering

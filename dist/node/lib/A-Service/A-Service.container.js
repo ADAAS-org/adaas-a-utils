@@ -25,9 +25,9 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
    */
   async load() {
     try {
-      await this.call(AService_constants.A_ServiceFeatures.onBeforeLoad);
-      await this.call(AService_constants.A_ServiceFeatures.onLoad);
-      await this.call(AService_constants.A_ServiceFeatures.onAfterLoad);
+      await this.call(AService_constants.A_ServiceFeatures.onBeforeLoad, this.scope);
+      await this.call(AService_constants.A_ServiceFeatures.onLoad, this.scope);
+      await this.call(AService_constants.A_ServiceFeatures.onAfterLoad, this.scope);
     } catch (error) {
       let wrappedError;
       switch (true) {
@@ -46,7 +46,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
           break;
       }
       this.scope.register(wrappedError);
-      await this.call(AService_constants.A_ServiceFeatures.onError);
+      await this.call(AService_constants.A_ServiceFeatures.onError, this.scope);
     }
   }
   /**
@@ -54,9 +54,9 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
    */
   async start() {
     try {
-      await this.call(AService_constants.A_ServiceFeatures.onBeforeStart);
-      await this.call(AService_constants.A_ServiceFeatures.onStart);
-      await this.call(AService_constants.A_ServiceFeatures.onAfterStart);
+      await this.call(AService_constants.A_ServiceFeatures.onBeforeStart, this.scope);
+      await this.call(AService_constants.A_ServiceFeatures.onStart, this.scope);
+      await this.call(AService_constants.A_ServiceFeatures.onAfterStart, this.scope);
     } catch (error) {
       let wrappedError;
       switch (true) {
@@ -75,7 +75,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
           break;
       }
       this.scope.register(wrappedError);
-      await this.call(AService_constants.A_ServiceFeatures.onError);
+      await this.call(AService_constants.A_ServiceFeatures.onError, this.scope);
     }
   }
   /**
@@ -83,9 +83,9 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
    */
   async stop() {
     try {
-      await this.call(AService_constants.A_ServiceFeatures.onBeforeStop);
-      await this.call(AService_constants.A_ServiceFeatures.onStop);
-      await this.call(AService_constants.A_ServiceFeatures.onAfterStop);
+      await this.call(AService_constants.A_ServiceFeatures.onBeforeStop, this.scope);
+      await this.call(AService_constants.A_ServiceFeatures.onStop, this.scope);
+      await this.call(AService_constants.A_ServiceFeatures.onAfterStop, this.scope);
     } catch (error) {
       let wrappedError;
       switch (true) {
@@ -104,7 +104,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
           break;
       }
       this.scope.register(wrappedError);
-      await this.call(AService_constants.A_ServiceFeatures.onError);
+      await this.call(AService_constants.A_ServiceFeatures.onError, this.scope);
     }
   }
   async [_j = AService_constants.A_ServiceFeatures.onBeforeLoad](polyfill, ...args) {

@@ -1,5 +1,5 @@
 import { __decorateClass } from '../../../chunk-EQQGB2QZ.mjs';
-import { A_Entity } from '@adaas/a-concept';
+import { A_Entity, A_TypeGuards } from '@adaas/a-concept';
 import { A_Frame } from '@adaas/a-frame';
 
 let A_SignalVector = class extends A_Entity {
@@ -59,8 +59,50 @@ let A_SignalVector = class extends A_Entity {
     };
   }
   /**
+   * Checks that 2 vectors are identical by types and data 
+   * 
+   * e.g. [UserSignInSignal, UserStatusSignal] is equal to [UserSignInSignal, UserStatusSignal] with the same data, 
+   * but not equal to [UserStatusSignal, UserSignInSignal] or [UserSignInSignal, UserStatusSignal] with different data.
+   * 
+   * @param other 
+   * @returns 
+   */
+  equals(other) {
+    if (this.structure.length !== other.structure.length) {
+      return false;
+    }
+    for (let i = 0; i < this.structure.length; i++) {
+      const thisSignalConstructor = this.structure[i];
+      const otherSignalConstructor = other.structure[i];
+      if (thisSignalConstructor !== otherSignalConstructor) {
+        return false;
+      }
+      const thisSignalIndex = this._signals.findIndex((s) => s.constructor === thisSignalConstructor);
+      const otherSignalIndex = other._signals.findIndex((s) => s.constructor === otherSignalConstructor);
+      if (thisSignalIndex !== otherSignalIndex) {
+        return false;
+      }
+      const thisSignal = thisSignalIndex !== -1 ? this._signals[thisSignalIndex] : void 0;
+      const otherSignal = otherSignalIndex !== -1 ? other._signals[otherSignalIndex] : void 0;
+      if (thisSignal && otherSignal) {
+        if (!thisSignal.compare(otherSignal)) {
+          return false;
+        }
+      } else if (thisSignal || otherSignal) {
+        return false;
+      }
+    }
+    return true;
+  }
+  /**
    * Allows to match the current Signal Vector with another Signal Vector by comparing each signal in the structure.
-   * This method returns true if all signals in the vector match the corresponding signals in the other vector.
+   * This method returns true if all signals in the vector A match the corresponding signals in vector B, and false otherwise.
+   * 
+   * 
+   * e.g. [UserSignInSignal, UserStatusSignal] matches [UserStatusSignal, UserSignInSignal] with the same data,
+   * 
+   * but not matches [UserSignInSignal, UserStatusSignal] with different data or [UserSignInSignal] or [UserSignInSignal, UserStatusSignal, UserActivitySignal].
+   * 
    * 
    * @param other 
    * @returns 
@@ -90,6 +132,23 @@ let A_SignalVector = class extends A_Entity {
     return true;
   }
   /**
+   * Checks if the current Signal Vector includes all signals from another Signal Vector, regardless of order.
+   * 
+   * e.g. [UserSignInSignal, UserStatusSignal] includes [UserStatusSignal] with the same data,
+   * but not includes [UserStatusSignal] with different data or [UserActivitySignal].
+   * 
+   * @param other 
+   */
+  includes(other) {
+    for (const signalConstructor of other.structure) {
+      const signalIndex = this._signals.findIndex((s) => s.constructor === signalConstructor);
+      if (signalIndex === -1) {
+        return false;
+      }
+    }
+    return true;
+  }
+  /**
    * This method should ensure that the current Signal Vector contains all signals from the provided Signal Vector.
    * 
    * @param signal 
@@ -105,7 +164,7 @@ let A_SignalVector = class extends A_Entity {
   }
   has(param1) {
     let signalConstructor;
-    if (param1 instanceof A_Entity) {
+    if (A_TypeGuards.isEntityInstance(param1)) {
       signalConstructor = param1.constructor;
     } else {
       signalConstructor = param1;
@@ -132,7 +191,7 @@ let A_SignalVector = class extends A_Entity {
    * @param structure - Optional structure to override the default ordering
    * @returns Array of signal instances in the specified order
    */
-  async toVector(structure) {
+  toVector(structure) {
     const usedStructure = structure || this.structure;
     return usedStructure.map((signalConstructor) => {
       const signalIndex = this._signals.findIndex((s) => s.constructor === signalConstructor);
@@ -146,14 +205,14 @@ let A_SignalVector = class extends A_Entity {
    * @param structure - Optional structure to override the default ordering
    * @returns Array of serialized signal data in the specified order
    */
-  async toDataVector(structure) {
+  toDataVector(structure) {
     const usedStructure = structure || this.structure;
     const results = [];
     for (const signalConstructor of usedStructure) {
       const signalIndex = this._signals.findIndex((s) => s.constructor === signalConstructor);
       let data;
       if (signalIndex === -1) {
-        data = await signalConstructor.default();
+        data = signalConstructor.default();
       } else {
         const signal = this._signals[signalIndex];
         data = signal;

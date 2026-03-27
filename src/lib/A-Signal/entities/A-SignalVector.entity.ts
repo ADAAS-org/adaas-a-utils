@@ -1,4 +1,4 @@
-import { A_Entity, A_Scope, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
+import { A_Entity, A_Scope, A_TypeGuards, A_TYPES__Component_Constructor, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
 import { A_SignalVector_Serialized, A_SignalVector_Init, A_Signal_TSignalsConstructors, A_SignalTValue, A_SignalTValueArray } from "../A-Signal.types";
 import { A_Signal } from "./A-Signal.entity";
 import { A_Frame } from "@adaas/a-frame";
@@ -107,10 +107,60 @@ export class A_SignalVector<
         };
     }
 
+    /**
+     * Checks that 2 vectors are identical by types and data 
+     * 
+     * e.g. [UserSignInSignal, UserStatusSignal] is equal to [UserSignInSignal, UserStatusSignal] with the same data, 
+     * but not equal to [UserStatusSignal, UserSignInSignal] or [UserSignInSignal, UserStatusSignal] with different data.
+     * 
+     * @param other 
+     * @returns 
+     */
+    equals(other: A_SignalVector<TSignals>): boolean {
+        if (this.structure.length !== other.structure.length) {
+            return false;
+        }
+
+        for (let i = 0; i < this.structure.length; i++) {
+            const thisSignalConstructor = this.structure[i];
+            const otherSignalConstructor = other.structure[i];
+
+            if (thisSignalConstructor !== otherSignalConstructor) {
+                return false;
+            }
+
+            const thisSignalIndex = this._signals.findIndex(s => s.constructor === thisSignalConstructor);
+            const otherSignalIndex = other._signals.findIndex(s => s.constructor === otherSignalConstructor);
+
+            if (thisSignalIndex !== otherSignalIndex) {
+                return false;
+            }
+
+            const thisSignal = thisSignalIndex !== -1 ? this._signals[thisSignalIndex] : undefined;
+            const otherSignal = otherSignalIndex !== -1 ? other._signals[otherSignalIndex] : undefined;
+
+            if (thisSignal && otherSignal) {
+                if (!thisSignal.compare(otherSignal)) {
+                    return false;
+                }
+            } else if (thisSignal || otherSignal) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
     /**
      * Allows to match the current Signal Vector with another Signal Vector by comparing each signal in the structure.
-     * This method returns true if all signals in the vector match the corresponding signals in the other vector.
+     * This method returns true if all signals in the vector A match the corresponding signals in vector B, and false otherwise.
+     * 
+     * 
+     * e.g. [UserSignInSignal, UserStatusSignal] matches [UserStatusSignal, UserSignInSignal] with the same data,
+     * 
+     * but not matches [UserSignInSignal, UserStatusSignal] with different data or [UserSignInSignal] or [UserSignInSignal, UserStatusSignal, UserActivitySignal].
+     * 
      * 
      * @param other 
      * @returns 
@@ -146,13 +196,32 @@ export class A_SignalVector<
         return true;
     }
 
-    
+
+    /**
+     * Checks if the current Signal Vector includes all signals from another Signal Vector, regardless of order.
+     * 
+     * e.g. [UserSignInSignal, UserStatusSignal] includes [UserStatusSignal] with the same data,
+     * but not includes [UserStatusSignal] with different data or [UserActivitySignal].
+     * 
+     * @param other 
+     */
+    includes(other: A_SignalVector<TSignals>): boolean {
+        for (const signalConstructor of other.structure) {
+            const signalIndex = this._signals.findIndex(s => s.constructor === signalConstructor);
+            if (signalIndex === -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     /**
      * This method should ensure that the current Signal Vector contains all signals from the provided Signal Vector.
      * 
      * @param signal 
      */
-    contains(signal: A_SignalVector): boolean{
+    contains(signal: A_SignalVector): boolean {
         for (const signalConstructor of signal.structure) {
             const signalIndex = this._signals.findIndex(s => s.constructor === signalConstructor);
             if (signalIndex === -1) {
@@ -171,12 +240,12 @@ export class A_SignalVector<
     has(signalConstructor: A_TYPES__Entity_Constructor<A_Signal>): boolean
     has(param1: A_Signal | A_TYPES__Entity_Constructor<A_Signal>): boolean {
         let signalConstructor: A_TYPES__Entity_Constructor<A_Signal>;
-        if (param1 instanceof A_Entity) {
+        if (A_TypeGuards.isEntityInstance(param1)) {
             signalConstructor = param1.constructor as A_TYPES__Entity_Constructor<A_Signal>;
         } else {
             signalConstructor = param1;
         }
-        return this.structure.includes(signalConstructor as any);
+        return this.structure.includes(signalConstructor);
     }
 
     /**
@@ -210,11 +279,11 @@ export class A_SignalVector<
      * @param structure - Optional structure to override the default ordering
      * @returns Array of signal instances in the specified order
      */
-    async toVector<
+    toVector<
         T extends Array<A_Signal> = TSignals,
     >(
         structure?: A_Signal_TSignalsConstructors<T>
-    ): Promise<T> {
+    ): T {
         const usedStructure = structure || this.structure;
 
         return usedStructure.map((signalConstructor) => {
@@ -231,11 +300,11 @@ export class A_SignalVector<
      * @param structure - Optional structure to override the default ordering
      * @returns Array of serialized signal data in the specified order
      */
-    async toDataVector<
+    toDataVector<
         T extends A_Signal[] = TSignals,
     >(
         structure?: A_Signal_TSignalsConstructors<T>
-    ): Promise<A_SignalTValueArray<T>> {
+    ): A_SignalTValueArray<T> {
 
         const usedStructure = structure || this.structure;
 
@@ -246,7 +315,7 @@ export class A_SignalVector<
             let data: any;
             if (signalIndex === -1) {
 
-                data = await (signalConstructor as typeof A_Signal).default()
+                data = (signalConstructor as typeof A_Signal).default()
 
             } else {
                 const signal = this._signals[signalIndex];

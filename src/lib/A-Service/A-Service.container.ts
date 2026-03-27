@@ -26,11 +26,11 @@ export class A_Service extends A_Container {
      */
     async load() {
         try {
-            await this.call(A_ServiceFeatures.onBeforeLoad);
+            await this.call(A_ServiceFeatures.onBeforeLoad, this.scope);
 
-            await this.call(A_ServiceFeatures.onLoad);
+            await this.call(A_ServiceFeatures.onLoad, this.scope);
 
-            await this.call(A_ServiceFeatures.onAfterLoad);
+            await this.call(A_ServiceFeatures.onAfterLoad, this.scope);
 
         } catch (error) {
 
@@ -56,7 +56,7 @@ export class A_Service extends A_Container {
 
             this.scope.register(wrappedError);
 
-            await this.call(A_ServiceFeatures.onError);
+            await this.call(A_ServiceFeatures.onError, this.scope);
         }
 
     }
@@ -68,11 +68,11 @@ export class A_Service extends A_Container {
      */
     async start() {
         try {
-            await this.call(A_ServiceFeatures.onBeforeStart);
+            await this.call(A_ServiceFeatures.onBeforeStart, this.scope);
 
-            await this.call(A_ServiceFeatures.onStart);
+            await this.call(A_ServiceFeatures.onStart, this.scope);
 
-            await this.call(A_ServiceFeatures.onAfterStart);
+            await this.call(A_ServiceFeatures.onAfterStart, this.scope);
 
         } catch (error) {
 
@@ -98,7 +98,7 @@ export class A_Service extends A_Container {
 
             this.scope.register(wrappedError);
 
-            await this.call(A_ServiceFeatures.onError);
+            await this.call(A_ServiceFeatures.onError, this.scope);
         }
 
     }
@@ -109,11 +109,11 @@ export class A_Service extends A_Container {
      */
     async stop() {
         try {
-            await this.call(A_ServiceFeatures.onBeforeStop);
+            await this.call(A_ServiceFeatures.onBeforeStop, this.scope);
 
-            await this.call(A_ServiceFeatures.onStop);
+            await this.call(A_ServiceFeatures.onStop, this.scope);
 
-            await this.call(A_ServiceFeatures.onAfterStop);
+            await this.call(A_ServiceFeatures.onAfterStop, this.scope);
 
         } catch (error) {
 
@@ -139,7 +139,7 @@ export class A_Service extends A_Container {
 
             this.scope.register(wrappedError);
 
-            await this.call(A_ServiceFeatures.onError);
+            await this.call(A_ServiceFeatures.onError, this.scope);
         }
     }
 
