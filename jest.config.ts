@@ -26,7 +26,9 @@ const config: Config.InitialOptions = {
         '^@adaas/a-utils/a-schedule$': '<rootDir>/src/lib/A-Schedule',
         '^@adaas/a-utils/a-service$': '<rootDir>/src/lib/A-Service',
         '^@adaas/a-utils/a-signal$': '<rootDir>/src/lib/A-Signal',
-        '^@adaas/a-utils/a-state-machine$': '<rootDir>/src/lib/A-StateMachine'
+        '^@adaas/a-utils/a-state-machine$': '<rootDir>/src/lib/A-StateMachine',
+
+        '^@adaas/a-utils/helpers/(.*)$': '<rootDir>/src/helpers/$1',
     }
 };
 export default config;

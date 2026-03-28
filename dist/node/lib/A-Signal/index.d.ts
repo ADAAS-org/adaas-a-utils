@@ -1,4 +1,4 @@
-export { A as A_Signal, a as A_SignalConfig_Init, b as A_SignalTValue, c as A_SignalTValueArray, d as A_SignalVector_Init, e as A_SignalVector_Serialized, f as A_Signal_Init, g as A_Signal_Serialized, h as A_Signal_TSignalsConstructors } from '../../A-Signal.types-C0Ta5Unp.js';
+export { A as A_Signal, a as A_SignalConfig_Init, b as A_SignalTValue, c as A_SignalTValueArray, d as A_SignalVector_Init, e as A_SignalVector_Serialized, f as A_Signal_Init, g as A_Signal_Serialized, h as A_Signal_TSignalsConstructors } from '../../A-Signal.types-DxQHmPm6.js';
 export { A_SignalVector } from './entities/A-SignalVector.entity.js';
 export { A_SignalBus } from './components/A-SignalBus.component.js';
 export { A_SignalBusError } from './components/A-SignalBus.error.js';

@@ -150,10 +150,14 @@ describe('A-Signal tests', () => {
         class UserIntentionSignal extends A_Signal<{ buttonId: string }> { }
 
         class UserMousePositionSignal extends A_Signal<{ x: number, y: number }> {
-            static default(): A_Signal | undefined {
-                return new UserMousePositionSignal({
-                    data: { x: 0, y: 0 }
-                });
+            fromUndefined(): void {
+                super.fromNew({
+                    name: 'UserMousePositionSignal',
+                    data: {
+                        x: 0,
+                        y: 0
+                    }
+                })
             }
         }
         class UserElementHoverSignal extends A_Signal<{ elementId: string }> { }

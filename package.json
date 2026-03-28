@@ -231,6 +231,22 @@
         "import": "./dist/node/lib/A-StateMachine/index.mjs",
         "require": "./dist/node/lib/A-StateMachine/index.js"
       }
+    },
+    "./helpers": {
+      "browser": {
+        "types": "./dist/browser/helpers/index.d.ts",
+        "import": "./dist/browser/helpers/index.mjs"
+      },
+      "node": {
+        "types": "./dist/node/helpers/index.d.ts",
+        "import": "./dist/node/helpers/index.mjs",
+        "require": "./dist/node/helpers/index.js"
+      },
+      "default": {
+        "types": "./dist/node/helpers/index.d.ts",
+        "import": "./dist/node/helpers/index.mjs",
+        "require": "./dist/node/helpers/index.js"
+      }
     }
   },
   "keywords": [

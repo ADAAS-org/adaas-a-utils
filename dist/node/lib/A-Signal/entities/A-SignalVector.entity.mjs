@@ -212,7 +212,7 @@ let A_SignalVector = class extends A_Entity {
       const signalIndex = this._signals.findIndex((s) => s.constructor === signalConstructor);
       let data;
       if (signalIndex === -1) {
-        data = signalConstructor.default();
+        data = new signalConstructor();
       } else {
         const signal = this._signals[signalIndex];
         data = signal;

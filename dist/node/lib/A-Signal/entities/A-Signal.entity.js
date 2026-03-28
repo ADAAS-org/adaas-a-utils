@@ -2,6 +2,7 @@
 
 var aConcept = require('@adaas/a-concept');
 var aFrame = require('@adaas/a-frame');
+var helpers = require('@adaas/a-utils/helpers');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -12,61 +13,6 @@ var __decorateClass = (decorators, target, key, kind) => {
   return result;
 };
 exports.A_Signal = class A_Signal extends aConcept.A_Entity {
-  // ========================================================================
-  // ========================== Static Methods ==============================
-  // ========================================================================
-  /**
-   * Allows to define default data for the signal.
-   * 
-   * If no data is provided during initialization, the default data will be used.
-   * 
-   * @returns 
-   */
-  static default() {
-    return void 0;
-  }
-  createHash(str) {
-    let hashSource;
-    if (str instanceof Map) {
-      hashSource = JSON.stringify(Array.from(str.entries()));
-    } else if (str instanceof Set) {
-      hashSource = JSON.stringify(Array.from(str.values()));
-    } else {
-      switch (typeof str) {
-        case "string":
-          hashSource = str;
-          break;
-        case "undefined":
-          hashSource = "undefined";
-          break;
-        case "object":
-          if ("toJSON" in str)
-            hashSource = JSON.stringify(str.toJSON());
-          else
-            hashSource = JSON.stringify(str);
-          break;
-        case "number":
-          hashSource = str.toString();
-          break;
-        case "boolean":
-          hashSource = str ? "true" : "false";
-          break;
-        case "function":
-          hashSource = str.toString();
-          break;
-        default:
-          hashSource = String(str);
-      }
-    }
-    let hash = 0, i, chr;
-    for (i = 0; i < hashSource.length; i++) {
-      chr = hashSource.charCodeAt(i);
-      hash = (hash << 5) - hash + chr;
-      hash |= 0;
-    }
-    const hashString = hash.toString();
-    return hashString;
-  }
   /**
    * This method compares the current signal with another signal instance by deduplication ID
    * this id can be configured during initialization with the "id" property.
@@ -86,21 +32,51 @@ exports.A_Signal = class A_Signal extends aConcept.A_Entity {
     }
     return true;
   }
-  fromJSON(serializedEntity) {
-    super.fromJSON(serializedEntity);
-    this.data = serializedEntity.data;
+  /**
+   * Allows to define default data for the signal.
+   * 
+   * If no data is provided during initialization, the default data will be used.
+   * 
+   * @returns 
+   */
+  fromUndefined() {
+    const name = this.constructor.entity;
+    this.data = void 0;
+    const identity = {
+      name,
+      data: this.data
+    };
+    const id = helpers.A_UtilsHelper.hash(identity);
+    this.aseid = this.generateASEID({
+      entity: name,
+      id
+    });
   }
+  /**
+   * Allows to initialize the signal from a new signal entity. This is useful for example when we want to create a new instance of the signal entity with the same data as another instance, but with a different ASEID.
+   * 
+   * @param newEntity 
+   */
   fromNew(newEntity) {
     this.data = newEntity.data;
     const identity = newEntity.id || {
       name: newEntity.name,
       data: this.data
     };
-    const id = this.createHash(identity);
+    const id = helpers.A_UtilsHelper.hash(identity);
     this.aseid = this.generateASEID({
       entity: newEntity.name,
       id
     });
+  }
+  /**
+   * Allows to initialize the signal from a serialized version of the signal. This is useful for example when we receive a signal from the server and we want to create an instance of the signal entity from the received data.
+   * 
+   * @param serializedEntity 
+   */
+  fromJSON(serializedEntity) {
+    super.fromJSON(serializedEntity);
+    this.data = serializedEntity.data;
   }
   toJSON() {
     return {

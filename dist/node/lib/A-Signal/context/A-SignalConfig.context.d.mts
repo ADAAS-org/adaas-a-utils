@@ -1,5 +1,5 @@
 import { A_Fragment, A_TYPES__Entity_Constructor } from '@adaas/a-concept';
-import { A as A_Signal, a as A_SignalConfig_Init } from '../../../A-Signal.types-C0Ta5Unp.mjs';
+import { A as A_Signal, a as A_SignalConfig_Init } from '../../../A-Signal.types-DxQHmPm6.mjs';
 
 /**
  * This component should dictate a structure of the vector for all signals within a given scope.

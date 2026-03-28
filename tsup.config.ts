@@ -32,6 +32,8 @@ export default defineConfig([
       "a-service": "src/lib/A-Service/index.ts",
       "a-signal": "src/lib/A-Signal/index.ts",
       "a-state-machine": "src/lib/A-StateMachine/index.ts",
+
+      "helpers": "src/helpers/index.ts",
     },
 
     // Output directory for browser bundle

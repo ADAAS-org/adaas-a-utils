@@ -315,7 +315,7 @@ export class A_SignalVector<
             let data: any;
             if (signalIndex === -1) {
 
-                data = (signalConstructor as typeof A_Signal).default()
+                data = new (signalConstructor as typeof A_Signal)()
 
             } else {
                 const signal = this._signals[signalIndex];

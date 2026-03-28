@@ -1,5 +1,5 @@
 import { A_Entity, A_TYPES__Entity_Constructor } from '@adaas/a-concept';
-import { A as A_Signal, d as A_SignalVector_Init, h as A_Signal_TSignalsConstructors, e as A_SignalVector_Serialized, c as A_SignalTValueArray } from '../../../A-Signal.types-C0Ta5Unp.mjs';
+import { A as A_Signal, d as A_SignalVector_Init, h as A_Signal_TSignalsConstructors, e as A_SignalVector_Serialized, c as A_SignalTValueArray } from '../../../A-Signal.types-DxQHmPm6.mjs';
 
 /**
  * A Signal Vector Entity is a collection of signals structured in a specific way.

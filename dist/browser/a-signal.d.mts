@@ -69,31 +69,9 @@ type A_Signal_Serialized<T extends any = any> = {
  */
 declare class A_Signal<_TSignalDataType extends any = any, _TSignalSerializedDataType extends any = _TSignalDataType> extends A_Entity<A_Signal_Init<_TSignalDataType>, A_Signal_Serialized<_TSignalSerializedDataType>> {
     /**
-     * Allows to define default data for the signal.
-     *
-     * If no data is provided during initialization, the default data will be used.
-     *
-     * @returns
-     */
-    static default(): A_Signal | undefined;
-    /**
      * The actual data carried by the signal.
      */
     data: _TSignalDataType;
-    /**
-      * Generates signal hash uses for comparison
-      *
-      * @param str
-      */
-    protected createHash(str?: string): string;
-    protected createHash(str?: undefined): string;
-    protected createHash(str?: Record<string, any>): string;
-    protected createHash(str?: Array<any>): string;
-    protected createHash(str?: number): string;
-    protected createHash(str?: boolean): string;
-    protected createHash(str?: null): string;
-    protected createHash(map?: Map<any, any>): string;
-    protected createHash(set?: Set<any>): string;
     /**
      * This method compares the current signal with another signal instance by deduplication ID
      * this id can be configured during initialization with the "id" property.
@@ -108,8 +86,26 @@ declare class A_Signal<_TSignalDataType extends any = any, _TSignalSerializedDat
      * @returns
      */
     compare(other: A_Signal<_TSignalDataType>): boolean;
-    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalSerializedDataType>): void;
+    /**
+     * Allows to define default data for the signal.
+     *
+     * If no data is provided during initialization, the default data will be used.
+     *
+     * @returns
+     */
+    fromUndefined(): void;
+    /**
+     * Allows to initialize the signal from a new signal entity. This is useful for example when we want to create a new instance of the signal entity with the same data as another instance, but with a different ASEID.
+     *
+     * @param newEntity
+     */
     fromNew(newEntity: A_Signal_Init<_TSignalDataType>): void;
+    /**
+     * Allows to initialize the signal from a serialized version of the signal. This is useful for example when we receive a signal from the server and we want to create an instance of the signal entity from the received data.
+     *
+     * @param serializedEntity
+     */
+    fromJSON(serializedEntity: A_Signal_Serialized<_TSignalSerializedDataType>): void;
     toJSON(): A_Signal_Serialized<_TSignalSerializedDataType>;
 }
 

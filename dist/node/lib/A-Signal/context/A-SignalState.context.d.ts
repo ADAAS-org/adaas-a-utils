@@ -1,5 +1,5 @@
 import { A_Fragment, A_TYPES__Component_Constructor } from '@adaas/a-concept';
-import { A as A_Signal } from '../../../A-Signal.types-C0Ta5Unp.js';
+import { A as A_Signal } from '../../../A-Signal.types-DxQHmPm6.js';
 import { A_SignalVector } from '../entities/A-SignalVector.entity.js';
 
 /**
