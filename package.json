@@ -305,8 +305,8 @@
     "build": "tsup --config tsup.config.ts"
   },
   "dependencies": {
-    "@adaas/a-concept": "^0.3.10",
-    "@adaas/a-frame": "^0.0.19"
+    "@adaas/a-concept": "^0.3.11",
+    "@adaas/a-frame": "^0.0.20"
   },
   "devDependencies": {
     "@types/chai": "^4.3.14",
