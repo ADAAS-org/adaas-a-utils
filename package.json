@@ -293,6 +293,9 @@
   },
   "scripts": {
     "test": "jest ",
+    "test:dist": "jest --config jest.config.dist.ts",
+    "test:signal": "jest --testPathPattern=A-Signal",
+    "test:signal:dist": "jest --config jest.config.dist.ts --testPathPattern=A-Signal",
     "start": "nodemon ./tests/log.ts",
     "example:A-Config": "nodemon ./examples/config.ts",
     "example:A-Logger": "nodemon ./examples/A-Logger-examples.ts",

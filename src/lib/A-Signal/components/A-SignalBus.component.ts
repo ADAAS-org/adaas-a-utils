@@ -1,4 +1,4 @@
-import { A_Caller, A_Component, A_Context, A_Dependency, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
+import { A_Caller, A_Component, A_Context, A_Dependency, A_Error, A_Feature, A_Inject, A_Scope, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
 import { A_SignalState } from "../context/A-SignalState.context";
 import { A_SignalConfig } from "../context/A-SignalConfig.context";
 import { A_Signal } from "../entities/A-Signal.entity";
@@ -69,7 +69,7 @@ export class A_SignalBus extends A_Component {
 
             scope.register(wrappedError);
 
-            await this.call(A_SignalBusFeatures.onError);
+            await this.call(A_SignalBusFeatures.onError, scope);
 
             scope.destroy();
         }
@@ -106,7 +106,18 @@ export class A_SignalBus extends A_Component {
         const componentContext = A_Context.scope(this);
 
         if (!config) {
+            // Auto-discover signal types from the call scope's signal instances
+            // (using A_Signal as the abstraction to find all concrete types in scope)
+            const signalTypes = [
+                ...new Set(
+                    scope.entities
+                        .filter((e: any): e is A_Signal => e instanceof A_Signal)
+                        .map((s: A_Signal) => s.constructor as A_TYPES__Entity_Constructor<A_Signal>)
+                )
+            ];
+
             config = new A_SignalConfig({
+                structure: signalTypes.length ? signalTypes : undefined,
                 stringStructure: globalConfig?.get('A_SIGNAL_VECTOR_STRUCTURE') || undefined
             });
 

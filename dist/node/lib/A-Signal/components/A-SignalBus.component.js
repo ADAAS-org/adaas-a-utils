@@ -50,7 +50,7 @@ exports.A_SignalBus = class A_SignalBus extends aConcept.A_Component {
           break;
       }
       scope.register(wrappedError);
-      await this.call(ASignalBus_constants.A_SignalBusFeatures.onError);
+      await this.call(ASignalBus_constants.A_SignalBusFeatures.onError, scope);
       scope.destroy();
     }
   }
@@ -60,7 +60,13 @@ exports.A_SignalBus = class A_SignalBus extends aConcept.A_Component {
   async [_b = ASignalBus_constants.A_SignalBusFeatures.onBeforeNext](scope, globalConfig, state, logger, config) {
     const componentContext = aConcept.A_Context.scope(this);
     if (!config) {
+      const signalTypes = [
+        ...new Set(
+          scope.entities.filter((e) => e instanceof ASignal_entity.A_Signal).map((s) => s.constructor)
+        )
+      ];
       config = new ASignalConfig_context.A_SignalConfig({
+        structure: signalTypes.length ? signalTypes : void 0,
         stringStructure: globalConfig?.get("A_SIGNAL_VECTOR_STRUCTURE") || void 0
       });
       componentContext.register(config);

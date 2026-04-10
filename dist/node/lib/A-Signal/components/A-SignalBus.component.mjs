@@ -38,7 +38,7 @@ let A_SignalBus = class extends A_Component {
           break;
       }
       scope.register(wrappedError);
-      await this.call(A_SignalBusFeatures.onError);
+      await this.call(A_SignalBusFeatures.onError, scope);
       scope.destroy();
     }
   }
@@ -48,7 +48,13 @@ let A_SignalBus = class extends A_Component {
   async [_b = A_SignalBusFeatures.onBeforeNext](scope, globalConfig, state, logger, config) {
     const componentContext = A_Context.scope(this);
     if (!config) {
+      const signalTypes = [
+        ...new Set(
+          scope.entities.filter((e) => e instanceof A_Signal).map((s) => s.constructor)
+        )
+      ];
       config = new A_SignalConfig({
+        structure: signalTypes.length ? signalTypes : void 0,
         stringStructure: globalConfig?.get("A_SIGNAL_VECTOR_STRUCTURE") || void 0
       });
       componentContext.register(config);
