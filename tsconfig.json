@@ -1,10 +1,8 @@
 {
    "extends": "./.conf/tsconfig.base.json",
    "compilerOptions": {
-      "ignoreDeprecations": "5.0",
       "isolatedModules": true,
       "rootDir": "./",
-      "baseUrl": ".",
       "paths": {
          "@adaas/a-utils/a-channel": ["src/lib/A-Channel"],
          "@adaas/a-utils/a-command": ["src/lib/A-Command"],

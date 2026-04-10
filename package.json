@@ -202,7 +202,7 @@
     },
     "./a-signal": {
       "browser": {
-        "types": "./dist/browser/a-signal.d.ts",
+        "types": "./dist/browser/a-signal.d.mts",
         "import": "./dist/browser/a-signal.mjs"
       },
       "node": {
@@ -218,7 +218,7 @@
     },
     "./a-state-machine": {
       "browser": {
-        "types": "./dist/browser/a-state-machine.d.ts",
+        "types": "./dist/browser/a-state-machine.d.mts",
         "import": "./dist/browser/a-state-machine.mjs"
       },
       "node": {
@@ -234,8 +234,8 @@
     },
     "./helpers": {
       "browser": {
-        "types": "./dist/browser/helpers/index.d.ts",
-        "import": "./dist/browser/helpers/index.mjs"
+        "types": "./dist/browser/helpers.d.mts",
+        "import": "./dist/browser/helpers.mjs"
       },
       "node": {
         "types": "./dist/node/helpers/index.d.ts",
