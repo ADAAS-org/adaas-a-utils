@@ -1,4 +1,4 @@
-import { A_Caller, A_Component, A_Context, A_Dependency, A_Error, A_Feature, A_Inject, A_Scope, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
+import { A_Caller, A_CommonHelper, A_Component, A_Context, A_Dependency, A_Error, A_Feature, A_Inject, A_Scope, A_TYPES__Entity_Constructor } from "@adaas/a-concept";
 import { A_SignalState } from "../context/A-SignalState.context";
 import { A_SignalConfig } from "../context/A-SignalConfig.context";
 import { A_Signal } from "../entities/A-Signal.entity";
@@ -39,14 +39,13 @@ export class A_SignalBus extends A_Component {
             .inherit(A_Context.scope(this));
 
         try {
-            await this.call(A_SignalBusFeatures.onBeforeNext, scope);
+            await this.call(A_SignalBusFeatures.onBeforeNext, A_Context.scope(this));
 
             await this.call(A_SignalBusFeatures.onNext, scope);
 
             scope.destroy();
 
         } catch (error) {
-
             let wrappedError;
 
             switch (true) {
@@ -108,13 +107,11 @@ export class A_SignalBus extends A_Component {
         if (!config) {
             // Auto-discover signal types from the call scope's signal instances
             // (using A_Signal as the abstraction to find all concrete types in scope)
-            const signalTypes = [
-                ...new Set(
-                    scope.entities
-                        .filter((e: any): e is A_Signal => e instanceof A_Signal)
-                        .map((s: A_Signal) => s.constructor as A_TYPES__Entity_Constructor<A_Signal>)
-                )
-            ];
+            const entries = componentContext.allowedEntities.entries();
+
+            const signalTypes = Array.from(entries)
+                .filter(([_, entity]) => A_CommonHelper.isInheritedFrom(entity, A_Signal))
+                .map(([ctor, _]) => ctor as A_TYPES__Entity_Constructor<A_Signal>);
 
             config = new A_SignalConfig({
                 structure: signalTypes.length ? signalTypes : undefined,
@@ -187,5 +184,6 @@ export class A_SignalBus extends A_Component {
         const vector = state.toVector();
 
         scope.register(vector);
+
     }
 }

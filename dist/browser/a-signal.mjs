@@ -518,7 +518,7 @@ var A_SignalBus = class extends A_Component {
       entities: signals
     }).inherit(A_Context.scope(this));
     try {
-      await this.call("_A_SignalBusFeatures_onBeforeNext" /* onBeforeNext */, scope);
+      await this.call("_A_SignalBusFeatures_onBeforeNext" /* onBeforeNext */, A_Context.scope(this));
       await this.call("_A_SignalBusFeatures_onNext" /* onNext */, scope);
       scope.destroy();
     } catch (error) {
@@ -549,11 +549,8 @@ var A_SignalBus = class extends A_Component {
   async [_b = "_A_SignalBusFeatures_onBeforeNext" /* onBeforeNext */](scope, globalConfig, state, logger, config) {
     const componentContext = A_Context.scope(this);
     if (!config) {
-      const signalTypes = [
-        ...new Set(
-          scope.entities.filter((e) => e instanceof A_Signal).map((s) => s.constructor)
-        )
-      ];
+      const entries = componentContext.allowedEntities.entries();
+      const signalTypes = Array.from(entries).filter(([_, entity]) => A_CommonHelper.isInheritedFrom(entity, A_Signal)).map(([ctor, _]) => ctor);
       config = new A_SignalConfig({
         structure: signalTypes.length ? signalTypes : void 0,
         stringStructure: globalConfig?.get("A_SIGNAL_VECTOR_STRUCTURE") || void 0

@@ -1,5 +1,5 @@
 import { __decorateClass, __decorateParam } from '../../../chunk-EQQGB2QZ.mjs';
-import { A_Component, A_Scope, A_Context, A_Error, A_Feature, A_Inject, A_Dependency } from '@adaas/a-concept';
+import { A_Component, A_Scope, A_Context, A_Error, A_CommonHelper, A_Feature, A_Inject, A_Dependency } from '@adaas/a-concept';
 import { A_SignalState } from '../context/A-SignalState.context';
 import { A_SignalConfig } from '../context/A-SignalConfig.context';
 import { A_Signal } from '../entities/A-Signal.entity';
@@ -17,7 +17,7 @@ let A_SignalBus = class extends A_Component {
       entities: signals
     }).inherit(A_Context.scope(this));
     try {
-      await this.call(A_SignalBusFeatures.onBeforeNext, scope);
+      await this.call(A_SignalBusFeatures.onBeforeNext, A_Context.scope(this));
       await this.call(A_SignalBusFeatures.onNext, scope);
       scope.destroy();
     } catch (error) {
@@ -48,11 +48,8 @@ let A_SignalBus = class extends A_Component {
   async [_b = A_SignalBusFeatures.onBeforeNext](scope, globalConfig, state, logger, config) {
     const componentContext = A_Context.scope(this);
     if (!config) {
-      const signalTypes = [
-        ...new Set(
-          scope.entities.filter((e) => e instanceof A_Signal).map((s) => s.constructor)
-        )
-      ];
+      const entries = componentContext.allowedEntities.entries();
+      const signalTypes = Array.from(entries).filter(([_, entity]) => A_CommonHelper.isInheritedFrom(entity, A_Signal)).map(([ctor, _]) => ctor);
       config = new A_SignalConfig({
         structure: signalTypes.length ? signalTypes : void 0,
         stringStructure: globalConfig?.get("A_SIGNAL_VECTOR_STRUCTURE") || void 0

@@ -309,6 +309,7 @@ describe('A-Signal tests', () => {
             containers: [new A_Container({
                 name: 'test-container',
                 components: [A_SignalBus, Listener],
+                entities:[RouteSignal],
                 fragments: []  // no explicit A_SignalConfig — auto-discovery from scope should kick in
             })]
         });
