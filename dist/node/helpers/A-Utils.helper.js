@@ -97,6 +97,55 @@ exports.A_UtilsHelper = class A_UtilsHelper extends aConcept.A_Component {
     const pairs = keys.map((k) => `${k}:${exports.A_UtilsHelper.serialize(value[k])}`).join(",");
     return `{${pairs}}`;
   }
+  /**
+   * Sets a nested property on an object using a dot-separated path string. This method safely navigates through the object structure and sets the value at the specified path, creating intermediate objects as needed. If any part of the path is invalid or if the input parameters are not properly formatted, the method will simply return without making any changes to the object.
+   * 
+   * @param obj The object on which to set the property.
+   * @param path A dot-separated string representing the path to the desired property (e.g., "user.profile.name").
+   * @param value The value to set at the specified path.
+   * @returns the target object with the updated property, or undefined if the input parameters are invalid.
+   */
+  static setBypath(obj, path, value) {
+    if (!obj || typeof obj !== "object" || !path || typeof path !== "string") {
+      return;
+    }
+    const parts = path.split(".");
+    const lastPart = parts.pop();
+    const target = parts.reduce((acc, part) => {
+      if (acc[part] === void 0) {
+        acc[part] = {};
+      }
+      return acc[part];
+    }, obj);
+    target[lastPart] = value;
+    return obj;
+  }
+  /**
+   * Extracts a nested property from an object using a dot-separated path string. This method safely navigates through the object structure and returns the value at the specified path, or undefined if any part of the path is invalid or does not exist.
+   * 
+   * @param obj The object from which to extract the property.
+   * @param path A dot-separated string representing the path to the desired property (e.g., "user.profile.name"). 
+   * @returns The value at the specified path, or undefined if the path is invalid or does not exist. 
+   */
+  static getByPath(obj, path) {
+    if (!path || typeof path !== "string") {
+      return obj;
+    }
+    if (!obj || typeof obj !== "object") {
+      return void 0;
+    }
+    try {
+      const result = path.split(".").reduce((acc, part) => {
+        if (acc === null || acc === void 0) {
+          return void 0;
+        }
+        return acc[part];
+      }, obj);
+      return result;
+    } catch {
+      return void 0;
+    }
+  }
   // ─────────────────────────────────────────────────────────────────────────────
   // ── FNV-1a (pure Number, no BigInt) ──────────────────────────────────────────
   // ─────────────────────────────────────────────────────────────────────────────
@@ -133,6 +182,23 @@ exports.A_UtilsHelper = class A_UtilsHelper extends aConcept.A_Component {
     const hash = exports.A_UtilsHelper.hash(caller);
     context.set(feature.name, hash);
   }
+  serialize(caller, context, feature) {
+    const serialized = exports.A_UtilsHelper.serialize(caller);
+    context.set(feature.name, serialized);
+  }
+  setByPath(caller, context, feature) {
+    const obj = context.get("object");
+    const path = context.get("path");
+    const value = context.get("value");
+    const result = exports.A_UtilsHelper.setBypath(obj, path, value);
+    context.set(feature.name, result);
+  }
+  getByPath(caller, context, feature) {
+    const obj = context.get("object");
+    const path = context.get("path");
+    const result = exports.A_UtilsHelper.getByPath(obj, path);
+    context.set(feature.name, result);
+  }
 };
 __decorateClass([
   aFrame.A_Frame.Method({
@@ -142,6 +208,30 @@ __decorateClass([
   __decorateParam(1, aConcept.A_Inject(aExecution.A_ExecutionContext)),
   __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
 ], exports.A_UtilsHelper.prototype, "hash", 1);
+__decorateClass([
+  aFrame.A_Frame.Method({
+    description: "Instance method wrapper for the static serialize function, allowing it to be injected as a dependency."
+  }),
+  __decorateParam(0, aConcept.A_Inject(aConcept.A_Caller)),
+  __decorateParam(1, aConcept.A_Inject(aExecution.A_ExecutionContext)),
+  __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
+], exports.A_UtilsHelper.prototype, "serialize", 1);
+__decorateClass([
+  aFrame.A_Frame.Method({
+    description: "Instance method wrapper for the static setByPath function, allowing it to be injected as a dependency."
+  }),
+  __decorateParam(0, aConcept.A_Inject(aConcept.A_Caller)),
+  __decorateParam(1, aConcept.A_Inject(aExecution.A_ExecutionContext)),
+  __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
+], exports.A_UtilsHelper.prototype, "setByPath", 1);
+__decorateClass([
+  aFrame.A_Frame.Method({
+    description: "Instance method wrapper for the static getByPath function, allowing it to be injected as a dependency."
+  }),
+  __decorateParam(0, aConcept.A_Inject(aConcept.A_Caller)),
+  __decorateParam(1, aConcept.A_Inject(aExecution.A_ExecutionContext)),
+  __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
+], exports.A_UtilsHelper.prototype, "getByPath", 1);
 exports.A_UtilsHelper = __decorateClass([
   aFrame.A_Frame.Component({
     namespace: "A-Utils",

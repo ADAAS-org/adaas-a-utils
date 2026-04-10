@@ -119,6 +119,63 @@ export class A_UtilsHelper extends A_Component {
         return `{${pairs}}`;
     }
 
+    /**
+     * Sets a nested property on an object using a dot-separated path string. This method safely navigates through the object structure and sets the value at the specified path, creating intermediate objects as needed. If any part of the path is invalid or if the input parameters are not properly formatted, the method will simply return without making any changes to the object.
+     * 
+     * @param obj The object on which to set the property.
+     * @param path A dot-separated string representing the path to the desired property (e.g., "user.profile.name").
+     * @param value The value to set at the specified path.
+     * @returns the target object with the updated property, or undefined if the input parameters are invalid.
+     */
+    static setBypath(obj: unknown, path: string, value: any): Record<string, any> | undefined {
+        if (!obj || typeof obj !== 'object' || !path || typeof path !== 'string') {
+            return;
+        }
+
+        const parts = path.split('.');
+        const lastPart = parts.pop() as string;
+
+        const target = parts.reduce((acc, part) => {
+            if (acc[part] === undefined) {
+                acc[part] = {};
+            }
+            return acc[part];
+        }, obj as Record<string, any>);
+
+        target[lastPart] = value;
+
+        return obj as Record<string, any>;
+    }
+
+    /**
+     * Extracts a nested property from an object using a dot-separated path string. This method safely navigates through the object structure and returns the value at the specified path, or undefined if any part of the path is invalid or does not exist.
+     * 
+     * @param obj The object from which to extract the property.
+     * @param path A dot-separated string representing the path to the desired property (e.g., "user.profile.name"). 
+     * @returns The value at the specified path, or undefined if the path is invalid or does not exist. 
+     */
+    static getByPath<T = any>(obj: unknown, path: string): T | undefined {
+        if (!path || typeof path !== 'string') {
+            return obj as T;
+        }
+
+        if (!obj || typeof obj !== 'object') {
+            return undefined;
+        }
+
+        try {
+            const result = path.split('.').reduce<any>((acc, part) => {
+                if (acc === null || acc === undefined) {
+                    return undefined;
+                }
+                return acc[part];
+            }, obj);
+
+            return result as T | undefined;
+        } catch {
+            return undefined;
+        }
+    }
 
     // ─────────────────────────────────────────────────────────────────────────────
     // ── FNV-1a (pure Number, no BigInt) ──────────────────────────────────────────
@@ -182,5 +239,54 @@ export class A_UtilsHelper extends A_Component {
         const hash = A_UtilsHelper.hash(caller);
 
         context.set(feature.name, hash);
+    }
+
+
+    @A_Frame.Method({
+        description: 'Instance method wrapper for the static serialize function, allowing it to be injected as a dependency.'
+    })
+    serialize(
+        @A_Inject(A_Caller) caller: any,
+        @A_Inject(A_ExecutionContext) context: A_ExecutionContext,
+        @A_Inject(A_Feature) feature: A_Feature
+    ) {
+        const serialized = A_UtilsHelper.serialize(caller);
+
+        context.set(feature.name, serialized);
+    }
+
+
+    @A_Frame.Method({
+        description: 'Instance method wrapper for the static setByPath function, allowing it to be injected as a dependency.'
+    })
+    setByPath(
+        @A_Inject(A_Caller) caller: any,
+        @A_Inject(A_ExecutionContext) context: A_ExecutionContext,
+        @A_Inject(A_Feature) feature: A_Feature
+    ) {
+        const obj = context.get('object');
+        const path = context.get('path');
+        const value = context.get('value');
+
+        const result = A_UtilsHelper.setBypath(obj, path, value);
+
+        context.set(feature.name, result);
+    }
+
+
+    @A_Frame.Method({
+        description: 'Instance method wrapper for the static getByPath function, allowing it to be injected as a dependency.'
+    })
+    getByPath(
+        @A_Inject(A_Caller) caller: any,
+        @A_Inject(A_ExecutionContext) context: A_ExecutionContext,
+        @A_Inject(A_Feature) feature: A_Feature
+    ) {
+        const obj = context.get('object');
+        const path = context.get('path');
+
+        const result = A_UtilsHelper.getByPath(obj, path);
+
+        context.set(feature.name, result);
     }
 }

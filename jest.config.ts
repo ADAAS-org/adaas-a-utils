@@ -29,6 +29,7 @@ const config: Config.InitialOptions = {
         '^@adaas/a-utils/a-state-machine$': '<rootDir>/src/lib/A-StateMachine',
 
         '^@adaas/a-utils/helpers/(.*)$': '<rootDir>/src/helpers/$1',
+        '^@adaas/a-utils/helpers$': '<rootDir>/src/helpers',
     }
 };
 export default config;

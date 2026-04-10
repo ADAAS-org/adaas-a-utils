@@ -34,6 +34,23 @@ declare class A_UtilsHelper extends A_Component {
      */
     static serialize(value: any): string;
     /**
+     * Sets a nested property on an object using a dot-separated path string. This method safely navigates through the object structure and sets the value at the specified path, creating intermediate objects as needed. If any part of the path is invalid or if the input parameters are not properly formatted, the method will simply return without making any changes to the object.
+     *
+     * @param obj The object on which to set the property.
+     * @param path A dot-separated string representing the path to the desired property (e.g., "user.profile.name").
+     * @param value The value to set at the specified path.
+     * @returns the target object with the updated property, or undefined if the input parameters are invalid.
+     */
+    static setBypath(obj: unknown, path: string, value: any): Record<string, any> | undefined;
+    /**
+     * Extracts a nested property from an object using a dot-separated path string. This method safely navigates through the object structure and returns the value at the specified path, or undefined if any part of the path is invalid or does not exist.
+     *
+     * @param obj The object from which to extract the property.
+     * @param path A dot-separated string representing the path to the desired property (e.g., "user.profile.name").
+     * @returns The value at the specified path, or undefined if the path is invalid or does not exist.
+     */
+    static getByPath<T = any>(obj: unknown, path: string): T | undefined;
+    /**
      * FNV-1a hash using two 32-bit halves to simulate a 52-bit space,
      * without requiring BigInt.
      *
@@ -51,6 +68,9 @@ declare class A_UtilsHelper extends A_Component {
      */
     private static fnv1a52;
     hash(caller: any, context: A_ExecutionContext, feature: A_Feature): void;
+    serialize(caller: any, context: A_ExecutionContext, feature: A_Feature): void;
+    setByPath(caller: any, context: A_ExecutionContext, feature: A_Feature): void;
+    getByPath(caller: any, context: A_ExecutionContext, feature: A_Feature): void;
 }
 
 export { A_UtilsHelper };
