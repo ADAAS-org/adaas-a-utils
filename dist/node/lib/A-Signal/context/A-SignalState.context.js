@@ -3,7 +3,7 @@
 var aConcept = require('@adaas/a-concept');
 var ASignal_entity = require('../entities/A-Signal.entity');
 var ASignalVector_entity = require('../entities/A-SignalVector.entity');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -104,9 +104,8 @@ exports.A_SignalState = class A_SignalState extends aConcept.A_Fragment {
   }
 };
 exports.A_SignalState = __decorateClass([
-  aFrame.A_Frame.Fragment({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalState",
     description: "Manages the latest state of all signals within a given scope, maintaining a mapping between signal constructors and their most recently emitted values."
   })
 ], exports.A_SignalState);

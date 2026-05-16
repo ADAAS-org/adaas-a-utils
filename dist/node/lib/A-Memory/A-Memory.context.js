@@ -1,7 +1,7 @@
 'use strict';
 
 var aConcept = require('@adaas/a-concept');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -33,9 +33,8 @@ exports.A_MemoryContext = class A_MemoryContext extends aConcept.A_Fragment {
   }
 };
 exports.A_MemoryContext = __decorateClass([
-  aFrame.A_Frame.Fragment({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-MemoryContext",
     description: "In-memory context fragment that provides a simple key-value store for temporary data storage during application runtime. It allows setting, getting, deleting, and checking the existence of key-value pairs, facilitating quick access to transient data without persistent storage. This context is useful for scenarios where data needs to be shared across different components or operations within the same execution context."
   })
 ], exports.A_MemoryContext);

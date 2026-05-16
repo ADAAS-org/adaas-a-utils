@@ -1,6 +1,6 @@
 import { __decorateClass } from '../../chunk-EQQGB2QZ.mjs';
 import { A_Fragment } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_Route = class extends A_Fragment {
   constructor(url) {
@@ -86,9 +86,8 @@ let A_Route = class extends A_Fragment {
   }
 };
 A_Route = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Route",
     description: "Route fragment that defines URL patterns for routing purposes. It supports dynamic parameters and query extraction, allowing for flexible route definitions. This fragment can be used in routing systems to match incoming URLs against defined routes and extract relevant parameters and query strings."
   })
 ], A_Route);

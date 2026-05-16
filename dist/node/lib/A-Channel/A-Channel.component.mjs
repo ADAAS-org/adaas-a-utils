@@ -4,7 +4,7 @@ import { A_ChannelError } from './A-Channel.error';
 import { A_ChannelFeatures } from './A-Channel.constants';
 import { A_OperationContext } from '@adaas/a-utils/a-operation';
 import { A_ChannelRequest } from './A-ChannelRequest.context';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_Channel = class extends A_Component {
   /**
@@ -282,9 +282,8 @@ __decorateClass([
   })
 ], A_Channel.prototype, "onSend", 1);
 A_Channel = __decorateClass([
-  A_Frame.Namespace("A-Utils"),
-  A_Frame.Component({
-    name: "A-Channel",
+  A_Frame.Define({
+    namespace: "A-Utils",
     description: "Component uses as abstract channel for communication patterns. Can be inherited and extended to implement custom channels."
   })
 ], A_Channel);

@@ -1,5 +1,5 @@
 import { __decorateClass } from '../../chunk-EQQGB2QZ.mjs';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 import { A_OperationContext } from '@adaas/a-utils/a-operation';
 
 let A_StateMachineTransition = class extends A_OperationContext {
@@ -25,8 +25,8 @@ let A_StateMachineTransition = class extends A_OperationContext {
   }
 };
 A_StateMachineTransition = __decorateClass([
-  A_Frame.Fragment({
-    name: "A-StateMachineTransition",
+  A_Frame.Define({
+    namespace: "A-Utils",
     description: "Context for managing state machine transitions."
   })
 ], A_StateMachineTransition);

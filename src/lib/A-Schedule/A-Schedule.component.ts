@@ -1,14 +1,13 @@
 import { A_Component, A_Fragment, A_TypeGuards } from "@adaas/a-concept";
 import { A_ScheduleObject } from "./A-ScheduleObject.class";
 import { A_UTILS_TYPES__ScheduleObjectCallback, A_UTILS_TYPES__ScheduleObjectConfig } from "./A-Schedule.types";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 
 
 
 
-@A_Frame.Component({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-Schedule',
     description: 'Scheduling component that allows scheduling of callbacks to be executed at specific times or after certain delays. It provides methods to schedule callbacks based on Unix timestamps or ISO date strings, as well as a method to execute callbacks after a specified delay in milliseconds. This component is useful for managing timed operations within an application.'
 })
 export class A_Schedule extends A_Component {

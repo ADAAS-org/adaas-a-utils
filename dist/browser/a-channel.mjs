@@ -1,8 +1,8 @@
-import { A_OperationContext } from './chunk-72ANHWNG.mjs';
-import './chunk-TQ5UON22.mjs';
+import { A_OperationContext } from './chunk-MMJI7Z6T.mjs';
+import './chunk-SEQJPRV7.mjs';
 import { __decorateClass } from './chunk-EQQGB2QZ.mjs';
 import { A_Feature, A_Error, A_TypeGuards, A_Component, A_Scope, A_IdentityHelper, A_Context } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 var A_ChannelError = class extends A_Error {
   /**
@@ -74,8 +74,8 @@ var A_ChannelRequest = class extends A_OperationContext {
   }
 };
 A_ChannelRequest = __decorateClass([
-  A_Frame.Fragment({
-    name: "A-ChannelRequest",
+  A_Frame.Define({
+    namespace: "A-Utils",
     description: "Context for managing channel requests. It encapsulates the request parameters and the result including status and data."
   })
 ], A_ChannelRequest);
@@ -355,9 +355,8 @@ __decorateClass([
   })
 ], A_Channel.prototype, "onSend", 1);
 A_Channel = __decorateClass([
-  A_Frame.Namespace("A-Utils"),
-  A_Frame.Component({
-    name: "A-Channel",
+  A_Frame.Define({
+    namespace: "A-Utils",
     description: "Component uses as abstract channel for communication patterns. Can be inherited and extended to implement custom channels."
   })
 ], A_Channel);

@@ -1,11 +1,11 @@
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 import { A_OperationContext } from "@adaas/a-utils/a-operation";
 import { A_StateMachineTransitionParams, A_StateMachineTransitionStorage } from "./A-StateMachine.types";
 
 
 
-@A_Frame.Fragment({
-    name: 'A-StateMachineTransition',
+@A_Frame.Define({
+    namespace: 'A-Utils',
     description: 'Context for managing state machine transitions.'
 })
 export class A_StateMachineTransition<

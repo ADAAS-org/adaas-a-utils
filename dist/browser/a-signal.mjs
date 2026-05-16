@@ -1,11 +1,11 @@
-import { A_UtilsHelper } from './chunk-APWFZSDX.mjs';
-import { A_Logger } from './chunk-TK5UEYMZ.mjs';
-import { A_Config } from './chunk-ECSGFDRQ.mjs';
-import './chunk-J6CLHXFQ.mjs';
-import './chunk-TQ5UON22.mjs';
+import { A_UtilsHelper } from './chunk-JI2IP6BQ.mjs';
+import { A_Logger } from './chunk-NFL7ROOO.mjs';
+import { A_Config } from './chunk-SJU7LRGF.mjs';
+import './chunk-ZSD77J3W.mjs';
+import './chunk-SEQJPRV7.mjs';
 import { __decorateClass, __decorateParam } from './chunk-EQQGB2QZ.mjs';
 import { A_Feature, A_Inject, A_Error, A_Scope, A_Dependency, A_Entity, A_TypeGuards, A_Fragment, A_Context, A_CommonHelper, A_Component } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 var A_Signal = class extends A_Entity {
   /**
@@ -81,9 +81,8 @@ var A_Signal = class extends A_Entity {
   }
 };
 A_Signal = __decorateClass([
-  A_Frame.Entity({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Signal",
     description: "A Signal Entity represents an individual signal instance that carries data, used for managing state within an application context. Signals are designed to reflect the current state rather than individual events, making them suitable for scenarios where state monitoring and real-time updates are essential."
   })
 ], A_Signal);
@@ -342,9 +341,8 @@ var A_SignalVector = class extends A_Entity {
   }
 };
 A_SignalVector = __decorateClass([
-  A_Frame.Entity({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalVector",
     description: "A Signal Vector Entity represents a collection of signals structured in a specific way, allowing for batch processing and transmission of related signals as a unified state representation."
   })
 ], A_SignalVector);
@@ -439,9 +437,8 @@ var A_SignalState = class extends A_Fragment {
   }
 };
 A_SignalState = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalState",
     description: "Manages the latest state of all signals within a given scope, maintaining a mapping between signal constructors and their most recently emitted values."
   })
 ], A_SignalState);
@@ -491,9 +488,8 @@ var A_SignalConfig = class extends A_Fragment {
   }
 };
 A_SignalConfig = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalConfig",
     description: "Signal configuration fragment that defines the structure and types of signals within a given scope. It allows specifying the expected signal constructors and their order, facilitating consistent signal management and processing across components that emit or listen to signals."
   })
 ], A_SignalConfig);
@@ -576,7 +572,7 @@ var A_SignalBus = class extends A_Component {
   }
 };
 __decorateClass([
-  A_Frame.Method({
+  A_Frame.Define({
     description: "Emit multiple signals through the signal bus."
   })
 ], A_SignalBus.prototype, "next", 1);
@@ -614,9 +610,8 @@ __decorateClass([
   __decorateParam(5, A_Inject(A_SignalConfig))
 ], A_SignalBus.prototype, _a, 1);
 A_SignalBus = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalBus",
     description: "Signal bus component that manages the emission and state of signals within a given scope. It listens for emitted signals, updates their state, and forwards them to registered watchers. The bus ensures a consistent signal vector structure based on the defined configuration, facilitating signal management across multiple components."
   })
 ], A_SignalBus);

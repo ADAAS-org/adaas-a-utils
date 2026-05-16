@@ -1,7 +1,7 @@
 'use strict';
 
 var aConcept = require('@adaas/a-concept');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -53,9 +53,8 @@ exports.A_ExecutionContext = class A_ExecutionContext extends aConcept.A_Fragmen
   }
 };
 exports.A_ExecutionContext = __decorateClass([
-  aFrame.A_Frame.Fragment({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-ExecutionContext",
     description: "Execution context fragment that provides a structured way to manage metadata and serialized data for execution environments. It allows storing and retrieving key-value pairs, facilitating context-aware operations within the application. It useful in cases when it's necessary to share some runtime data across multiple steps of thee features, or components."
   })
 ], exports.A_ExecutionContext);

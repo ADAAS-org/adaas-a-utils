@@ -4,7 +4,7 @@ var aConcept = require('@adaas/a-concept');
 var aExecution = require('@adaas/a-utils/a-execution');
 var AConfig_constants = require('./A-Config.constants');
 var AConfig_error = require('./A-Config.error');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -55,9 +55,8 @@ exports.A_Config = class A_Config extends aExecution.A_ExecutionContext {
   }
 };
 exports.A_Config = __decorateClass([
-  aFrame.A_Frame.Fragment({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Config",
     description: "Configuration management context that provides structured access to application configuration variables, supporting defaults and strict mode for enhanced reliability. Default environment variables are included for comprehensive configuration handling."
   })
 ], exports.A_Config);

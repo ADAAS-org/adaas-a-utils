@@ -4,7 +4,7 @@ import { A_MemoryFeatures } from './A-Memory.constants';
 import { A_MemoryContext } from './A-Memory.context';
 import { A_MemoryError } from './A-Memory.error';
 import { A_OperationContext } from '@adaas/a-utils/a-operation';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 var _a, _b, _c, _d, _e, _f, _g, _h, _i;
 let A_Memory = class extends A_Component {
@@ -36,31 +36,36 @@ let A_Memory = class extends A_Component {
   async [_f = A_MemoryFeatures.onDestroy](context, ...args) {
     context.clear();
   }
-  async [_e = A_MemoryFeatures.onGet](operation, context, ...args) {
+  async [_e = A_MemoryFeatures.onGet](operation, context, scope, ...args) {
+    await this.ready;
     operation.succeed(context.get(operation.params.key));
   }
   /**
    * Handles the 'has' operation for checking existence of a key in memory
    */
   async [_d = A_MemoryFeatures.onHas](operation, context, ...args) {
+    await this.ready;
     operation.succeed(context.has(operation.params.key));
   }
   /**
    * Handles the 'set' operation for saving a value in memory
    */
   async [_c = A_MemoryFeatures.onSet](operation, context, scope, ...args) {
+    await this.ready;
     context.set(operation.params.key, operation.params.value);
   }
   /**
    * Handles the 'drop' operation for removing a value from memory
    */
   async [_b = A_MemoryFeatures.onDrop](operation, context, ...args) {
+    await this.ready;
     context.delete(operation.params.key);
   }
   /**
    * Handles the 'clear' operation for clearing all values from memory
    */
   async [_a = A_MemoryFeatures.onClear](operation, context, ...args) {
+    await this.ready;
     context.clear();
   }
   // ======================================================================
@@ -285,7 +290,8 @@ __decorateClass([
   A_Feature.Extend(),
   __decorateParam(0, A_Dependency.Required()),
   __decorateParam(0, A_Inject(A_OperationContext)),
-  __decorateParam(1, A_Inject(A_MemoryContext))
+  __decorateParam(1, A_Inject(A_MemoryContext)),
+  __decorateParam(2, A_Inject(A_Scope))
 ], A_Memory.prototype, _e, 1);
 __decorateClass([
   A_Feature.Extend(),
@@ -313,9 +319,8 @@ __decorateClass([
   __decorateParam(1, A_Inject(A_MemoryContext))
 ], A_Memory.prototype, _a, 1);
 A_Memory = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Memory",
     description: "In-memory data storage component that provides a simple key-value store with asynchronous operations. It supports basic memory operations such as get, set, has, drop, and clear, along with lifecycle management and error handling features. This components features can be extended with other components to provide ability store data across multiple storage, or extract data from multiple external sources. Good example is to store some runtime data that needs to be shared across multiple containers or concepts."
   })
 ], A_Memory);

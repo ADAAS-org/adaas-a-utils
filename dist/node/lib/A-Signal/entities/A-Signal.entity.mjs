@@ -1,6 +1,6 @@
 import { __decorateClass } from '../../../chunk-EQQGB2QZ.mjs';
 import { A_Entity } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 import { A_UtilsHelper } from '@adaas/a-utils/helpers';
 
 let A_Signal = class extends A_Entity {
@@ -77,9 +77,8 @@ let A_Signal = class extends A_Entity {
   }
 };
 A_Signal = __decorateClass([
-  A_Frame.Entity({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Signal",
     description: "A Signal Entity represents an individual signal instance that carries data, used for managing state within an application context. Signals are designed to reflect the current state rather than individual events, making them suitable for scenarios where state monitoring and real-time updates are essential."
   })
 ], A_Signal);

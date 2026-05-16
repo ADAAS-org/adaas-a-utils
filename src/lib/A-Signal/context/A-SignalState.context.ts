@@ -1,7 +1,7 @@
 import { A_Context, A_Fragment, A_TYPES__Component_Constructor } from "@adaas/a-concept";
 import { A_Signal } from "../entities/A-Signal.entity";
 import { A_SignalVector } from "../entities/A-SignalVector.entity";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 
 /**
  * A_SignalState manages the latest state of all signals within a given scope.
@@ -16,9 +16,8 @@ import { A_Frame } from "@adaas/a-frame";
  * - Signal instances and their emitted value types
  * - Vector structure and the data it contains
  */
-@A_Frame.Fragment({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-SignalState',
     description: 'Manages the latest state of all signals within a given scope, maintaining a mapping between signal constructors and their most recently emitted values.'
 })
 export class A_SignalState<

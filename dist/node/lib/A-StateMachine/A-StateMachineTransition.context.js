@@ -1,6 +1,6 @@
 'use strict';
 
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var aOperation = require('@adaas/a-utils/a-operation');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -34,8 +34,8 @@ exports.A_StateMachineTransition = class A_StateMachineTransition extends aOpera
   }
 };
 exports.A_StateMachineTransition = __decorateClass([
-  aFrame.A_Frame.Fragment({
-    name: "A-StateMachineTransition",
+  core.A_Frame.Define({
+    namespace: "A-Utils",
     description: "Context for managing state machine transitions."
   })
 ], exports.A_StateMachineTransition);

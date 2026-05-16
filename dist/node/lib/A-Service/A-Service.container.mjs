@@ -3,7 +3,7 @@ import { A_Container, A_Error, A_Concept, A_Feature, A_Inject } from '@adaas/a-c
 import { A_ServiceFeatures } from './A-Service.constants';
 import { A_Logger } from '@adaas/a-utils/a-logger';
 import { A_Service_Error } from './A-Service.error';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 import { A_Polyfill } from '@adaas/a-utils/a-polyfill';
 
 var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
@@ -166,9 +166,8 @@ __decorateClass([
   __decorateParam(1, A_Inject(A_Logger))
 ], A_Service.prototype, _a, 1);
 A_Service = __decorateClass([
-  A_Frame.Container({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Service",
     description: "Service container that manages the lifecycle of various types of services, such as HTTP servers and workers or UI loader. It dynamically loads necessary components based on the provided configuration and orchestrates the start and stop processes, ensuring proper error handling and extensibility through feature hooks."
   })
 ], A_Service);

@@ -3,13 +3,12 @@ import { A_TYPES__ConfigContainerConstructor } from "./A-Config.types";
 import { A_ExecutionContext } from "@adaas/a-utils/a-execution";
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "./A-Config.constants";
 import { A_ConfigError } from "./A-Config.error";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 
 
 
-@A_Frame.Fragment({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-Config',
     description: 'Configuration management context that provides structured access to application configuration variables, supporting defaults and strict mode for enhanced reliability. Default environment variables are included for comprehensive configuration handling.'
 })
 export class A_Config<

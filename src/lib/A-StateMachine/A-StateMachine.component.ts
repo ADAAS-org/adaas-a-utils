@@ -2,7 +2,7 @@ import { A_Component, A_Context, A_Feature, A_FormatterHelper, A_Scope } from "@
 import { A_StateMachineError } from "./A-StateMachine.error";
 import { A_StateMachineFeatures } from "./A-StateMachine.constants";
 import { A_StateMachineTransition } from "./A-StateMachineTransition.context";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 
 /**
  * A_StateMachine is a powerful state machine implementation that allows you to define and manage
@@ -31,9 +31,8 @@ import { A_Frame } from "@adaas/a-frame";
  * ```
  */
 
-@A_Frame.Namespace('A-Utils')
-@A_Frame.Component({
-    name: 'A-StateMachine',
+@A_Frame.Define({
+    namespace: 'A-Utils',
     description: 'A powerful state machine component for managing complex state transitions.'
 })
 export class A_StateMachine<
@@ -218,8 +217,7 @@ export class A_StateMachine<
      * 
      * If any step fails, the onError hook is called and a wrapped error is thrown.
      */
-    @A_Frame.Method({
-        name: 'transition',
+    @A_Frame.Define({
         description: 'Executes a state transition from one state to another.'
     })
     async transition(

@@ -1,12 +1,11 @@
 import { A_Fragment, A_Meta, A_TYPES__Fragment_Serialized } from "@adaas/a-concept";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 
 
 
 
-@A_Frame.Fragment({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-ExecutionContext',
     description: 'Execution context fragment that provides a structured way to manage metadata and serialized data for execution environments. It allows storing and retrieving key-value pairs, facilitating context-aware operations within the application. It useful in cases when it\'s necessary to share some runtime data across multiple steps of thee features, or components.'
 })
 export class A_ExecutionContext<

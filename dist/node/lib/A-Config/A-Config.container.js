@@ -6,7 +6,7 @@ var AConfig_error = require('./A-Config.error');
 var FileConfigReader_component = require('./components/FileConfigReader.component');
 var ENVConfigReader_component = require('./components/ENVConfigReader.component');
 var AConfig_constants = require('./A-Config.constants');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var aPolyfill = require('@adaas/a-utils/a-polyfill');
 
 var __defProp = Object.defineProperty;
@@ -68,9 +68,8 @@ __decorateClass([
   __decorateParam(0, aConcept.A_Inject(aPolyfill.A_Polyfill))
 ], exports.A_ConfigLoader.prototype, "prepare", 1);
 exports.A_ConfigLoader = __decorateClass([
-  aFrame.A_Frame.Container({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-ConfigLoader",
     description: "Container responsible for loading and initializing the A_Config component based on the environment and available configuration sources. It can be useful for application that need a separated configuration management and sharable across multiple containers."
   })
 ], exports.A_ConfigLoader);

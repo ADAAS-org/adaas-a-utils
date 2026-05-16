@@ -2,7 +2,7 @@
 
 var aConcept = require('@adaas/a-concept');
 var ConfigReader_component = require('./ConfigReader.component');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -40,9 +40,8 @@ exports.FileConfigReader = class FileConfigReader extends ConfigReader_component
   }
 };
 exports.FileConfigReader = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "FileConfigReader",
     description: "Configuration reader that loads configuration data from a JSON file located in the application root directory. It reads the file named after the current concept with a .conf.json extension and parses its contents into the configuration context."
   })
 ], exports.FileConfigReader);

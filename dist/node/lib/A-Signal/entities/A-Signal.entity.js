@@ -1,7 +1,7 @@
 'use strict';
 
 var aConcept = require('@adaas/a-concept');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var helpers = require('@adaas/a-utils/helpers');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -86,9 +86,8 @@ exports.A_Signal = class A_Signal extends aConcept.A_Entity {
   }
 };
 exports.A_Signal = __decorateClass([
-  aFrame.A_Frame.Entity({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Signal",
     description: "A Signal Entity represents an individual signal instance that carries data, used for managing state within an application context. Signals are designed to reflect the current state rather than individual events, making them suitable for scenarios where state monitoring and real-time updates are essential."
   })
 ], exports.A_Signal);

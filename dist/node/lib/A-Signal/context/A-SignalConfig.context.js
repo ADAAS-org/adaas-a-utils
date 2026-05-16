@@ -2,7 +2,7 @@
 
 var aConcept = require('@adaas/a-concept');
 var ASignal_entity = require('../entities/A-Signal.entity');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -58,9 +58,8 @@ exports.A_SignalConfig = class A_SignalConfig extends aConcept.A_Fragment {
   }
 };
 exports.A_SignalConfig = __decorateClass([
-  aFrame.A_Frame.Fragment({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalConfig",
     description: "Signal configuration fragment that defines the structure and types of signals within a given scope. It allows specifying the expected signal constructors and their order, facilitating consistent signal management and processing across components that emit or listen to signals."
   })
 ], exports.A_SignalConfig);

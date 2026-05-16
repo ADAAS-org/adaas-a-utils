@@ -8,7 +8,7 @@ import { A_PathPolyfill } from './browser/A-Path-Polyfill';
 import { A_UrlPolyfill } from './browser/A-Url-Polyfill';
 import { A_BufferPolyfill } from './browser/A-Buffer-Polyfill';
 import { A_ProcessPolyfill } from './browser/A-Process-Polyfill';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_Polyfill = class extends A_Component {
   constructor(logger) {
@@ -140,9 +140,8 @@ __decorateClass([
   A_Concept.Load()
 ], A_Polyfill.prototype, "attachToWindow", 1);
 A_Polyfill = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Polyfill",
     description: "Polyfill component that provides cross-environment compatibility for Node.js core modules such as fs, crypto, http, https, path, url, buffer, and process. It dynamically loads appropriate polyfills based on the execution environment (Node.js or browser), enabling seamless usage of these modules in different contexts."
   }),
   __decorateParam(0, A_Inject("A_Logger"))

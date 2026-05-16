@@ -1,7 +1,7 @@
 'use strict';
 
 var aConcept = require('@adaas/a-concept');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var aExecution = require('@adaas/a-utils/a-execution');
 
 var __defProp = Object.defineProperty;
@@ -201,7 +201,7 @@ exports.A_UtilsHelper = class A_UtilsHelper extends aConcept.A_Component {
   }
 };
 __decorateClass([
-  aFrame.A_Frame.Method({
+  core.A_Frame.Define({
     description: "Instance method wrapper for the static hash function, allowing it to be injected as a dependency."
   }),
   __decorateParam(0, aConcept.A_Inject(aConcept.A_Caller)),
@@ -209,7 +209,7 @@ __decorateClass([
   __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
 ], exports.A_UtilsHelper.prototype, "hash", 1);
 __decorateClass([
-  aFrame.A_Frame.Method({
+  core.A_Frame.Define({
     description: "Instance method wrapper for the static serialize function, allowing it to be injected as a dependency."
   }),
   __decorateParam(0, aConcept.A_Inject(aConcept.A_Caller)),
@@ -217,7 +217,7 @@ __decorateClass([
   __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
 ], exports.A_UtilsHelper.prototype, "serialize", 1);
 __decorateClass([
-  aFrame.A_Frame.Method({
+  core.A_Frame.Define({
     description: "Instance method wrapper for the static setByPath function, allowing it to be injected as a dependency."
   }),
   __decorateParam(0, aConcept.A_Inject(aConcept.A_Caller)),
@@ -225,7 +225,7 @@ __decorateClass([
   __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
 ], exports.A_UtilsHelper.prototype, "setByPath", 1);
 __decorateClass([
-  aFrame.A_Frame.Method({
+  core.A_Frame.Define({
     description: "Instance method wrapper for the static getByPath function, allowing it to be injected as a dependency."
   }),
   __decorateParam(0, aConcept.A_Inject(aConcept.A_Caller)),
@@ -233,9 +233,8 @@ __decorateClass([
   __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
 ], exports.A_UtilsHelper.prototype, "getByPath", 1);
 exports.A_UtilsHelper = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-UtilsHelper",
     description: "Utility helper class providing common functions for A-Utils library, such as hashing and serialization."
   })
 ], exports.A_UtilsHelper);

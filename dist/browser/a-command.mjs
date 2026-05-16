@@ -1,12 +1,12 @@
-import { A_StateMachineTransition, A_StateMachine } from './chunk-NLPSQYIQ.mjs';
-import { A_Logger } from './chunk-TK5UEYMZ.mjs';
-import './chunk-ECSGFDRQ.mjs';
-import './chunk-J6CLHXFQ.mjs';
-import './chunk-72ANHWNG.mjs';
-import { A_ExecutionContext } from './chunk-TQ5UON22.mjs';
+import { A_StateMachineTransition, A_StateMachine } from './chunk-VWWA2AWF.mjs';
+import { A_Logger } from './chunk-NFL7ROOO.mjs';
+import './chunk-SJU7LRGF.mjs';
+import './chunk-ZSD77J3W.mjs';
+import './chunk-MMJI7Z6T.mjs';
+import { A_ExecutionContext } from './chunk-SEQJPRV7.mjs';
 import { __decorateClass, __decorateParam } from './chunk-EQQGB2QZ.mjs';
 import { A_Feature, A_Inject, A_Error, A_Dependency, A_Entity, A_Scope, A_Context } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 // src/lib/A-Command/A-Command.constants.ts
 var A_Command_Status = /* @__PURE__ */ ((A_Command_Status2) => {
@@ -555,9 +555,8 @@ __decorateClass([
   __decorateParam(1, A_Inject(A_ExecutionContext))
 ], A_Command.prototype, _a, 1);
 A_Command = __decorateClass([
-  A_Frame.Entity({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Command",
     description: "Advanced Command Pattern Implementation with full lifecycle management, event handling, and state persistence. This entity allows to execute commands in distributed environment across multiple services."
   })
 ], A_Command);

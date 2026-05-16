@@ -1,6 +1,6 @@
 import { __decorateClass } from '../../chunk-EQQGB2QZ.mjs';
 import { A_ExecutionContext } from '@adaas/a-utils/a-execution';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_OperationContext = class extends A_ExecutionContext {
   constructor(operation, params) {
@@ -36,9 +36,8 @@ let A_OperationContext = class extends A_ExecutionContext {
   }
 };
 A_OperationContext = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-OperationContext",
     description: "Operation execution context that encapsulates the metadata and serialized data related to a specific operation. It provides structured access to operation parameters, results, and error handling, facilitating the management of operation lifecycles within the application."
   })
 ], A_OperationContext);

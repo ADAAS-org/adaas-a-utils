@@ -15,7 +15,7 @@ import { A_CommandError } from "./A-Command.error";
 import { A_StateMachine, A_StateMachineFeatures, A_StateMachineTransition } from "@adaas/a-utils/a-state-machine";
 import { A_Logger } from "@adaas/a-utils/a-logger";
 import { A_ExecutionContext } from "@adaas/a-utils/a-execution";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 
 /**
  * A_Command - Advanced Command Pattern Implementation
@@ -76,9 +76,8 @@ import { A_Frame } from "@adaas/a-frame";
  * console.log('Status:', command.status);
  * ```
  */
-@A_Frame.Entity({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-Command',
     description: 'Advanced Command Pattern Implementation with full lifecycle management, event handling, and state persistence. This entity allows to execute commands in distributed environment across multiple services.'
 })
 export class A_Command<

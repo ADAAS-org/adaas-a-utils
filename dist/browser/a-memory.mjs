@@ -1,8 +1,8 @@
-import { A_OperationContext } from './chunk-72ANHWNG.mjs';
-import './chunk-TQ5UON22.mjs';
+import { A_OperationContext } from './chunk-MMJI7Z6T.mjs';
+import './chunk-SEQJPRV7.mjs';
 import { __decorateClass, __decorateParam } from './chunk-EQQGB2QZ.mjs';
 import { A_Feature, A_Inject, A_Dependency, A_Scope, A_Fragment, A_Error, A_Component, A_Context } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 // src/lib/A-Memory/A-Memory.constants.ts
 var A_MemoryFeatures = /* @__PURE__ */ ((A_MemoryFeatures2) => {
@@ -40,9 +40,8 @@ var A_MemoryContext = class extends A_Fragment {
   }
 };
 A_MemoryContext = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-MemoryContext",
     description: "In-memory context fragment that provides a simple key-value store for temporary data storage during application runtime. It allows setting, getting, deleting, and checking the existence of key-value pairs, facilitating quick access to transient data without persistent storage. This context is useful for scenarios where data needs to be shared across different components or operations within the same execution context."
   })
 ], A_MemoryContext);
@@ -86,31 +85,36 @@ var A_Memory = class extends A_Component {
   async [_f = "_A_Memory_onDestroy" /* onDestroy */](context, ...args) {
     context.clear();
   }
-  async [_e = "_A_Memory_onGet" /* onGet */](operation, context, ...args) {
+  async [_e = "_A_Memory_onGet" /* onGet */](operation, context, scope, ...args) {
+    await this.ready;
     operation.succeed(context.get(operation.params.key));
   }
   /**
    * Handles the 'has' operation for checking existence of a key in memory
    */
   async [_d = "_A_Memory_onHas" /* onHas */](operation, context, ...args) {
+    await this.ready;
     operation.succeed(context.has(operation.params.key));
   }
   /**
    * Handles the 'set' operation for saving a value in memory
    */
   async [_c = "_A_Memory_onSet" /* onSet */](operation, context, scope, ...args) {
+    await this.ready;
     context.set(operation.params.key, operation.params.value);
   }
   /**
    * Handles the 'drop' operation for removing a value from memory
    */
   async [_b = "_A_Memory_onDrop" /* onDrop */](operation, context, ...args) {
+    await this.ready;
     context.delete(operation.params.key);
   }
   /**
    * Handles the 'clear' operation for clearing all values from memory
    */
   async [_a = "_A_Memory_onClear" /* onClear */](operation, context, ...args) {
+    await this.ready;
     context.clear();
   }
   // ======================================================================
@@ -335,7 +339,8 @@ __decorateClass([
   A_Feature.Extend(),
   __decorateParam(0, A_Dependency.Required()),
   __decorateParam(0, A_Inject(A_OperationContext)),
-  __decorateParam(1, A_Inject(A_MemoryContext))
+  __decorateParam(1, A_Inject(A_MemoryContext)),
+  __decorateParam(2, A_Inject(A_Scope))
 ], A_Memory.prototype, _e, 1);
 __decorateClass([
   A_Feature.Extend(),
@@ -363,9 +368,8 @@ __decorateClass([
   __decorateParam(1, A_Inject(A_MemoryContext))
 ], A_Memory.prototype, _a, 1);
 A_Memory = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Memory",
     description: "In-memory data storage component that provides a simple key-value store with asynchronous operations. It supports basic memory operations such as get, set, has, drop, and clear, along with lifecycle management and error handling features. This components features can be extended with other components to provide ability store data across multiple storage, or extract data from multiple external sources. Good example is to store some runtime data that needs to be shared across multiple containers or concepts."
   })
 ], A_Memory);

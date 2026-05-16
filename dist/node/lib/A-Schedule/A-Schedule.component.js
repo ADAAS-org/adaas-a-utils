@@ -2,7 +2,7 @@
 
 var aConcept = require('@adaas/a-concept');
 var AScheduleObject_class = require('./A-ScheduleObject.class');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -36,9 +36,8 @@ exports.A_Schedule = class A_Schedule extends aConcept.A_Component {
   }
 };
 exports.A_Schedule = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Schedule",
     description: "Scheduling component that allows scheduling of callbacks to be executed at specific times or after certain delays. It provides methods to schedule callbacks based on Unix timestamps or ISO date strings, as well as a method to execute callbacks after a specified delay in milliseconds. This component is useful for managing timed operations within an application."
   })
 ], exports.A_Schedule);

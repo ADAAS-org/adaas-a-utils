@@ -1,6 +1,6 @@
 'use strict';
 
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var aOperation = require('@adaas/a-utils/a-operation');
 var AChannel_constants = require('./A-Channel.constants');
 
@@ -32,8 +32,8 @@ exports.A_ChannelRequest = class A_ChannelRequest extends aOperation.A_Operation
   }
 };
 exports.A_ChannelRequest = __decorateClass([
-  aFrame.A_Frame.Fragment({
-    name: "A-ChannelRequest",
+  core.A_Frame.Define({
+    namespace: "A-Utils",
     description: "Context for managing channel requests. It encapsulates the request parameters and the result including status and data."
   })
 ], exports.A_ChannelRequest);

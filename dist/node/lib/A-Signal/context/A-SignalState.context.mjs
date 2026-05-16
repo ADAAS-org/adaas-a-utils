@@ -2,7 +2,7 @@ import { __decorateClass } from '../../../chunk-EQQGB2QZ.mjs';
 import { A_Fragment } from '@adaas/a-concept';
 import { A_Signal } from '../entities/A-Signal.entity';
 import { A_SignalVector } from '../entities/A-SignalVector.entity';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_SignalState = class extends A_Fragment {
   /**
@@ -95,9 +95,8 @@ let A_SignalState = class extends A_Fragment {
   }
 };
 A_SignalState = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalState",
     description: "Manages the latest state of all signals within a given scope, maintaining a mapping between signal constructors and their most recently emitted values."
   })
 ], A_SignalState);

@@ -4,7 +4,7 @@ import { A_SignalConfig } from "../context/A-SignalConfig.context";
 import { A_Signal } from "../entities/A-Signal.entity";
 import { A_Config } from "@adaas/a-utils/a-config";
 import { A_Logger } from "@adaas/a-utils/a-logger";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 import { A_SignalBusFeatures } from "./A-SignalBus.constants";
 import { A_SignalBusError } from "./A-SignalBus.error";
 
@@ -20,15 +20,14 @@ import { A_SignalBusError } from "./A-SignalBus.error";
  * 
  * The component itself is stateless and all methods uses only parameters (context) is provided with.
  */
-@A_Frame.Component({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-SignalBus',
     description: 'Signal bus component that manages the emission and state of signals within a given scope. It listens for emitted signals, updates their state, and forwards them to registered watchers. The bus ensures a consistent signal vector structure based on the defined configuration, facilitating signal management across multiple components.'
 })
 export class A_SignalBus extends A_Component {
 
 
-    @A_Frame.Method({
+    @A_Frame.Define({
         description: 'Emit multiple signals through the signal bus.'
     })
     async next(...signals: A_Signal[]) {

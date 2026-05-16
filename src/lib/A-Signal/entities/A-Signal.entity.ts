@@ -1,6 +1,6 @@
 import { A_Entity } from "@adaas/a-concept";
 import { A_Signal_Init, A_Signal_Serialized } from "../A-Signal.types";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 import { A_UtilsHelper } from "@adaas/a-utils/helpers";
 
 /**
@@ -16,9 +16,8 @@ import { A_UtilsHelper } from "@adaas/a-utils/helpers";
  * Signals are typically used in scenarios where the current state is more important than individual events, 
  * such as monitoring systems, real-time dashboards, or stateful applications.
  */
-@A_Frame.Entity({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-Signal',
     description: 'A Signal Entity represents an individual signal instance that carries data, used for managing state within an application context. Signals are designed to reflect the current state rather than individual events, making them suitable for scenarios where state monitoring and real-time updates are essential.'
 })
 export class A_Signal<

@@ -4,13 +4,12 @@ import { A_MemoryContext } from "./A-Memory.context";
 import { A_MemoryError } from "./A-Memory.error";
 import { A_OperationContext } from "@adaas/a-utils/a-operation";
 import { A_MemoryOperationContext } from "./A-Memory.types";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 
 
 
-@A_Frame.Component({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-Memory',
     description: 'In-memory data storage component that provides a simple key-value store with asynchronous operations. It supports basic memory operations such as get, set, has, drop, and clear, along with lifecycle management and error handling features. This components features can be extended with other components to provide ability store data across multiple storage, or extract data from multiple external sources. Good example is to store some runtime data that needs to be shared across multiple containers or concepts.'
 })
 export class A_Memory<
@@ -79,8 +78,12 @@ export class A_Memory<
         @A_Dependency.Required()
         @A_Inject(A_OperationContext) operation: A_MemoryOperationContext,
         @A_Inject(A_MemoryContext) context: A_MemoryContext<_StorageType>,
+        @A_Inject(A_Scope) scope: A_Scope,
         ...args: any[]
     ): Promise<void> {
+
+        await this.ready;
+
         // Handle get operation
         operation.succeed(context.get(operation.params.key));
     }
@@ -95,6 +98,8 @@ export class A_Memory<
         @A_Inject(A_MemoryContext) context: A_MemoryContext<_StorageType>,
         ...args: any[]
     ): Promise<void> {
+        await this.ready;
+
         // Handle has operation
         operation.succeed(context.has(operation.params.key));
     }
@@ -110,6 +115,8 @@ export class A_Memory<
         @A_Inject(A_Scope) scope: A_Scope,
         ...args: any[]
     ): Promise<void> {
+        await this.ready;
+
         // Handle set operation
         context.set(operation.params.key, operation.params.value);
     }
@@ -124,6 +131,8 @@ export class A_Memory<
         @A_Inject(A_MemoryContext) context: A_MemoryContext<_StorageType>,
         ...args: any[]
     ): Promise<void> {
+        await this.ready;
+
         // Handle drop operation
         context.delete(operation.params.key);
     }
@@ -138,6 +147,8 @@ export class A_Memory<
         @A_Inject(A_MemoryContext) context: A_MemoryContext<_StorageType>,
         ...args: any[]
     ): Promise<void> {
+        await this.ready;
+
         // Handle clear operation
         context.clear();
     }

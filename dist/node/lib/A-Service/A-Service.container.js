@@ -4,7 +4,7 @@ var aConcept = require('@adaas/a-concept');
 var AService_constants = require('./A-Service.constants');
 var aLogger = require('@adaas/a-utils/a-logger');
 var AService_error = require('./A-Service.error');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var aPolyfill = require('@adaas/a-utils/a-polyfill');
 
 var __defProp = Object.defineProperty;
@@ -178,9 +178,8 @@ __decorateClass([
   __decorateParam(1, aConcept.A_Inject(aLogger.A_Logger))
 ], exports.A_Service.prototype, _a, 1);
 exports.A_Service = __decorateClass([
-  aFrame.A_Frame.Container({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Service",
     description: "Service container that manages the lifecycle of various types of services, such as HTTP servers and workers or UI loader. It dynamically loads necessary components based on the provided configuration and orchestrates the start and stop processes, ensuring proper error handling and extensibility through feature hooks."
   })
 ], exports.A_Service);

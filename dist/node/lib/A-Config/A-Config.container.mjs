@@ -5,7 +5,7 @@ import { A_ConfigError } from './A-Config.error';
 import { FileConfigReader } from './components/FileConfigReader.component';
 import { ENVConfigReader } from './components/ENVConfigReader.component';
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from './A-Config.constants';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 import { A_Polyfill } from '@adaas/a-utils/a-polyfill';
 
 let A_ConfigLoader = class extends A_Container {
@@ -56,9 +56,8 @@ __decorateClass([
   __decorateParam(0, A_Inject(A_Polyfill))
 ], A_ConfigLoader.prototype, "prepare", 1);
 A_ConfigLoader = __decorateClass([
-  A_Frame.Container({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-ConfigLoader",
     description: "Container responsible for loading and initializing the A_Config component based on the environment and available configuration sources. It can be useful for application that need a separated configuration management and sharable across multiple containers."
   })
 ], A_ConfigLoader);

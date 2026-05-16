@@ -13,7 +13,7 @@ import {
     A_LOGGER_SAFE_RANDOM_COLORS,
     A_LOGGER_TERMINAL
 } from "./A-Logger.constants";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 
 
 /**
@@ -81,9 +81,8 @@ import { A_Frame } from "@adaas/a-frame";
  * const logger = new A_Logger(scope, config);
  * ```
  */
-@A_Frame.Component({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A_Logger',
     description: 'Advanced Logging Component with Scope-based Output Formatting that provides color-coded console output, multi-type support, and configurable log levels for enhanced debugging and monitoring.'
 })
 export class A_Logger extends A_Component {

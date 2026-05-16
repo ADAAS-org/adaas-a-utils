@@ -4,7 +4,7 @@ var aConcept = require('@adaas/a-concept');
 var AStateMachine_error = require('./A-StateMachine.error');
 var AStateMachine_constants = require('./A-StateMachine.constants');
 var AStateMachineTransition_context = require('./A-StateMachineTransition.context');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -103,15 +103,13 @@ __decorateClass([
   aConcept.A_Feature.Extend()
 ], exports.A_StateMachine.prototype, _a, 1);
 __decorateClass([
-  aFrame.A_Frame.Method({
-    name: "transition",
+  core.A_Frame.Define({
     description: "Executes a state transition from one state to another."
   })
 ], exports.A_StateMachine.prototype, "transition", 1);
 exports.A_StateMachine = __decorateClass([
-  aFrame.A_Frame.Namespace("A-Utils"),
-  aFrame.A_Frame.Component({
-    name: "A-StateMachine",
+  core.A_Frame.Define({
+    namespace: "A-Utils",
     description: "A powerful state machine component for managing complex state transitions."
   })
 ], exports.A_StateMachine);

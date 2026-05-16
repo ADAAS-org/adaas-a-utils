@@ -2,7 +2,7 @@ import { __decorateClass, __decorateParam } from '../../../chunk-EQQGB2QZ.mjs';
 import { A_Concept, A_Inject, A_Feature, A_CONCEPT_ENV, A_FormatterHelper } from '@adaas/a-concept';
 import { ConfigReader } from './ConfigReader.component';
 import { A_Config } from '../A-Config.context';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 import { A_Polyfill } from '@adaas/a-utils/a-polyfill';
 
 let ENVConfigReader = class extends ConfigReader {
@@ -47,9 +47,8 @@ __decorateClass([
   __decorateParam(2, A_Inject(A_Feature))
 ], ENVConfigReader.prototype, "readEnvFile", 1);
 ENVConfigReader = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "ENVConfigReader",
     description: "Configuration reader that sources configuration data from environment variables. It supports loading variables from a .env file and maps them to the configuration context, making it suitable for applications running in diverse environments such as local development, staging, and production."
   })
 ], ENVConfigReader);

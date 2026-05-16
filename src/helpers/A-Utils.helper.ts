@@ -1,12 +1,11 @@
 import { A_Caller, A_Component, A_Feature, A_Inject } from "@adaas/a-concept";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 import { A_ExecutionContext } from "@adaas/a-utils/a-execution";
 
 
 
-@A_Frame.Component({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'A-UtilsHelper',
     description: 'Utility helper class providing common functions for A-Utils library, such as hashing and serialization.'
 })
 export class A_UtilsHelper extends A_Component {
@@ -228,7 +227,7 @@ export class A_UtilsHelper extends A_Component {
     // ==============================================================================
     // =============== Instance methods for used for Injection ======================
     // ==============================================================================
-    @A_Frame.Method({
+    @A_Frame.Define({
         description: 'Instance method wrapper for the static hash function, allowing it to be injected as a dependency.'
     })
     hash(
@@ -242,7 +241,7 @@ export class A_UtilsHelper extends A_Component {
     }
 
 
-    @A_Frame.Method({
+    @A_Frame.Define({
         description: 'Instance method wrapper for the static serialize function, allowing it to be injected as a dependency.'
     })
     serialize(
@@ -256,7 +255,7 @@ export class A_UtilsHelper extends A_Component {
     }
 
 
-    @A_Frame.Method({
+    @A_Frame.Define({
         description: 'Instance method wrapper for the static setByPath function, allowing it to be injected as a dependency.'
     })
     setByPath(
@@ -274,7 +273,7 @@ export class A_UtilsHelper extends A_Component {
     }
 
 
-    @A_Frame.Method({
+    @A_Frame.Define({
         description: 'Instance method wrapper for the static getByPath function, allowing it to be injected as a dependency.'
     })
     getByPath(

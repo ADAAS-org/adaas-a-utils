@@ -9,7 +9,7 @@ var AUrlPolyfill = require('./node/A-Url-Polyfill');
 var ABufferPolyfill = require('./node/A-Buffer-Polyfill');
 var AProcessPolyfill = require('./node/A-Process-Polyfill');
 var AFSPolyfill = require('./node/A-FS-Polyfill');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -149,9 +149,8 @@ __decorateClass([
   aConcept.A_Concept.Load()
 ], exports.A_Polyfill.prototype, "attachToWindow", 1);
 exports.A_Polyfill = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Polyfill",
     description: "Polyfill component that provides cross-environment compatibility for Node.js core modules such as fs, crypto, http, https, path, url, buffer, and process. It dynamically loads appropriate polyfills based on the execution environment (Node.js or browser), enabling seamless usage of these modules in different contexts."
   }),
   __decorateParam(0, aConcept.A_Inject("A_Logger"))

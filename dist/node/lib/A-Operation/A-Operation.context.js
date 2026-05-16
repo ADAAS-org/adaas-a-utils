@@ -1,7 +1,7 @@
 'use strict';
 
 var aExecution = require('@adaas/a-utils/a-execution');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -45,9 +45,8 @@ exports.A_OperationContext = class A_OperationContext extends aExecution.A_Execu
   }
 };
 exports.A_OperationContext = __decorateClass([
-  aFrame.A_Frame.Fragment({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-OperationContext",
     description: "Operation execution context that encapsulates the metadata and serialized data related to a specific operation. It provides structured access to operation parameters, results, and error handling, facilitating the management of operation lifecycles within the application."
   })
 ], exports.A_OperationContext);

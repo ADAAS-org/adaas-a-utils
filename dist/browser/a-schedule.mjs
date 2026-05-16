@@ -1,6 +1,6 @@
 import { __decorateClass } from './chunk-EQQGB2QZ.mjs';
 import { A_Component, A_TypeGuards, A_Error } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 // src/lib/A-Schedule/A-Deferred.class.ts
 var A_Deferred = class {
@@ -85,9 +85,8 @@ var A_Schedule = class extends A_Component {
   }
 };
 A_Schedule = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Schedule",
     description: "Scheduling component that allows scheduling of callbacks to be executed at specific times or after certain delays. It provides methods to schedule callbacks based on Unix timestamps or ISO date strings, as well as a method to execute callbacks after a specified delay in milliseconds. This component is useful for managing timed operations within an application."
   })
 ], A_Schedule);

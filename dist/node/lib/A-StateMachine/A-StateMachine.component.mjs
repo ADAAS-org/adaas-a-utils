@@ -3,7 +3,7 @@ import { A_Component, A_FormatterHelper, A_Scope, A_Context, A_Feature } from '@
 import { A_StateMachineError } from './A-StateMachine.error';
 import { A_StateMachineFeatures } from './A-StateMachine.constants';
 import { A_StateMachineTransition } from './A-StateMachineTransition.context';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 var _a, _b, _c, _d;
 let A_StateMachine = class extends A_Component {
@@ -92,15 +92,13 @@ __decorateClass([
   A_Feature.Extend()
 ], A_StateMachine.prototype, _a, 1);
 __decorateClass([
-  A_Frame.Method({
-    name: "transition",
+  A_Frame.Define({
     description: "Executes a state transition from one state to another."
   })
 ], A_StateMachine.prototype, "transition", 1);
 A_StateMachine = __decorateClass([
-  A_Frame.Namespace("A-Utils"),
-  A_Frame.Component({
-    name: "A-StateMachine",
+  A_Frame.Define({
+    namespace: "A-Utils",
     description: "A powerful state machine component for managing complex state transitions."
   })
 ], A_StateMachine);

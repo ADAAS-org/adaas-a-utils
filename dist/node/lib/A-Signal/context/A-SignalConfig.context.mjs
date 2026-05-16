@@ -1,7 +1,7 @@
 import { __decorateClass } from '../../../chunk-EQQGB2QZ.mjs';
 import { A_Fragment, A_Context, A_CommonHelper } from '@adaas/a-concept';
 import { A_Signal } from '../entities/A-Signal.entity';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_SignalConfig = class extends A_Fragment {
   get structure() {
@@ -49,9 +49,8 @@ let A_SignalConfig = class extends A_Fragment {
   }
 };
 A_SignalConfig = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalConfig",
     description: "Signal configuration fragment that defines the structure and types of signals within a given scope. It allows specifying the expected signal constructors and their order, facilitating consistent signal management and processing across components that emit or listen to signals."
   })
 ], A_SignalConfig);

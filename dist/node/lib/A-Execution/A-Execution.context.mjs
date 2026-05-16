@@ -1,6 +1,6 @@
 import { __decorateClass } from '../../chunk-EQQGB2QZ.mjs';
 import { A_Fragment, A_Meta } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_ExecutionContext = class extends A_Fragment {
   constructor(name, defaults) {
@@ -44,9 +44,8 @@ let A_ExecutionContext = class extends A_Fragment {
   }
 };
 A_ExecutionContext = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-ExecutionContext",
     description: "Execution context fragment that provides a structured way to manage metadata and serialized data for execution environments. It allows storing and retrieving key-value pairs, facilitating context-aware operations within the application. It useful in cases when it's necessary to share some runtime data across multiple steps of thee features, or components."
   })
 ], A_ExecutionContext);

@@ -3,7 +3,7 @@ import { A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_FormatterHelper } from '@ad
 import { A_ExecutionContext } from '@adaas/a-utils/a-execution';
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from './A-Config.constants';
 import { A_ConfigError } from './A-Config.error';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_Config = class extends A_ExecutionContext {
   constructor(config) {
@@ -46,9 +46,8 @@ let A_Config = class extends A_ExecutionContext {
   }
 };
 A_Config = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Config",
     description: "Configuration management context that provides structured access to application configuration variables, supporting defaults and strict mode for enhanced reliability. Default environment variables are included for comprehensive configuration handling."
   })
 ], A_Config);

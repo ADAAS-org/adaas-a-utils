@@ -1,7 +1,7 @@
 'use strict';
 
 var aConcept = require('@adaas/a-concept');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -266,9 +266,8 @@ exports.A_SignalVector = class A_SignalVector extends aConcept.A_Entity {
   }
 };
 exports.A_SignalVector = __decorateClass([
-  aFrame.A_Frame.Entity({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalVector",
     description: "A Signal Vector Entity represents a collection of signals structured in a specific way, allowing for batch processing and transmission of related signals as a unified state representation."
   })
 ], exports.A_SignalVector);

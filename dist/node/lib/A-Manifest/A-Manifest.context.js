@@ -3,7 +3,7 @@
 var aConcept = require('@adaas/a-concept');
 var AManifest_error = require('./A-Manifest.error');
 var AManifestChecker_class = require('./classes/A-ManifestChecker.class');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -154,9 +154,8 @@ exports.A_Manifest = class A_Manifest extends aConcept.A_Fragment {
   }
 };
 exports.A_Manifest = __decorateClass([
-  aFrame.A_Frame.Fragment({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Manifest",
     description: "A-Manifest is a configuration fragment that allows to include or exclude component application for particular methods. It provides fine-grained control over which components are applied to which targets and methods within the application, enabling flexible and dynamic behavior based on defined rules."
   })
 ], exports.A_Manifest);

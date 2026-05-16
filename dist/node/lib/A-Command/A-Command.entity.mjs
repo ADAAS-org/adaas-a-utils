@@ -5,7 +5,7 @@ import { A_CommandError } from './A-Command.error';
 import { A_StateMachineFeatures, A_StateMachine, A_StateMachineTransition } from '@adaas/a-utils/a-state-machine';
 import { A_Logger } from '@adaas/a-utils/a-logger';
 import { A_ExecutionContext } from '@adaas/a-utils/a-execution';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
 let A_Command = class extends A_Entity {
@@ -508,9 +508,8 @@ __decorateClass([
   __decorateParam(1, A_Inject(A_ExecutionContext))
 ], A_Command.prototype, _a, 1);
 A_Command = __decorateClass([
-  A_Frame.Entity({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Command",
     description: "Advanced Command Pattern Implementation with full lifecycle management, event handling, and state persistence. This entity allows to execute commands in distributed environment across multiple services."
   })
 ], A_Command);

@@ -1,7 +1,7 @@
 'use strict';
 
 var aConcept = require('@adaas/a-concept');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var AConfig_context = require('../A-Config.context');
 var aPolyfill = require('@adaas/a-utils/a-polyfill');
 var AConfig_constants = require('../A-Config.constants');
@@ -69,9 +69,8 @@ __decorateClass([
   __decorateParam(0, aConcept.A_Inject(AConfig_context.A_Config))
 ], exports.ConfigReader.prototype, "initialize", 1);
 exports.ConfigReader = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "ConfigReader",
     description: "Abstract component for reading configuration data from various sources such as files, environment variables, or remote services. This component can be extended to implement specific configuration reading strategies."
   }),
   __decorateParam(0, aConcept.A_Dependency.Required()),

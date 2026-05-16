@@ -3,7 +3,7 @@
 var aConcept = require('@adaas/a-concept');
 var aConfig = require('@adaas/a-utils/a-config');
 var ALogger_constants = require('./A-Logger.constants');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -611,9 +611,8 @@ ${scopePadding}|-------------------------------
   }
 };
 exports.A_Logger = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A_Logger",
     description: "Advanced Logging Component with Scope-based Output Formatting that provides color-coded console output, multi-type support, and configurable log levels for enhanced debugging and monitoring."
   }),
   __decorateParam(0, aConcept.A_Inject(aConcept.A_Scope)),

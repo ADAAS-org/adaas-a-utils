@@ -1,10 +1,10 @@
-import { A_Logger } from './chunk-TK5UEYMZ.mjs';
-import './chunk-ECSGFDRQ.mjs';
-import { A_Polyfill } from './chunk-J6CLHXFQ.mjs';
-import './chunk-TQ5UON22.mjs';
+import { A_Logger } from './chunk-NFL7ROOO.mjs';
+import './chunk-SJU7LRGF.mjs';
+import { A_Polyfill } from './chunk-ZSD77J3W.mjs';
+import './chunk-SEQJPRV7.mjs';
 import { __decorateClass, __decorateParam } from './chunk-EQQGB2QZ.mjs';
 import { A_Concept, A_Feature, A_Inject, A_Error, A_Container } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 // src/lib/A-Service/A-Service.constants.ts
 var A_ServiceFeatures = /* @__PURE__ */ ((A_ServiceFeatures2) => {
@@ -185,9 +185,8 @@ __decorateClass([
   __decorateParam(1, A_Inject(A_Logger))
 ], A_Service.prototype, _a, 1);
 A_Service = __decorateClass([
-  A_Frame.Container({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Service",
     description: "Service container that manages the lifecycle of various types of services, such as HTTP servers and workers or UI loader. It dynamically loads necessary components based on the provided configuration and orchestrates the start and stop processes, ensuring proper error handling and extensibility through feature hooks."
   })
 ], A_Service);

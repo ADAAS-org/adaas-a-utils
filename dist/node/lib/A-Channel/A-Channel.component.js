@@ -5,7 +5,7 @@ var AChannel_error = require('./A-Channel.error');
 var AChannel_constants = require('./A-Channel.constants');
 var aOperation = require('@adaas/a-utils/a-operation');
 var AChannelRequest_context = require('./A-ChannelRequest.context');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -293,9 +293,8 @@ __decorateClass([
   })
 ], exports.A_Channel.prototype, "onSend", 1);
 exports.A_Channel = __decorateClass([
-  aFrame.A_Frame.Namespace("A-Utils"),
-  aFrame.A_Frame.Component({
-    name: "A-Channel",
+  core.A_Frame.Define({
+    namespace: "A-Utils",
     description: "Component uses as abstract channel for communication patterns. Can be inherited and extended to implement custom channels."
   })
 ], exports.A_Channel);

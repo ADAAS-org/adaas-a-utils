@@ -1,6 +1,6 @@
 import { __decorateClass } from './chunk-EQQGB2QZ.mjs';
 import { A_Error, A_Fragment, A_TypeGuards } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 var A_ManifestError = class extends A_Error {
 };
@@ -164,9 +164,8 @@ var A_Manifest = class extends A_Fragment {
   }
 };
 A_Manifest = __decorateClass([
-  A_Frame.Fragment({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Manifest",
     description: "A-Manifest is a configuration fragment that allows to include or exclude component application for particular methods. It provides fine-grained control over which components are applied to which targets and methods within the application, enabling flexible and dynamic behavior based on defined rules."
   })
 ], A_Manifest);

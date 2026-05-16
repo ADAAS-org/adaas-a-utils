@@ -5,7 +5,7 @@ var AMemory_constants = require('./A-Memory.constants');
 var AMemory_context = require('./A-Memory.context');
 var AMemory_error = require('./A-Memory.error');
 var aOperation = require('@adaas/a-utils/a-operation');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -48,31 +48,36 @@ exports.A_Memory = class A_Memory extends aConcept.A_Component {
   async [_f = AMemory_constants.A_MemoryFeatures.onDestroy](context, ...args) {
     context.clear();
   }
-  async [_e = AMemory_constants.A_MemoryFeatures.onGet](operation, context, ...args) {
+  async [_e = AMemory_constants.A_MemoryFeatures.onGet](operation, context, scope, ...args) {
+    await this.ready;
     operation.succeed(context.get(operation.params.key));
   }
   /**
    * Handles the 'has' operation for checking existence of a key in memory
    */
   async [_d = AMemory_constants.A_MemoryFeatures.onHas](operation, context, ...args) {
+    await this.ready;
     operation.succeed(context.has(operation.params.key));
   }
   /**
    * Handles the 'set' operation for saving a value in memory
    */
   async [_c = AMemory_constants.A_MemoryFeatures.onSet](operation, context, scope, ...args) {
+    await this.ready;
     context.set(operation.params.key, operation.params.value);
   }
   /**
    * Handles the 'drop' operation for removing a value from memory
    */
   async [_b = AMemory_constants.A_MemoryFeatures.onDrop](operation, context, ...args) {
+    await this.ready;
     context.delete(operation.params.key);
   }
   /**
    * Handles the 'clear' operation for clearing all values from memory
    */
   async [_a = AMemory_constants.A_MemoryFeatures.onClear](operation, context, ...args) {
+    await this.ready;
     context.clear();
   }
   // ======================================================================
@@ -297,7 +302,8 @@ __decorateClass([
   aConcept.A_Feature.Extend(),
   __decorateParam(0, aConcept.A_Dependency.Required()),
   __decorateParam(0, aConcept.A_Inject(aOperation.A_OperationContext)),
-  __decorateParam(1, aConcept.A_Inject(AMemory_context.A_MemoryContext))
+  __decorateParam(1, aConcept.A_Inject(AMemory_context.A_MemoryContext)),
+  __decorateParam(2, aConcept.A_Inject(aConcept.A_Scope))
 ], exports.A_Memory.prototype, _e, 1);
 __decorateClass([
   aConcept.A_Feature.Extend(),
@@ -325,9 +331,8 @@ __decorateClass([
   __decorateParam(1, aConcept.A_Inject(AMemory_context.A_MemoryContext))
 ], exports.A_Memory.prototype, _a, 1);
 exports.A_Memory = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Memory",
     description: "In-memory data storage component that provides a simple key-value store with asynchronous operations. It supports basic memory operations such as get, set, has, drop, and clear, along with lifecycle management and error handling features. This components features can be extended with other components to provide ability store data across multiple storage, or extract data from multiple external sources. Good example is to store some runtime data that needs to be shared across multiple containers or concepts."
   })
 ], exports.A_Memory);

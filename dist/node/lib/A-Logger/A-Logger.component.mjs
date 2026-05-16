@@ -2,7 +2,7 @@ import { __decorateClass, __decorateParam } from '../../chunk-EQQGB2QZ.mjs';
 import { A_Inject, A_Scope, A_Component, A_Context, A_Error } from '@adaas/a-concept';
 import { A_Config } from '@adaas/a-utils/a-config';
 import { A_LOGGER_COLORS, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_TERMINAL, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_FORMAT, A_LOGGER_ANSI, A_LOGGER_TIME_FORMAT } from './A-Logger.constants';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_Logger = class extends A_Component {
   // =============================================
@@ -601,9 +601,8 @@ ${scopePadding}|-------------------------------
   }
 };
 A_Logger = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A_Logger",
     description: "Advanced Logging Component with Scope-based Output Formatting that provides color-coded console output, multi-type support, and configurable log levels for enhanced debugging and monitoring."
   }),
   __decorateParam(0, A_Inject(A_Scope)),

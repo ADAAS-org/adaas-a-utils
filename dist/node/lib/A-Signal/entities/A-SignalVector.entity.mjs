@@ -1,6 +1,6 @@
 import { __decorateClass } from '../../../chunk-EQQGB2QZ.mjs';
 import { A_Entity, A_TypeGuards } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 
 let A_SignalVector = class extends A_Entity {
   constructor(param1, param2) {
@@ -257,9 +257,8 @@ let A_SignalVector = class extends A_Entity {
   }
 };
 A_SignalVector = __decorateClass([
-  A_Frame.Entity({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalVector",
     description: "A Signal Vector Entity represents a collection of signals structured in a specific way, allowing for batch processing and transmission of related signals as a unified state representation."
   })
 ], A_SignalVector);

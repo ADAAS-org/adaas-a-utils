@@ -6,7 +6,7 @@ var ASignalConfig_context = require('../context/A-SignalConfig.context');
 var ASignal_entity = require('../entities/A-Signal.entity');
 var aConfig = require('@adaas/a-utils/a-config');
 var aLogger = require('@adaas/a-utils/a-logger');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var ASignalBus_constants = require('./A-SignalBus.constants');
 var ASignalBus_error = require('./A-SignalBus.error');
 
@@ -87,7 +87,7 @@ exports.A_SignalBus = class A_SignalBus extends aConcept.A_Component {
   }
 };
 __decorateClass([
-  aFrame.A_Frame.Method({
+  core.A_Frame.Define({
     description: "Emit multiple signals through the signal bus."
   })
 ], exports.A_SignalBus.prototype, "next", 1);
@@ -125,9 +125,8 @@ __decorateClass([
   __decorateParam(5, aConcept.A_Inject(ASignalConfig_context.A_SignalConfig))
 ], exports.A_SignalBus.prototype, _a, 1);
 exports.A_SignalBus = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalBus",
     description: "Signal bus component that manages the emission and state of signals within a given scope. It listens for emitted signals, updates their state, and forwards them to registered watchers. The bus ensures a consistent signal vector structure based on the defined configuration, facilitating signal management across multiple components."
   })
 ], exports.A_SignalBus);

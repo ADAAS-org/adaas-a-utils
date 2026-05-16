@@ -1,11 +1,11 @@
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 import { A_OperationContext } from "@adaas/a-utils/a-operation";
 import { A_ChannelRequestStatuses } from "./A-Channel.constants";
 
 
 
-@A_Frame.Fragment({
-    name: 'A-ChannelRequest',
+@A_Frame.Define({
+    namespace: 'A-Utils',
     description: 'Context for managing channel requests. It encapsulates the request parameters and the result including status and data.'
 })
 export class A_ChannelRequest<

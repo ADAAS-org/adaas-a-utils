@@ -6,7 +6,7 @@ var ACommand_error = require('./A-Command.error');
 var aStateMachine = require('@adaas/a-utils/a-state-machine');
 var aLogger = require('@adaas/a-utils/a-logger');
 var aExecution = require('@adaas/a-utils/a-execution');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -520,9 +520,8 @@ __decorateClass([
   __decorateParam(1, aConcept.A_Inject(aExecution.A_ExecutionContext))
 ], exports.A_Command.prototype, _a, 1);
 exports.A_Command = __decorateClass([
-  aFrame.A_Frame.Entity({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-Command",
     description: "Advanced Command Pattern Implementation with full lifecycle management, event handling, and state persistence. This entity allows to execute commands in distributed environment across multiple services."
   })
 ], exports.A_Command);

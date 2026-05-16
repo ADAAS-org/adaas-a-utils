@@ -4,7 +4,7 @@ import {
     A_Container, A_Dependency,
     A_Inject, A_Scope
 } from "@adaas/a-concept";
-import { A_Frame } from "@adaas/a-frame";
+import { A_Frame } from "@adaas/a-frame/core";
 import { A_Config } from "../A-Config.context";
 import { A_Polyfill } from "@adaas/a-utils/a-polyfill";
 import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "../A-Config.constants";
@@ -12,9 +12,8 @@ import { A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY } from "../A-Config.constants";
 /**
  * Config Reader
  */
-@A_Frame.Component({
+@A_Frame.Define({
     namespace: 'A-Utils',
-    name: 'ConfigReader',
     description: 'Abstract component for reading configuration data from various sources such as files, environment variables, or remote services. This component can be extended to implement specific configuration reading strategies.'
 })
 export class ConfigReader extends A_Component {

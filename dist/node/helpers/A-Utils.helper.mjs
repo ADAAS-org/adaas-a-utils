@@ -1,6 +1,6 @@
 import { __decorateClass, __decorateParam } from '../chunk-EQQGB2QZ.mjs';
 import { A_Inject, A_Caller, A_Feature, A_Component } from '@adaas/a-concept';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 import { A_ExecutionContext } from '@adaas/a-utils/a-execution';
 
 let A_UtilsHelper = class extends A_Component {
@@ -189,7 +189,7 @@ let A_UtilsHelper = class extends A_Component {
   }
 };
 __decorateClass([
-  A_Frame.Method({
+  A_Frame.Define({
     description: "Instance method wrapper for the static hash function, allowing it to be injected as a dependency."
   }),
   __decorateParam(0, A_Inject(A_Caller)),
@@ -197,7 +197,7 @@ __decorateClass([
   __decorateParam(2, A_Inject(A_Feature))
 ], A_UtilsHelper.prototype, "hash", 1);
 __decorateClass([
-  A_Frame.Method({
+  A_Frame.Define({
     description: "Instance method wrapper for the static serialize function, allowing it to be injected as a dependency."
   }),
   __decorateParam(0, A_Inject(A_Caller)),
@@ -205,7 +205,7 @@ __decorateClass([
   __decorateParam(2, A_Inject(A_Feature))
 ], A_UtilsHelper.prototype, "serialize", 1);
 __decorateClass([
-  A_Frame.Method({
+  A_Frame.Define({
     description: "Instance method wrapper for the static setByPath function, allowing it to be injected as a dependency."
   }),
   __decorateParam(0, A_Inject(A_Caller)),
@@ -213,7 +213,7 @@ __decorateClass([
   __decorateParam(2, A_Inject(A_Feature))
 ], A_UtilsHelper.prototype, "setByPath", 1);
 __decorateClass([
-  A_Frame.Method({
+  A_Frame.Define({
     description: "Instance method wrapper for the static getByPath function, allowing it to be injected as a dependency."
   }),
   __decorateParam(0, A_Inject(A_Caller)),
@@ -221,9 +221,8 @@ __decorateClass([
   __decorateParam(2, A_Inject(A_Feature))
 ], A_UtilsHelper.prototype, "getByPath", 1);
 A_UtilsHelper = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-UtilsHelper",
     description: "Utility helper class providing common functions for A-Utils library, such as hashing and serialization."
   })
 ], A_UtilsHelper);

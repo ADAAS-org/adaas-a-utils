@@ -3,7 +3,7 @@
 var aConcept = require('@adaas/a-concept');
 var ConfigReader_component = require('./ConfigReader.component');
 var AConfig_context = require('../A-Config.context');
-var aFrame = require('@adaas/a-frame');
+var core = require('@adaas/a-frame/core');
 var aPolyfill = require('@adaas/a-utils/a-polyfill');
 
 var __defProp = Object.defineProperty;
@@ -59,9 +59,8 @@ __decorateClass([
   __decorateParam(2, aConcept.A_Inject(aConcept.A_Feature))
 ], exports.ENVConfigReader.prototype, "readEnvFile", 1);
 exports.ENVConfigReader = __decorateClass([
-  aFrame.A_Frame.Component({
+  core.A_Frame.Define({
     namespace: "A-Utils",
-    name: "ENVConfigReader",
     description: "Configuration reader that sources configuration data from environment variables. It supports loading variables from a .env file and maps them to the configuration context, making it suitable for applications running in diverse environments such as local development, staging, and production."
   })
 ], exports.ENVConfigReader);

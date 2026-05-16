@@ -5,7 +5,7 @@ import { A_SignalConfig } from '../context/A-SignalConfig.context';
 import { A_Signal } from '../entities/A-Signal.entity';
 import { A_Config } from '@adaas/a-utils/a-config';
 import { A_Logger } from '@adaas/a-utils/a-logger';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 import { A_SignalBusFeatures } from './A-SignalBus.constants';
 import { A_SignalBusError } from './A-SignalBus.error';
 
@@ -75,7 +75,7 @@ let A_SignalBus = class extends A_Component {
   }
 };
 __decorateClass([
-  A_Frame.Method({
+  A_Frame.Define({
     description: "Emit multiple signals through the signal bus."
   })
 ], A_SignalBus.prototype, "next", 1);
@@ -113,9 +113,8 @@ __decorateClass([
   __decorateParam(5, A_Inject(A_SignalConfig))
 ], A_SignalBus.prototype, _a, 1);
 A_SignalBus = __decorateClass([
-  A_Frame.Component({
+  A_Frame.Define({
     namespace: "A-Utils",
-    name: "A-SignalBus",
     description: "Signal bus component that manages the emission and state of signals within a given scope. It listens for emitted signals, updates their state, and forwards them to registered watchers. The bus ensures a consistent signal vector structure based on the defined configuration, facilitating signal management across multiple components."
   })
 ], A_SignalBus);

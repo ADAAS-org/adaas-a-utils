@@ -1,5 +1,5 @@
 import { __decorateClass } from '../../chunk-EQQGB2QZ.mjs';
-import { A_Frame } from '@adaas/a-frame';
+import { A_Frame } from '@adaas/a-frame/core';
 import { A_OperationContext } from '@adaas/a-utils/a-operation';
 import { A_ChannelRequestStatuses } from './A-Channel.constants';
 
@@ -23,8 +23,8 @@ let A_ChannelRequest = class extends A_OperationContext {
   }
 };
 A_ChannelRequest = __decorateClass([
-  A_Frame.Fragment({
-    name: "A-ChannelRequest",
+  A_Frame.Define({
+    namespace: "A-Utils",
     description: "Context for managing channel requests. It encapsulates the request parameters and the result including status and data."
   })
 ], A_ChannelRequest);
