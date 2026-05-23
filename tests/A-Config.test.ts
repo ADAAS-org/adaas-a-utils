@@ -1,5 +1,6 @@
 import {
     A_Concept,
+    A_CONCEPT_ENV,
     A_CONSTANTS__DEFAULT_ENV_VARIABLES,
     A_Context,
 } from '@adaas/a-concept';
@@ -7,6 +8,7 @@ import { A_Config, A_ConfigLoader, ENVConfigReader, FileConfigReader } from '@ad
 import { A_Logger } from '@adaas/a-utils/a-logger';
 import { A_Polyfill } from '@adaas/a-utils/a-polyfill';
 import fs from 'fs';
+import path from 'path';
 
 jest.retryTimes(0);
 
@@ -175,5 +177,39 @@ describe('A-Config tests', () => {
         } catch (error) {
 
         }
+    });
+});
+
+
+// ── A_CONCEPT_ROOT_FOLDER tests ────────────────────────────────────────────────
+
+describe('A_CONCEPT_ROOT_FOLDER', () => {
+
+    const ORIGINAL_ENV = process.env[A_CONSTANTS__DEFAULT_ENV_VARIABLES.A_CONCEPT_ROOT_FOLDER];
+
+    afterEach(() => {
+        // restore
+        if (ORIGINAL_ENV === undefined) {
+            delete process.env[A_CONSTANTS__DEFAULT_ENV_VARIABLES.A_CONCEPT_ROOT_FOLDER];
+        } else {
+            process.env[A_CONSTANTS__DEFAULT_ENV_VARIABLES.A_CONCEPT_ROOT_FOLDER] = ORIGINAL_ENV;
+        }
+    });
+
+    it('defaults to process.cwd() when env var is not set', () => {
+        delete process.env[A_CONSTANTS__DEFAULT_ENV_VARIABLES.A_CONCEPT_ROOT_FOLDER];
+        expect(A_CONCEPT_ENV.A_CONCEPT_ROOT_FOLDER).toBe(process.cwd());
+    });
+
+    it('returns the value set via env var', () => {
+        process.env[A_CONSTANTS__DEFAULT_ENV_VARIABLES.A_CONCEPT_ROOT_FOLDER] = '/custom/path';
+        expect(A_CONCEPT_ENV.A_CONCEPT_ROOT_FOLDER).toBe('/custom/path');
+    });
+
+    it('A_CONCEPT_ROOT_FOLDER points to a directory that contains package.json (current project)', () => {
+        delete process.env[A_CONSTANTS__DEFAULT_ENV_VARIABLES.A_CONCEPT_ROOT_FOLDER];
+        const rootFolder = A_CONCEPT_ENV.A_CONCEPT_ROOT_FOLDER;
+        const pkgPath = path.join(rootFolder, 'package.json');
+        expect(fs.existsSync(pkgPath)).toBe(true);
     });
 });
