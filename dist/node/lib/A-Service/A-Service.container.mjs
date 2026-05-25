@@ -12,7 +12,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onBeforeLoad,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -20,7 +20,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onLoad,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -28,7 +28,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onAfterLoad,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -36,7 +36,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onBeforeStart,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -44,7 +44,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onStart,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -52,7 +52,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onAfterStart,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -60,7 +60,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onBeforeStop,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -68,7 +68,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onStop,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -76,7 +76,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onAfterStop,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -84,7 +84,7 @@ let A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_ServiceFeatures.onError,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }

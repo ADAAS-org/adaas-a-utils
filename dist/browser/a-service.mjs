@@ -1,4 +1,4 @@
-import { A_Logger } from './chunk-FPM7M4RY.mjs';
+import { A_Logger } from './chunk-JRVUD4BM.mjs';
 import './chunk-SJU7LRGF.mjs';
 import { A_Polyfill } from './chunk-ZSD77J3W.mjs';
 import './chunk-SEQJPRV7.mjs';
@@ -31,7 +31,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onBeforeLoad" /* onBeforeLoad */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -39,7 +39,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onLoad" /* onLoad */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -47,7 +47,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onAfterLoad" /* onAfterLoad */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -55,7 +55,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onBeforeStart" /* onBeforeStart */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -63,7 +63,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onStart" /* onStart */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -71,7 +71,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onAfterStart" /* onAfterStart */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -79,7 +79,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onBeforeStop" /* onBeforeStop */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -87,7 +87,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onStop" /* onStop */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -95,7 +95,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onAfterStop" /* onAfterStop */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -103,7 +103,7 @@ var A_Service = class extends A_Container {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: "_A_Service_onError" /* onError */,
-        scope: [target.constructor]
+        scope: [A_Service]
       })(target, propertyKey, descriptor);
     };
   }

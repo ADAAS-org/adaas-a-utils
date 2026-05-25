@@ -24,7 +24,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onBeforeLoad,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -32,7 +32,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onLoad,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -40,7 +40,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onAfterLoad,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -48,7 +48,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onBeforeStart,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -56,7 +56,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onStart,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -64,7 +64,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onAfterStart,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -72,7 +72,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onBeforeStop,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -80,7 +80,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onStop,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -88,7 +88,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onAfterStop,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }
@@ -96,7 +96,7 @@ exports.A_Service = class A_Service extends aConcept.A_Container {
     return (target, propertyKey, descriptor) => {
       return aConcept.A_Feature.Extend({
         name: AService_constants.A_ServiceFeatures.onError,
-        scope: [target.constructor]
+        scope: [exports.A_Service]
       })(target, propertyKey, descriptor);
     };
   }

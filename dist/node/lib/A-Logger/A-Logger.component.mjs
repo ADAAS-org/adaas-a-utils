@@ -39,7 +39,7 @@ let A_Logger = class extends A_Component {
     return (target, propertyKey, descriptor) => {
       return A_Feature.Extend({
         name: A_LOGGER_FEATURES.onLog,
-        scope: [target.constructor]
+        scope: [A_Logger]
       })(target, propertyKey, descriptor);
     };
   }

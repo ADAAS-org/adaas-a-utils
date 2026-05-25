@@ -93,7 +93,7 @@ export class A_Logger extends A_Component {
         return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
             return A_Feature.Extend({
                 name: A_LOGGER_FEATURES.onLog,
-                scope: [target.constructor],
+                scope: [A_Logger],
             })(target, propertyKey, descriptor);
         }
     }
