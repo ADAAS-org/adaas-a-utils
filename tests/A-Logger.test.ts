@@ -12,6 +12,7 @@
 
 import { A_Scope, A_Error } from "@adaas/a-concept";
 import { A_Logger, A_LOGGER_COLORS } from "@adaas/a-utils/a-logger";
+import { A_Config } from "@adaas/a-utils/a-config";
 
 // Mock console methods for testing
 const originalConsoleLog = console.log;
@@ -36,16 +37,29 @@ function clearCapturedLogs() {
 }
 
 // =============================================
+// Helpers
+// =============================================
+
+/**
+ * Proper way to obtain a logger: register A_Logger in a named scope
+ * and resolve it so the DI system injects the scope automatically.
+ */
+function makeLogger(scopeName: string, config?: A_Config<any>): A_Logger {
+    const scope = new A_Scope({ name: scopeName });
+    if (config) scope.register(config);
+    scope.register(A_Logger);
+    return scope.resolve(A_Logger)!;
+}
+
+// =============================================
 // Test Suite Setup
 // =============================================
 
 describe('A_Logger Component', () => {
-    let scope: A_Scope;
     let logger: A_Logger;
 
     beforeEach(() => {
-        scope = new A_Scope({ name: 'TestScope' });
-        logger = new A_Logger(scope);
+        logger = makeLogger('TestScope');
         clearCapturedLogs();
         mockConsole();
     });
@@ -99,8 +113,7 @@ describe('A_Logger Component', () => {
 
     describe('Scope Formatting', () => {
         test('should pad short scope names to standard length', () => {
-            const shortScope = new A_Scope({ name: 'API' });
-            const shortLogger = new A_Logger(shortScope);
+            const shortLogger = makeLogger('API');
             
             shortLogger.log('Test message');
             
@@ -110,8 +123,7 @@ describe('A_Logger Component', () => {
         });
 
         test('should handle long scope names', () => {
-            const longScope = new A_Scope({ name: 'VeryLongServiceNameThatExceedsStandardLength' });
-            const longLogger = new A_Logger(longScope);
+            const longLogger = makeLogger('VeryLongServiceNameThatExceedsStandardLength');
             
             longLogger.log('Test message');
             
@@ -122,15 +134,8 @@ describe('A_Logger Component', () => {
         });
 
         test('should maintain consistent alignment across different scope lengths', () => {
-            const scopes = [
-                new A_Scope({ name: 'A' }),
-                new A_Scope({ name: 'MediumLengthScope' }),
-                new A_Scope({ name: 'VeryVeryLongScopeName' })
-            ];
-
-            scopes.forEach(testScope => {
-                const testLogger = new A_Logger(testScope);
-                testLogger.log('Alignment test');
+            ['A', 'MediumLengthScope', 'VeryVeryLongScopeName'].forEach(name => {
+                makeLogger(name).log('Alignment test');
             });
 
             const logs = getCapturedLogs();
@@ -304,8 +309,8 @@ describe('A_Logger Component', () => {
 
     describe('Log Level Filtering', () => {
         test('should respect debug log level (show all)', () => {
-            const config = { get: () => 'debug' } as any;
-            const debugLogger = new A_Logger(scope, config);
+            const debugLogger = makeLogger('debug-scope',
+                new A_Config({ defaults: { A_LOGGER_LEVEL: 'debug' } }));
 
             debugLogger.log('Debug message');
             debugLogger.warning('Warning message');
@@ -316,8 +321,8 @@ describe('A_Logger Component', () => {
         });
 
         test('should respect info log level (show log, warning, error)', () => {
-            const config = { get: () => 'info' } as any;
-            const infoLogger = new A_Logger(scope, config);
+            const infoLogger = makeLogger('info-scope',
+                new A_Config({ defaults: { A_LOGGER_LEVEL: 'info' } }));
 
             infoLogger.log('Info message');
             infoLogger.warning('Warning message');
@@ -328,8 +333,8 @@ describe('A_Logger Component', () => {
         });
 
         test('should respect warn log level (show warning, error only)', () => {
-            const config = { get: () => 'warn' } as any;
-            const warnLogger = new A_Logger(scope, config);
+            const warnLogger = makeLogger('warn-scope',
+                new A_Config({ defaults: { A_LOGGER_LEVEL: 'warn' } }));
 
             warnLogger.log('Info message');
             warnLogger.warning('Warning message');
@@ -342,8 +347,8 @@ describe('A_Logger Component', () => {
         });
 
         test('should respect error log level (show error only)', () => {
-            const config = { get: () => 'error' } as any;
-            const errorLogger = new A_Logger(scope, config);
+            const errorLogger = makeLogger('error-scope',
+                new A_Config({ defaults: { A_LOGGER_LEVEL: 'error' } }));
 
             errorLogger.log('Info message');
             errorLogger.warning('Warning message');
@@ -355,8 +360,8 @@ describe('A_Logger Component', () => {
         });
 
         test('should handle unknown log level (default to no logging)', () => {
-            const config = { get: () => 'unknown' } as any;
-            const unknownLogger = new A_Logger(scope, config);
+            const unknownLogger = makeLogger('unknown-scope',
+                new A_Config({ defaults: { A_LOGGER_LEVEL: 'unknown' } }));
 
             unknownLogger.log('Info message');
             unknownLogger.warning('Warning message');
@@ -444,8 +449,7 @@ describe('A_Logger Component', () => {
         });
 
         test('should handle empty scope name', () => {
-            const emptyScope = new A_Scope({ name: '' });
-            const emptyLogger = new A_Logger(emptyScope);
+            const emptyLogger = makeLogger('');
             
             emptyLogger.log('Empty scope test');
             
@@ -500,8 +504,7 @@ describe('A_Logger Component', () => {
         test('should detect terminal width in Node.js environment', () => {
             // The logger should initialize without errors and handle terminal width detection
             expect(() => {
-                const testScope = new A_Scope({ name: 'TerminalTest' });
-                const terminalLogger = new A_Logger(testScope);
+                const terminalLogger = makeLogger('TerminalTest');
                 terminalLogger.info('Terminal width test message');
             }).not.toThrow();
         });
@@ -566,15 +569,8 @@ describe('A_Logger Integration', () => {
     });
 
     test('should work with different scope configurations', () => {
-        const scopes = [
-            new A_Scope({ name: 'Service1' }),
-            new A_Scope({ name: 'Service2' }),
-            new A_Scope({ name: 'Service3' })
-        ];
-
-        scopes.forEach((scope, index) => {
-            const logger = new A_Logger(scope);
-            logger.log(`Message from ${scope.name}`);
+        ['Service1', 'Service2', 'Service3'].forEach(name => {
+            makeLogger(name).log(`Message from ${name}`);
         });
 
         const logs = getCapturedLogs();
@@ -587,11 +583,8 @@ describe('A_Logger Integration', () => {
     });
 
     test('should maintain scope isolation', () => {
-        const scope1 = new A_Scope({ name: 'Scope1' });
-        const scope2 = new A_Scope({ name: 'Scope2' });
-        
-        const logger1 = new A_Logger(scope1);
-        const logger2 = new A_Logger(scope2);
+        const logger1 = makeLogger('Scope1');
+        const logger2 = makeLogger('Scope2');
 
         logger1.log('Message from logger 1');
         logger2.log('Message from logger 2');

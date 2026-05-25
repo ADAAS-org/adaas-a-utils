@@ -3,6 +3,7 @@ import { A_ServiceFeatures } from './A-Service.constants.mjs';
 import { A_Logger } from '../A-Logger/A-Logger.component.mjs';
 import { A_Polyfill } from '../A-Polyfill/A-Polyfill.component.env-node.mjs';
 import '../A-Logger/A-Logger.types.mjs';
+import '../A-Logger/A-Logger.constants.mjs';
 import '../A-Logger/A-Logger.env.mjs';
 import '../A-Config/A-Config.context.mjs';
 import '../A-Config/A-Config.types.mjs';
@@ -32,6 +33,16 @@ import '../A-Polyfill/base/A-FS-Polyfill.base.mjs';
  *
  */
 declare class A_Service extends A_Container {
+    static get onBeforeLoad(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onLoad(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onAfterLoad(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onBeforeStart(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onStart(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onAfterStart(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onBeforeStop(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onStop(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onAfterStop(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onError(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
     load(): Promise<void>;
     start(): Promise<void>;
     stop(): Promise<void>;

@@ -1,5 +1,5 @@
 import { A_TYPES__Entity_Serialized, A_TYPES__Entity_Constructor, A_Entity, A_Fragment, A_TYPES__Component_Constructor, A_Component, A_Error, A_Scope } from '@adaas/a-concept';
-import { A as A_Logger, f as A_Config } from './A-Logger.component-Be-LMV3I.mjs';
+import { A as A_Logger, a as A_Config } from './index-B5jryYH7.mjs';
 import './a-execution.mjs';
 
 type A_SignalConfig_Init<TSignals extends Array<A_Signal> = Array<A_Signal>> = {

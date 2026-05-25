@@ -1,5 +1,6 @@
 import { A_Component, A_Scope, A_Error } from '@adaas/a-concept';
 import { A_LoggerColorName } from './A-Logger.types.mjs';
+import { A_LOGGER_COLOR_CODES } from './A-Logger.constants.mjs';
 import { A_LoggerEnvVariablesType } from './A-Logger.env.mjs';
 import { A_Config } from '../A-Config/A-Config.context.mjs';
 import '../A-Config/A-Config.types.mjs';
@@ -29,7 +30,7 @@ import '../A-Config/A-Config.constants.mjs';
  * ```typescript
  * // Basic usage with dependency injection (uses deterministic colors based on scope name)
  * class MyService {
- *   constructor(@A_Inject(A_Logger) private logger: A_Logger) {}
+ *   constructor(@A_Inject(A_Logger) protected logger: A_Logger) {}
  *
  *   doSomething() {
  *     this.logger.info('Processing started'); // Uses scope-name-based colors, always shows
@@ -74,6 +75,7 @@ import '../A-Config/A-Config.constants.mjs';
 declare class A_Logger extends A_Component {
     protected scope: A_Scope;
     protected config?: A_Config<A_LoggerEnvVariablesType> | undefined;
+    static get onLog(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
     /**
      * Terminal color codes for different log levels and custom styling
      * These codes work with ANSI escape sequences for colored terminal output
@@ -83,28 +85,28 @@ declare class A_Logger extends A_Component {
      * Standard scope length for consistent formatting
      * This ensures all log messages align properly regardless of scope name length
      */
-    private readonly STANDARD_SCOPE_LENGTH;
+    protected readonly STANDARD_SCOPE_LENGTH: any;
     /**
      * Default color for the scope portion of log messages
      * This color is used for the scope brackets and content, and remains consistent
      * for this logger instance regardless of message color overrides
      */
-    private readonly DEFAULT_SCOPE_COLOR;
+    protected readonly DEFAULT_SCOPE_COLOR: keyof typeof A_LOGGER_COLOR_CODES;
     /**
      * Default color for log message content when no explicit color is provided
      * This color is used for the message body when logging without specifying a color
      */
-    private readonly DEFAULT_LOG_COLOR;
+    protected readonly DEFAULT_LOG_COLOR: keyof typeof A_LOGGER_COLOR_CODES;
     /**
      * Current terminal width for responsive formatting
      * Automatically detected or falls back to default values
      */
-    private readonly TERMINAL_WIDTH;
+    protected readonly TERMINAL_WIDTH: number;
     /**
      * Maximum content width based on terminal size
      * Used for word wrapping and line length calculations
      */
-    private readonly MAX_CONTENT_WIDTH;
+    protected readonly MAX_CONTENT_WIDTH: number;
     /**
      * Initialize A_Logger with dependency injection
      * Colors are configured through A_Config or generated randomly if not provided
@@ -120,7 +122,7 @@ declare class A_Logger extends A_Component {
      * @param str - The string to hash
      * @returns A numeric hash value
      */
-    private simpleHash;
+    protected simpleHash(str: string): number;
     /**
      * Generate a deterministic color based on scope name
      * Same scope names will always get the same color, but uses safe color palette
@@ -128,7 +130,7 @@ declare class A_Logger extends A_Component {
      * @param scopeName - The scope name to generate color for
      * @returns A color key from the safe colors palette
      */
-    private generateColorFromScopeName;
+    protected generateColorFromScopeName(scopeName: string): keyof typeof A_LOGGER_COLOR_CODES;
     /**
      * Generate a pair of complementary colors based on scope name
      * Ensures visual harmony between scope and message colors while being deterministic
@@ -136,7 +138,10 @@ declare class A_Logger extends A_Component {
      * @param scopeName - The scope name to base colors on
      * @returns Object with scopeColor and logColor that work well together
      */
-    private generateComplementaryColorsFromScope;
+    protected generateComplementaryColorsFromScope(scopeName: string): {
+        scopeColor: keyof typeof A_LOGGER_COLOR_CODES;
+        logColor: keyof typeof A_LOGGER_COLOR_CODES;
+    };
     /**
      * Detect current terminal width based on environment
      *
@@ -147,7 +152,7 @@ declare class A_Logger extends A_Component {
      *
      * @returns Terminal width in characters
      */
-    private detectTerminalWidth;
+    protected detectTerminalWidth(): number;
     /**
      * Wrap text to fit within terminal width while preserving formatting
      *
@@ -156,7 +161,7 @@ declare class A_Logger extends A_Component {
      * @param isFirstLine - Whether this is the first line (affects available width calculation)
      * @returns Array of wrapped lines with proper indentation
      */
-    private wrapText;
+    protected wrapText(text: string, scopePadding: string, isFirstLine?: boolean): string[];
     /**
      * Split a long word that doesn't fit on a single line
      *
@@ -164,7 +169,7 @@ declare class A_Logger extends A_Component {
      * @param maxLength - Maximum length per chunk
      * @returns Array of word chunks
      */
-    private splitLongWord;
+    protected splitLongWord(word: string, maxLength: number): string[];
     /**
      * Get the formatted scope length for consistent message alignment
      * Uses a standard length to ensure all messages align properly regardless of scope name
@@ -201,7 +206,7 @@ declare class A_Logger extends A_Component {
      * @param scopePadding - The padding string for consistent alignment
      * @returns Formatted object string or the object itself for browser environments
      */
-    private formatObject;
+    protected formatObject(obj: any, shouldAddNewline: boolean, scopePadding: string): any;
     /**
      * Wrap a long JSON string value while preserving readability
      *
@@ -209,7 +214,7 @@ declare class A_Logger extends A_Component {
      * @param maxWidth - Maximum width for the value
      * @returns Wrapped string value
      */
-    private wrapJsonStringValue;
+    protected wrapJsonStringValue(value: string, maxWidth: number): string;
     /**
      * Format a string for display with proper indentation and terminal width wrapping
      *
@@ -218,7 +223,7 @@ declare class A_Logger extends A_Component {
      * @param scopePadding - The padding string for consistent alignment
      * @returns Formatted string
      */
-    private formatString;
+    protected formatString(str: string, shouldAddNewline: boolean, scopePadding: string): string;
     /**
      * Determine if a log message should be output based on configured log level
      *
@@ -347,7 +352,7 @@ declare class A_Logger extends A_Component {
      * @param baseIndent - Base indentation for continuation lines
      * @returns Array of formatted stack trace lines
      */
-    private formatStackTrace;
+    protected formatStackTrace(stack: string, baseIndent: string): string[];
     /**
      * Format standard Error instances for inline display within compiled messages
      *

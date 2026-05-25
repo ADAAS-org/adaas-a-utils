@@ -3,6 +3,7 @@ import { A_Polyfill } from '../A-Polyfill/A-Polyfill.component.env-node.js';
 import '../A-Polyfill/A-Polyfill.types.js';
 import '../A-Logger/A-Logger.component.js';
 import '../A-Logger/A-Logger.types.js';
+import '../A-Logger/A-Logger.constants.js';
 import '../A-Logger/A-Logger.env.js';
 import './A-Config.context.js';
 import './A-Config.types.js';

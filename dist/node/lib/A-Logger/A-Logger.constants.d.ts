@@ -14,7 +14,7 @@ declare const A_LOGGER_DEFAULT_LEVEL = "all";
 /**
  * Terminal color codes mapping
  */
-declare const A_LOGGER_COLORS: {
+declare const A_LOGGER_COLOR_CODES: {
     readonly red: "31";
     readonly yellow: "33";
     readonly green: "32";
@@ -43,6 +43,36 @@ declare const A_LOGGER_COLORS: {
     readonly silver: "38;5;250";
     readonly smoke: "38;5;244";
     readonly slate: "38;5;240";
+};
+declare const A_LOGGER_COLORS: {
+    readonly red: "red";
+    readonly yellow: "yellow";
+    readonly green: "green";
+    readonly blue: "blue";
+    readonly cyan: "cyan";
+    readonly magenta: "magenta";
+    readonly gray: "gray";
+    readonly brightBlue: "brightBlue";
+    readonly brightCyan: "brightCyan";
+    readonly brightMagenta: "brightMagenta";
+    readonly darkGray: "darkGray";
+    readonly lightGray: "lightGray";
+    readonly indigo: "indigo";
+    readonly violet: "violet";
+    readonly purple: "purple";
+    readonly lavender: "lavender";
+    readonly skyBlue: "skyBlue";
+    readonly steelBlue: "steelBlue";
+    readonly slateBlue: "slateBlue";
+    readonly deepBlue: "deepBlue";
+    readonly lightBlue: "lightBlue";
+    readonly periwinkle: "periwinkle";
+    readonly cornflower: "cornflower";
+    readonly powder: "powder";
+    readonly charcoal: "charcoal";
+    readonly silver: "silver";
+    readonly smoke: "smoke";
+    readonly slate: "slate";
 };
 /**
  * Safe colors for random selection - grey-blue-violet palette
@@ -99,5 +129,42 @@ declare const A_LOGGER_ENV_KEYS: {
     readonly DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR";
     readonly DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR";
 };
+declare const A_LOGGER_LEVELS: {
+    debug: string;
+    info: string;
+    log: string;
+    warning: string;
+    error: string;
+    all: string;
+};
+declare const A_LOGGER_FEATURES: {
+    readonly onLog: "A_Logger_onLog";
+};
+declare const A_LOGGER_ENV_VARIABLES: {
+    /**
+     * Sets the log level for the logger
+     *
+     * @example 'debug', 'info', 'warn', 'error'
+     */
+    readonly A_LOGGER_LEVEL: "A_LOGGER_LEVEL";
+    /**
+     * Sets the default scope length for log messages
+     *
+     * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
+     */
+    readonly A_LOGGER_DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH";
+    /**
+     * Sets the default color for scope display in log messages
+     *
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    readonly A_LOGGER_DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR";
+    /**
+     * Sets the default color for log message content
+     *
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    readonly A_LOGGER_DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR";
+};
 
-export { A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT };
+export { A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_COLOR_CODES, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_ENV_VARIABLES, A_LOGGER_FEATURES, A_LOGGER_FORMAT, A_LOGGER_LEVELS, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT };

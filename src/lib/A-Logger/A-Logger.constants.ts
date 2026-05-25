@@ -17,12 +17,12 @@ export const A_LOGGER_DEFAULT_LEVEL = 'all';
 /**
  * Terminal color codes mapping
  */
-export const A_LOGGER_COLORS = {
+export const A_LOGGER_COLOR_CODES = {
     // System colors (reserved for specific purposes)
     red: '31',          // Errors, critical issues
     yellow: '33',       // Warnings, caution messages
     green: '32',        // Success, completion messages
-    
+
     // Safe palette for random selection (grey-blue-violet theme)
     blue: '34',         // Info, general messages
     cyan: '36',         // Headers, titles
@@ -33,7 +33,7 @@ export const A_LOGGER_COLORS = {
     brightMagenta: '95', // Bright magenta variant
     darkGray: '30',     // Dark gray
     lightGray: '37',    // Light gray (white)
-    
+
     // Extended blue-violet palette
     indigo: '38;5;54',      // Deep indigo
     violet: '38;5;93',      // Violet
@@ -47,12 +47,44 @@ export const A_LOGGER_COLORS = {
     periwinkle: '38;5;111', // Periwinkle
     cornflower: '38;5;69',  // Cornflower blue
     powder: '38;5;152',     // Powder blue
-    
+
     // Additional grays for variety
     charcoal: '38;5;236',   // Charcoal
     silver: '38;5;250',     // Silver
     smoke: '38;5;244',      // Smoke gray
     slate: '38;5;240',      // Slate gray
+} as const;
+
+
+export const A_LOGGER_COLORS = {
+    red: 'red',
+    yellow: 'yellow',
+    green: 'green',
+    blue: 'blue',
+    cyan: 'cyan',
+    magenta: 'magenta',
+    gray: 'gray',
+    brightBlue: 'brightBlue',
+    brightCyan: 'brightCyan',
+    brightMagenta: 'brightMagenta',
+    darkGray: 'darkGray',
+    lightGray: 'lightGray',
+    indigo: 'indigo',
+    violet: 'violet',
+    purple: 'purple',
+    lavender: 'lavender',
+    skyBlue: 'skyBlue',
+    steelBlue: 'steelBlue',
+    slateBlue: 'slateBlue',
+    deepBlue: 'deepBlue',
+    lightBlue: 'lightBlue',
+    periwinkle: 'periwinkle',
+    cornflower: 'cornflower',
+    powder: 'powder',
+    charcoal: 'charcoal',
+    silver: 'silver',
+    smoke: 'smoke',
+    slate: 'slate'
 } as const;
 
 /**
@@ -119,4 +151,48 @@ export const A_LOGGER_ENV_KEYS = {
     DEFAULT_SCOPE_LENGTH: 'A_LOGGER_DEFAULT_SCOPE_LENGTH',
     DEFAULT_SCOPE_COLOR: 'A_LOGGER_DEFAULT_SCOPE_COLOR',
     DEFAULT_LOG_COLOR: 'A_LOGGER_DEFAULT_LOG_COLOR'
+} as const;
+
+export const A_LOGGER_LEVELS = {
+    debug: 'debug',
+    info: 'info',
+    log: 'log',
+    warning: 'warning',
+    error: 'error',
+    all: 'all'
+}
+
+export const A_LOGGER_FEATURES = {
+    onLog: 'A_Logger_onLog',
+} as const;
+
+
+export const A_LOGGER_ENV_VARIABLES = {
+    /**
+     * Sets the log level for the logger
+     * 
+     * @example 'debug', 'info', 'warn', 'error'
+     */
+    A_LOGGER_LEVEL: 'A_LOGGER_LEVEL',
+
+    /**     
+     * Sets the default scope length for log messages
+     * 
+     * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
+     */
+    A_LOGGER_DEFAULT_SCOPE_LENGTH: 'A_LOGGER_DEFAULT_SCOPE_LENGTH',
+
+    /**
+     * Sets the default color for scope display in log messages
+     * 
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    A_LOGGER_DEFAULT_SCOPE_COLOR: 'A_LOGGER_DEFAULT_SCOPE_COLOR',
+
+    /**
+     * Sets the default color for log message content
+     * 
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    A_LOGGER_DEFAULT_LOG_COLOR: 'A_LOGGER_DEFAULT_LOG_COLOR',
 } as const;

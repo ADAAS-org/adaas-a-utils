@@ -1,5 +1,5 @@
 import { A_Container, A_Error } from '@adaas/a-concept';
-import { A as A_Logger } from './A-Logger.component-Be-LMV3I.mjs';
+import { A as A_Logger } from './index-B5jryYH7.mjs';
 import { A_Polyfill } from './a-polyfill.mjs';
 import './a-execution.mjs';
 
@@ -22,6 +22,16 @@ declare enum A_ServiceFeatures {
  *
  */
 declare class A_Service extends A_Container {
+    static get onBeforeLoad(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onLoad(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onAfterLoad(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onBeforeStart(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onStart(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onAfterStart(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onBeforeStop(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onStop(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onAfterStop(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
+    static get onError(): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any;
     load(): Promise<void>;
     start(): Promise<void>;
     stop(): Promise<void>;

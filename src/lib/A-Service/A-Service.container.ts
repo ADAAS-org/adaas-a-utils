@@ -19,6 +19,97 @@ import { A_Polyfill } from '@adaas/a-utils/a-polyfill';
 export class A_Service extends A_Container {
 
 
+
+    static get onBeforeLoad() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onBeforeLoad,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onLoad() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onLoad,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onAfterLoad() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onAfterLoad,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onBeforeStart() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onBeforeStart,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onStart() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onStart,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onAfterStart() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onAfterStart,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onBeforeStop() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onBeforeStop,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onStop() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onStop,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onAfterStop() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onAfterStop,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
+    static get onError() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_ServiceFeatures.onError,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
+
     @A_Concept.Load()
     /**
      * Load the service

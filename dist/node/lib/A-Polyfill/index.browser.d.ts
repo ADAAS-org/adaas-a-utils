@@ -18,6 +18,7 @@ export { A_BufferPolyfill } from './browser/A-Buffer-Polyfill.js';
 import '@adaas/a-concept';
 import '../A-Logger/A-Logger.component.js';
 import '../A-Logger/A-Logger.types.js';
+import '../A-Logger/A-Logger.constants.js';
 import '../A-Logger/A-Logger.env.js';
 import '../A-Config/A-Config.context.js';
 import '../A-Config/A-Config.types.js';

@@ -1,5 +1,5 @@
 import { __decorateClass, __decorateParam } from '../../chunk-EQQGB2QZ.mjs';
-import { A_Container, A_Error, A_Concept, A_Feature, A_Inject } from '@adaas/a-concept';
+import { A_Container, A_Feature, A_Error, A_Concept, A_Inject } from '@adaas/a-concept';
 import { A_ServiceFeatures } from './A-Service.constants';
 import { A_Logger } from '@adaas/a-utils/a-logger';
 import { A_Service_Error } from './A-Service.error';
@@ -8,6 +8,86 @@ import { A_Polyfill } from '@adaas/a-utils/a-polyfill';
 
 var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
 let A_Service = class extends A_Container {
+  static get onBeforeLoad() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onBeforeLoad,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onLoad() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onLoad,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onAfterLoad() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onAfterLoad,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onBeforeStart() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onBeforeStart,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onStart() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onStart,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onAfterStart() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onAfterStart,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onBeforeStop() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onBeforeStop,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onStop() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onStop,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onAfterStop() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onAfterStop,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onError() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: A_ServiceFeatures.onError,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
   /**
    * Load the service
    */

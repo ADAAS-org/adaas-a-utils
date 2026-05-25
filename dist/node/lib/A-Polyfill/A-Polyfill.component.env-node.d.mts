@@ -18,6 +18,7 @@ import './base/A-Path-Polyfill.base.mjs';
 import './base/A-Process-Polyfill.base.mjs';
 import './base/A-Url-Polyfill.base.mjs';
 import '../A-Logger/A-Logger.types.mjs';
+import '../A-Logger/A-Logger.constants.mjs';
 import '../A-Logger/A-Logger.env.mjs';
 import '../A-Config/A-Config.context.mjs';
 import '../A-Config/A-Config.types.mjs';

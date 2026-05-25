@@ -1,7 +1,7 @@
 import { A_TYPES__Error_Serialized, A_TYPES__Entity_Serialized, A_Entity, A_Scope, A_Error } from '@adaas/a-concept';
 import { a as A_StateMachineFeatures, b as A_StateMachineTransition, A as A_StateMachine } from './A-StateMachineTransition.context-BINjcsgq.mjs';
 import { A_ExecutionContext } from './a-execution.mjs';
-import { A as A_Logger } from './A-Logger.component-Be-LMV3I.mjs';
+import { A as A_Logger } from './index-B5jryYH7.mjs';
 import './a-operation.mjs';
 
 /**

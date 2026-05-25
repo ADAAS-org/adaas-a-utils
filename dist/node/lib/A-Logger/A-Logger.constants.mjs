@@ -2,7 +2,7 @@ import '../../chunk-EQQGB2QZ.mjs';
 
 const A_LOGGER_DEFAULT_SCOPE_LENGTH = 20;
 const A_LOGGER_DEFAULT_LEVEL = "all";
-const A_LOGGER_COLORS = {
+const A_LOGGER_COLOR_CODES = {
   // System colors (reserved for specific purposes)
   red: "31",
   // Errors, critical issues
@@ -63,6 +63,36 @@ const A_LOGGER_COLORS = {
   // Smoke gray
   slate: "38;5;240"
   // Slate gray
+};
+const A_LOGGER_COLORS = {
+  red: "red",
+  yellow: "yellow",
+  green: "green",
+  blue: "blue",
+  cyan: "cyan",
+  magenta: "magenta",
+  gray: "gray",
+  brightBlue: "brightBlue",
+  brightCyan: "brightCyan",
+  brightMagenta: "brightMagenta",
+  darkGray: "darkGray",
+  lightGray: "lightGray",
+  indigo: "indigo",
+  violet: "violet",
+  purple: "purple",
+  lavender: "lavender",
+  skyBlue: "skyBlue",
+  steelBlue: "steelBlue",
+  slateBlue: "slateBlue",
+  deepBlue: "deepBlue",
+  lightBlue: "lightBlue",
+  periwinkle: "periwinkle",
+  cornflower: "cornflower",
+  powder: "powder",
+  charcoal: "charcoal",
+  silver: "silver",
+  smoke: "smoke",
+  slate: "slate"
 };
 const A_LOGGER_SAFE_RANDOM_COLORS = [
   "blue",
@@ -127,7 +157,44 @@ const A_LOGGER_ENV_KEYS = {
   DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR",
   DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR"
 };
+const A_LOGGER_LEVELS = {
+  debug: "debug",
+  info: "info",
+  log: "log",
+  warning: "warning",
+  error: "error",
+  all: "all"
+};
+const A_LOGGER_FEATURES = {
+  onLog: "A_Logger_onLog"
+};
+const A_LOGGER_ENV_VARIABLES = {
+  /**
+   * Sets the log level for the logger
+   * 
+   * @example 'debug', 'info', 'warn', 'error'
+   */
+  A_LOGGER_LEVEL: "A_LOGGER_LEVEL",
+  /**     
+   * Sets the default scope length for log messages
+   * 
+   * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
+   */
+  A_LOGGER_DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH",
+  /**
+   * Sets the default color for scope display in log messages
+   * 
+   * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+   */
+  A_LOGGER_DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR",
+  /**
+   * Sets the default color for log message content
+   * 
+   * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+   */
+  A_LOGGER_DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR"
+};
 
-export { A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_FORMAT, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT };
+export { A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_COLOR_CODES, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_ENV_VARIABLES, A_LOGGER_FEATURES, A_LOGGER_FORMAT, A_LOGGER_LEVELS, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT };
 //# sourceMappingURL=A-Logger.constants.mjs.map
 //# sourceMappingURL=A-Logger.constants.mjs.map

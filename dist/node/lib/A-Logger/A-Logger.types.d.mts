@@ -1,8 +1,11 @@
-type A_LoggerLevel = 'debug' | 'info' | 'warn' | 'error' | 'all';
+import { A_LOGGER_COLORS, A_LOGGER_FEATURES, A_LOGGER_LEVELS } from './A-Logger.constants.mjs';
+
+type A_LoggerLevel = typeof A_LOGGER_LEVELS[keyof typeof A_LOGGER_LEVELS];
 /**
  * Available color names for the logger
  * Can be used as first parameter in logging methods to specify message color
  */
-type A_LoggerColorName = 'red' | 'yellow' | 'green' | 'blue' | 'cyan' | 'magenta' | 'gray' | 'brightBlue' | 'brightCyan' | 'brightMagenta' | 'darkGray' | 'lightGray' | 'indigo' | 'violet' | 'purple' | 'lavender' | 'skyBlue' | 'steelBlue' | 'slateBlue' | 'deepBlue' | 'lightBlue' | 'periwinkle' | 'cornflower' | 'powder' | 'charcoal' | 'silver' | 'smoke' | 'slate';
+type A_LoggerColorName = typeof A_LOGGER_COLORS[keyof typeof A_LOGGER_COLORS];
+type A_LoggerFeatureName = typeof A_LOGGER_FEATURES[keyof typeof A_LOGGER_FEATURES];
 
-export type { A_LoggerColorName, A_LoggerLevel };
+export type { A_LoggerColorName, A_LoggerFeatureName, A_LoggerLevel };

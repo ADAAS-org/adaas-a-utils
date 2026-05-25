@@ -4,6 +4,7 @@ var aConcept = require('@adaas/a-concept');
 var aConfig = require('@adaas/a-utils/a-config');
 var ALogger_constants = require('./A-Logger.constants');
 var core = require('@adaas/a-frame/core');
+var ALoggerLog_context = require('./A-LoggerLog.context');
 
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __decorateClass = (decorators, target, key, kind) => {
@@ -29,7 +30,7 @@ exports.A_Logger = class A_Logger extends aConcept.A_Component {
     super();
     this.scope = scope;
     this.config = config;
-    this.COLORS = ALogger_constants.A_LOGGER_COLORS;
+    this.COLORS = ALogger_constants.A_LOGGER_COLOR_CODES;
     this.STANDARD_SCOPE_LENGTH = config?.get(ALogger_constants.A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_LENGTH) || ALogger_constants.A_LOGGER_DEFAULT_SCOPE_LENGTH;
     const configScopeColor = config?.get(ALogger_constants.A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_COLOR);
     const configLogColor = config?.get(ALogger_constants.A_LOGGER_ENV_KEYS.DEFAULT_LOG_COLOR);
@@ -43,6 +44,14 @@ exports.A_Logger = class A_Logger extends aConcept.A_Component {
     }
     this.TERMINAL_WIDTH = this.detectTerminalWidth();
     this.MAX_CONTENT_WIDTH = Math.floor(this.TERMINAL_WIDTH * ALogger_constants.A_LOGGER_TERMINAL.MAX_LINE_LENGTH_RATIO);
+  }
+  static get onLog() {
+    return (target, propertyKey, descriptor) => {
+      return aConcept.A_Feature.Extend({
+        name: ALogger_constants.A_LOGGER_FEATURES.onLog,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
   }
   // =============================================
   // Color Generation Utilities
@@ -404,18 +413,40 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
   }
   debug(param1, ...args) {
     if (!this.shouldLog("debug")) return;
+    const callScope = new aConcept.A_Scope({
+      name: this.scope.name + ":debug",
+      fragments: [new ALoggerLog_context.A_LoggerLogContext("debug", ...args)]
+    }).inherit(this.scope);
+    let compiled = [];
     if (typeof param1 === "string" && this.COLORS[param1]) {
-      console.log(...this.compile(param1, ...args));
+      compiled = this.compile(param1, ...args);
     } else {
-      console.log(...this.compile(this.DEFAULT_LOG_COLOR, param1, ...args));
+      compiled = this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
+    }
+    try {
+      console.log(...compiled);
+      this.call(ALogger_constants.A_LOGGER_FEATURES.onLog, callScope);
+    } finally {
+      callScope.destroy();
     }
   }
   info(param1, ...args) {
     if (!this.shouldLog("info")) return;
+    const callScope = new aConcept.A_Scope({
+      name: this.scope.name + ":info",
+      fragments: [new ALoggerLog_context.A_LoggerLogContext("info", ...args)]
+    }).inherit(this.scope);
+    let compiled = [];
     if (typeof param1 === "string" && this.COLORS[param1]) {
-      console.log(...this.compile(param1, ...args));
+      compiled = this.compile(param1, ...args);
     } else {
-      console.log(...this.compile(this.DEFAULT_LOG_COLOR, param1, ...args));
+      compiled = this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
+    }
+    try {
+      console.log(...compiled);
+      this.call(ALogger_constants.A_LOGGER_FEATURES.onLog, callScope);
+    } finally {
+      callScope.destroy();
     }
   }
   log(param1, ...args) {
@@ -437,7 +468,17 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
    */
   warning(...args) {
     if (!this.shouldLog("warning")) return;
-    console.log(...this.compile("yellow", ...args));
+    const callScope = new aConcept.A_Scope({
+      name: this.scope.name + ":warning",
+      fragments: [new ALoggerLog_context.A_LoggerLogContext("warning", ...args)]
+    }).inherit(this.scope);
+    let compiled = this.compile("yellow", ...args);
+    try {
+      console.log(...compiled);
+      this.call(ALogger_constants.A_LOGGER_FEATURES.onLog, callScope);
+    } finally {
+      callScope.destroy();
+    }
   }
   /**
    * Log error messages with red color coding
@@ -456,7 +497,17 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
    */
   error(...args) {
     if (!this.shouldLog("error")) return;
-    console.log(...this.compile("red", ...args));
+    const callScope = new aConcept.A_Scope({
+      name: this.scope.name + ":error",
+      fragments: [new ALoggerLog_context.A_LoggerLogContext("error", ...args)]
+    }).inherit(this.scope);
+    let compiled = this.compile("red", ...args);
+    try {
+      console.log(...compiled);
+      this.call(ALogger_constants.A_LOGGER_FEATURES.onLog, callScope);
+    } finally {
+      callScope.destroy();
+    }
   }
   // =============================================
   // Specialized Error Formatting

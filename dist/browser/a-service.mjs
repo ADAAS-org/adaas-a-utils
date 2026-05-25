@@ -1,4 +1,4 @@
-import { A_Logger } from './chunk-NFL7ROOO.mjs';
+import { A_Logger } from './chunk-FPM7M4RY.mjs';
 import './chunk-SJU7LRGF.mjs';
 import { A_Polyfill } from './chunk-ZSD77J3W.mjs';
 import './chunk-SEQJPRV7.mjs';
@@ -27,6 +27,86 @@ A_Service_Error.ServiceStartError = "Service start error";
 A_Service_Error.ServiceStopError = "Service stop error";
 var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
 var A_Service = class extends A_Container {
+  static get onBeforeLoad() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onBeforeLoad" /* onBeforeLoad */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onLoad() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onLoad" /* onLoad */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onAfterLoad() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onAfterLoad" /* onAfterLoad */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onBeforeStart() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onBeforeStart" /* onBeforeStart */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onStart() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onStart" /* onStart */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onAfterStart() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onAfterStart" /* onAfterStart */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onBeforeStop() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onBeforeStop" /* onBeforeStop */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onStop() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onStop" /* onStop */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onAfterStop() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onAfterStop" /* onAfterStop */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
+  static get onError() {
+    return (target, propertyKey, descriptor) => {
+      return A_Feature.Extend({
+        name: "_A_Service_onError" /* onError */,
+        scope: [target.constructor]
+      })(target, propertyKey, descriptor);
+    };
+  }
   /**
    * Load the service
    */

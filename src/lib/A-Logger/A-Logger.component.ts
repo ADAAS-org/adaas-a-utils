@@ -1,19 +1,21 @@
-import { A_Component, A_Context, A_Error, A_Inject, A_Scope } from "@adaas/a-concept";
+import { A_Component, A_Context, A_Error, A_Feature, A_Inject, A_Scope } from "@adaas/a-concept";
 
 import { A_Config } from "@adaas/a-utils/a-config";
 import { A_LoggerEnvVariablesType } from "./A-Logger.env";
 import { A_LoggerLevel, A_LoggerColorName } from "./A-Logger.types";
 import {
     A_LOGGER_DEFAULT_SCOPE_LENGTH,
-    A_LOGGER_COLORS,
+    A_LOGGER_COLOR_CODES,
     A_LOGGER_ANSI,
     A_LOGGER_TIME_FORMAT,
     A_LOGGER_FORMAT,
     A_LOGGER_ENV_KEYS,
     A_LOGGER_SAFE_RANDOM_COLORS,
-    A_LOGGER_TERMINAL
+    A_LOGGER_TERMINAL,
+    A_LOGGER_FEATURES
 } from "./A-Logger.constants";
 import { A_Frame } from "@adaas/a-frame/core";
+import { A_LoggerLogContext } from "./A-LoggerLog.context";
 
 
 /**
@@ -39,7 +41,7 @@ import { A_Frame } from "@adaas/a-frame/core";
  * ```typescript
  * // Basic usage with dependency injection (uses deterministic colors based on scope name)
  * class MyService {
- *   constructor(@A_Inject(A_Logger) private logger: A_Logger) {}
+ *   constructor(@A_Inject(A_Logger) protected logger: A_Logger) {}
  *   
  *   doSomething() {
  *     this.logger.info('Processing started'); // Uses scope-name-based colors, always shows
@@ -87,6 +89,14 @@ import { A_Frame } from "@adaas/a-frame/core";
 })
 export class A_Logger extends A_Component {
 
+    static get onLog() {
+        return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            return A_Feature.Extend({
+                name: A_LOGGER_FEATURES.onLog,
+                scope: [target.constructor],
+            })(target, propertyKey, descriptor);
+        }
+    }
     // =============================================
     // Configuration and Constants
     // =============================================
@@ -101,32 +111,32 @@ export class A_Logger extends A_Component {
      * Standard scope length for consistent formatting
      * This ensures all log messages align properly regardless of scope name length
      */
-    private readonly STANDARD_SCOPE_LENGTH;
+    protected readonly STANDARD_SCOPE_LENGTH;
 
     /**
      * Default color for the scope portion of log messages
      * This color is used for the scope brackets and content, and remains consistent
      * for this logger instance regardless of message color overrides
      */
-    private readonly DEFAULT_SCOPE_COLOR: keyof typeof A_LOGGER_COLORS;
+    protected readonly DEFAULT_SCOPE_COLOR: keyof typeof A_LOGGER_COLOR_CODES;
 
     /**
      * Default color for log message content when no explicit color is provided
      * This color is used for the message body when logging without specifying a color
      */
-    private readonly DEFAULT_LOG_COLOR: keyof typeof A_LOGGER_COLORS;
+    protected readonly DEFAULT_LOG_COLOR: keyof typeof A_LOGGER_COLOR_CODES;
 
     /**
      * Current terminal width for responsive formatting
      * Automatically detected or falls back to default values
      */
-    private readonly TERMINAL_WIDTH: number;
+    protected readonly TERMINAL_WIDTH: number;
 
     /**
      * Maximum content width based on terminal size
      * Used for word wrapping and line length calculations
      */
-    private readonly MAX_CONTENT_WIDTH: number;
+    protected readonly MAX_CONTENT_WIDTH: number;
 
     // =============================================
     // Constructor and Initialization
@@ -144,12 +154,12 @@ export class A_Logger extends A_Component {
         @A_Inject(A_Config) protected config?: A_Config<A_LoggerEnvVariablesType>
     ) {
         super();
-        this.COLORS = A_LOGGER_COLORS;
+        this.COLORS = A_LOGGER_COLOR_CODES;
         this.STANDARD_SCOPE_LENGTH = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_LENGTH) || A_LOGGER_DEFAULT_SCOPE_LENGTH;
 
         // Get colors from config or generate deterministic colors based on scope name
-        const configScopeColor = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_COLOR) as keyof typeof A_LOGGER_COLORS;
-        const configLogColor = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_LOG_COLOR) as keyof typeof A_LOGGER_COLORS;
+        const configScopeColor = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_COLOR) as keyof typeof A_LOGGER_COLOR_CODES;
+        const configLogColor = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_LOG_COLOR) as keyof typeof A_LOGGER_COLOR_CODES;
 
         if (configScopeColor || configLogColor) {
             // If any color is configured, use config values or fallback to scope-based selection
@@ -178,7 +188,7 @@ export class A_Logger extends A_Component {
      * @param str - The string to hash
      * @returns A numeric hash value
      */
-    private simpleHash(str: string): number {
+    protected simpleHash(str: string): number {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
@@ -195,7 +205,7 @@ export class A_Logger extends A_Component {
      * @param scopeName - The scope name to generate color for
      * @returns A color key from the safe colors palette
      */
-    private generateColorFromScopeName(scopeName: string): keyof typeof A_LOGGER_COLORS {
+    protected generateColorFromScopeName(scopeName: string): keyof typeof A_LOGGER_COLOR_CODES {
         const safeColors = A_LOGGER_SAFE_RANDOM_COLORS;
         const hash = this.simpleHash(scopeName);
         const colorIndex = hash % safeColors.length;
@@ -209,7 +219,7 @@ export class A_Logger extends A_Component {
      * @param scopeName - The scope name to base colors on
      * @returns Object with scopeColor and logColor that work well together
      */
-    private generateComplementaryColorsFromScope(scopeName: string): { scopeColor: keyof typeof A_LOGGER_COLORS, logColor: keyof typeof A_LOGGER_COLORS } {
+    protected generateComplementaryColorsFromScope(scopeName: string): { scopeColor: keyof typeof A_LOGGER_COLOR_CODES, logColor: keyof typeof A_LOGGER_COLOR_CODES } {
         // Define color groups that work well together
         const colorPairs = [
             { scopeColor: 'indigo' as const, logColor: 'lightBlue' as const },
@@ -243,7 +253,7 @@ export class A_Logger extends A_Component {
      * 
      * @returns Terminal width in characters
      */
-    private detectTerminalWidth(): number {
+    protected detectTerminalWidth(): number {
         try {
             // Browser environment
             if (A_Context.environment === 'browser') {
@@ -273,7 +283,7 @@ export class A_Logger extends A_Component {
      * @param isFirstLine - Whether this is the first line (affects available width calculation)
      * @returns Array of wrapped lines with proper indentation
      */
-    private wrapText(text: string, scopePadding: string, isFirstLine: boolean = true): string[] {
+    protected wrapText(text: string, scopePadding: string, isFirstLine: boolean = true): string[] {
         if (A_Context.environment === 'browser') {
             // In browser, don't wrap - let browser console handle it
             return [text];
@@ -342,7 +352,7 @@ export class A_Logger extends A_Component {
      * @param maxLength - Maximum length per chunk
      * @returns Array of word chunks
      */
-    private splitLongWord(word: string, maxLength: number): string[] {
+    protected splitLongWord(word: string, maxLength: number): string[] {
         const chunks: string[] = [];
         for (let i = 0; i < word.length; i += maxLength) {
             chunks.push(word.slice(i, i + maxLength));
@@ -462,7 +472,7 @@ export class A_Logger extends A_Component {
      * @param scopePadding - The padding string for consistent alignment
      * @returns Formatted object string or the object itself for browser environments
      */
-    private formatObject(obj: any, shouldAddNewline: boolean, scopePadding: string): any {
+    protected formatObject(obj: any, shouldAddNewline: boolean, scopePadding: string): any {
 
         // In case it's browser, return the object as is to use native console object rendering
         // This allows the browser console to display objects with its native interactive features
@@ -531,7 +541,7 @@ export class A_Logger extends A_Component {
      * @param maxWidth - Maximum width for the value
      * @returns Wrapped string value
      */
-    private wrapJsonStringValue(value: string, maxWidth: number): string {
+    protected wrapJsonStringValue(value: string, maxWidth: number): string {
         if (value.length <= maxWidth) {
             return value;
         }
@@ -555,7 +565,7 @@ export class A_Logger extends A_Component {
      * @param scopePadding - The padding string for consistent alignment
      * @returns Formatted string
      */
-    private formatString(str: string, shouldAddNewline: boolean, scopePadding: string): string {
+    protected formatString(str: string, shouldAddNewline: boolean, scopePadding: string): string {
         // In browser environment, keep simple formatting
         if (A_Context.environment === 'browser') {
             const prefix = shouldAddNewline ? '\n' : '';
@@ -651,12 +661,26 @@ export class A_Logger extends A_Component {
     debug(param1: any, ...args: any[]): void {
         if (!this.shouldLog('debug')) return;
 
+        const callScope = new A_Scope({
+            name: this.scope.name + ':debug',
+            fragments: [new A_LoggerLogContext('debug', ...args)]
+        }).inherit(this.scope);
+
+        let compiled: any[] = [];
+
         // Check if first parameter is a valid color key
         if (typeof param1 === 'string' && this.COLORS[param1 as keyof typeof this.COLORS]) {
-            console.log(...this.compile(param1 as keyof typeof this.COLORS, ...args));
+            compiled = this.compile(param1 as keyof typeof this.COLORS, ...args)
         } else {
             // Use instance's default log color and treat param1 as first message argument
-            console.log(...this.compile(this.DEFAULT_LOG_COLOR, param1, ...args));
+            compiled = this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
+        }
+
+        try {
+            console.log(...compiled);
+            this.call(A_LOGGER_FEATURES.onLog, callScope)
+        } finally {
+            callScope.destroy();
         }
     }
 
@@ -686,12 +710,26 @@ export class A_Logger extends A_Component {
     info(param1: any, ...args: any[]): void {
         if (!this.shouldLog('info')) return;
 
+        const callScope = new A_Scope({
+            name: this.scope.name + ':info',
+            fragments: [new A_LoggerLogContext('info', ...args)]
+        }).inherit(this.scope);
+
+        let compiled: any[] = [];
+
         // Check if first parameter is a valid color key
         if (typeof param1 === 'string' && this.COLORS[param1 as keyof typeof this.COLORS]) {
-            console.log(...this.compile(param1 as keyof typeof this.COLORS, ...args));
+            compiled = this.compile(param1 as keyof typeof this.COLORS, ...args)
         } else {
             // Use instance's default log color and treat param1 as first message argument
-            console.log(...this.compile(this.DEFAULT_LOG_COLOR, param1, ...args));
+            compiled = this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
+        }
+
+        try {
+            console.log(...compiled);
+            this.call(A_LOGGER_FEATURES.onLog, callScope)
+        } finally {
+            callScope.destroy();
         }
     }
 
@@ -725,7 +763,20 @@ export class A_Logger extends A_Component {
      */
     warning(...args: any[]): void {
         if (!this.shouldLog('warning')) return;
-        console.log(...this.compile('yellow', ...args));
+
+        const callScope = new A_Scope({
+            name: this.scope.name + ':warning',
+            fragments: [new A_LoggerLogContext('warning', ...args)]
+        }).inherit(this.scope);
+
+        let compiled: any[] = this.compile('yellow', ...args);
+
+        try {
+            console.log(...compiled);
+            this.call(A_LOGGER_FEATURES.onLog, callScope)
+        } finally {
+            callScope.destroy();
+        }
     }
 
     /**
@@ -745,7 +796,20 @@ export class A_Logger extends A_Component {
      */
     error(...args: any[]): void {
         if (!this.shouldLog('error')) return;
-        console.log(...this.compile('red', ...args));
+
+        const callScope = new A_Scope({
+            name: this.scope.name + ':error',
+            fragments: [new A_LoggerLogContext('error', ...args)]
+        }).inherit(this.scope);
+
+        let compiled: any[] = this.compile('red', ...args);
+
+        try {
+            console.log(...compiled);
+            this.call(A_LOGGER_FEATURES.onLog, callScope)
+        } finally {
+            callScope.destroy();
+        }
     }
 
     // =============================================
@@ -854,7 +918,7 @@ ${scopePadding}|-------------------------------
      * @param baseIndent - Base indentation for continuation lines
      * @returns Array of formatted stack trace lines
      */
-    private formatStackTrace(stack: string, baseIndent: string): string[] {
+    protected formatStackTrace(stack: string, baseIndent: string): string[] {
         const stackLines = stack.split('\n');
         const formatted: string[] = [];
 
