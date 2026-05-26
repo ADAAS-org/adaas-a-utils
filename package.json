@@ -308,7 +308,7 @@
     "build": "tsup --config tsup.config.ts"
   },
   "peerDependencies": {
-    "@adaas/a-concept": "^0.3.16",
+    "@adaas/a-concept": "^0.3.17",
     "@adaas/a-frame": "^0.1.2"
   },
   "devDependencies": {

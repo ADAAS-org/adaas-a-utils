@@ -1,5 +1,5 @@
 import { A_Container, A_Error } from '@adaas/a-concept';
-import { A as A_Logger } from './index-B5jryYH7.mjs';
+import { n as A_Logger } from './A-Logger.component-C7Tak6HK.mjs';
 import { A_Polyfill } from './a-polyfill.mjs';
 import './a-execution.mjs';
 
