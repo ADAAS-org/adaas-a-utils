@@ -142,18 +142,29 @@ exports.A_SignalVector = class A_SignalVector extends aConcept.A_Entity {
   }
   /**
    * Checks if the current Signal Vector includes all signals from another Signal Vector, regardless of order.
-   * 
+   * Matching is data-aware: for every signal in `other`, there must be a signal in this vector with the
+   * same constructor type whose data satisfies the comparison (via `conditionSignal.compare(incomingSignal)`).
+   *
    * e.g. [UserSignInSignal, UserStatusSignal] includes [UserStatusSignal] with the same data,
-   * but not includes [UserStatusSignal] with different data or [UserActivitySignal].
-   * 
-   * @param other 
+   * but not [UserStatusSignal] with different data or [UserActivitySignal].
+   *
+   * An optional `comparator` can be provided to override the per-signal `compare()` call, enabling
+   * externally controlled matching strategies (e.g. loose / strict / custom route matchers).
+   *
+   * @param other       The vector whose signals must all be present in this one.
+   * @param comparator  Optional custom function: (incoming, condition) => boolean.
+   *                    Receives the incoming signal first so that symmetric usage is intuitive.
+   *                    Defaults to `conditionSignal.compare(incomingSignal)`.
    */
-  includes(other) {
-    for (const signalConstructor of other.structure) {
-      const signalIndex = this._signals.findIndex((s) => s.constructor === signalConstructor);
-      if (signalIndex === -1) {
-        return false;
-      }
+  includes(other, comparator) {
+    for (const condSignal of other) {
+      if (!condSignal) continue;
+      const found = this._signals.some((incomingSignal) => {
+        if (!incomingSignal) return false;
+        if (incomingSignal.constructor !== condSignal.constructor) return false;
+        return comparator ? comparator(incomingSignal, condSignal) : condSignal.compare(incomingSignal);
+      });
+      if (!found) return false;
     }
     return true;
   }

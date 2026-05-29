@@ -180,13 +180,21 @@ declare class A_SignalVector<TSignals extends A_Signal[] = A_Signal[]> extends A
     match(other: A_SignalVector<TSignals>): boolean;
     /**
      * Checks if the current Signal Vector includes all signals from another Signal Vector, regardless of order.
+     * Matching is data-aware: for every signal in `other`, there must be a signal in this vector with the
+     * same constructor type whose data satisfies the comparison (via `conditionSignal.compare(incomingSignal)`).
      *
      * e.g. [UserSignInSignal, UserStatusSignal] includes [UserStatusSignal] with the same data,
-     * but not includes [UserStatusSignal] with different data or [UserActivitySignal].
+     * but not [UserStatusSignal] with different data or [UserActivitySignal].
      *
-     * @param other
+     * An optional `comparator` can be provided to override the per-signal `compare()` call, enabling
+     * externally controlled matching strategies (e.g. loose / strict / custom route matchers).
+     *
+     * @param other       The vector whose signals must all be present in this one.
+     * @param comparator  Optional custom function: (incoming, condition) => boolean.
+     *                    Receives the incoming signal first so that symmetric usage is intuitive.
+     *                    Defaults to `conditionSignal.compare(incomingSignal)`.
      */
-    includes(other: A_SignalVector<TSignals>): boolean;
+    includes(other: A_SignalVector<TSignals>, comparator?: (incoming: A_Signal, condition: A_Signal) => boolean): boolean;
     /**
      * This method should ensure that the current Signal Vector contains all signals from the provided Signal Vector.
      *
