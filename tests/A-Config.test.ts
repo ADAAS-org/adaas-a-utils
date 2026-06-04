@@ -107,75 +107,87 @@ describe('A-Config tests', () => {
         }).toThrowError();
     });
     it('Should Allow to create a config object with variables from File', async () => {
+        // Use a unique concept name per test so the conf file path can never
+        // collide with another test file running in a parallel jest worker
+        // (workers share process.cwd()).
+        const conceptName = `a-config-test-from-file-${Math.random().toString(36).slice(2, 8)}`;
+        const confPath = `${conceptName}.conf.json`;
+        const prevConcept = process.env.A_CONCEPT_NAME;
+        process.env.A_CONCEPT_NAME = conceptName;
+
         // 1. create a config file
-        fs.writeFileSync('a-concept.conf.json', JSON.stringify({
+        fs.writeFileSync(confPath, JSON.stringify({
             testVar1: 'env1',
             testVar2: 'env2'
         }, null, 4));
 
-        const config = new A_Config({
-            variables: ['TEST_VAR1', 'TEST_VAR2'] as const,
-            defaults: {
-                TEST_VAR1: 'default1',
-            }
-        });
+        try {
+            const config = new A_Config({
+                variables: ['TEST_VAR1', 'TEST_VAR2'] as const,
+                defaults: {
+                    TEST_VAR1: 'default1',
+                }
+            });
 
-        const configLoader = new A_ConfigLoader({
-            name: 'test-config-loader',
-            fragments: [config],
-            components: [A_Logger, A_Polyfill, FileConfigReader]
-        })
+            const configLoader = new A_ConfigLoader({
+                name: 'test-config-loader',
+                fragments: [config],
+                components: [A_Logger, A_Polyfill, FileConfigReader]
+            })
 
-        const concept = new A_Concept({
-            name: 'test-concept',
-            containers: [configLoader]
-        })
+            const concept = new A_Concept({
+                name: conceptName,
+                containers: [configLoader]
+            })
 
-        await concept.load();
+            await concept.load();
 
-        expect(config.get('TEST_VAR1')).toBe('env1');
-        expect(config.get('TEST_VAR1')).toBe('env1');
-
-        // 3. delete the config file
-        fs.unlinkSync('a-concept.conf.json');
+            expect(config.get('TEST_VAR1')).toBe('env1');
+            expect(config.get('TEST_VAR1')).toBe('env1');
+        } finally {
+            try { fs.unlinkSync(confPath); } catch { /* ignore */ }
+            if (prevConcept === undefined) delete process.env.A_CONCEPT_NAME;
+            else process.env.A_CONCEPT_NAME = prevConcept;
+        }
     });
     it('Should Allow to create a config object with variables from File with different variable cases', async () => {
+        const conceptName = `a-config-test-cases-${Math.random().toString(36).slice(2, 8)}`;
+        const confPath = `${conceptName}.conf.json`;
+        const prevConcept = process.env.A_CONCEPT_NAME;
+        process.env.A_CONCEPT_NAME = conceptName;
 
         // 1. create a config file
-        fs.writeFileSync('a-concept.conf.json', JSON.stringify({
+        fs.writeFileSync(confPath, JSON.stringify({
             testVar2: 'env2'
         }, null, 4));
 
-        const config = new A_Config({
-            variables: ['testVar1', 'testVar2'] as const,
-            defaults: {
-                testVar1: 'default1',
-            }
-        });
-
-        const configLoader = new A_ConfigLoader({
-            name: 'test-config-loader',
-            fragments: [config],
-            components: [A_Logger, A_Polyfill, FileConfigReader]
-        })
-
-        const concept = new A_Concept({
-            name: 'test-concept',
-            containers: [configLoader]
-        })
-
-        await concept.load();
-
-
-
-        expect(config.get('testVar1')).toBe('default1');
-        expect(config.get('testVar2')).toBe('env2');
-
-        // 3. delete the config file
         try {
-            fs.unlinkSync('a-concept.conf.json');
-        } catch (error) {
+            const config = new A_Config({
+                variables: ['testVar1', 'testVar2'] as const,
+                defaults: {
+                    testVar1: 'default1',
+                }
+            });
 
+            const configLoader = new A_ConfigLoader({
+                name: 'test-config-loader',
+                fragments: [config],
+                components: [A_Logger, A_Polyfill, FileConfigReader]
+            })
+
+            const concept = new A_Concept({
+                name: conceptName,
+                containers: [configLoader]
+            })
+
+            await concept.load();
+
+            expect(config.get('testVar1')).toBe('default1');
+            expect(config.get('testVar2')).toBe('env2');
+        } finally {
+            try { fs.unlinkSync(confPath); } catch { /* ignore */ }
+            if (prevConcept === undefined) delete process.env.A_CONCEPT_NAME;
+            else process.env.A_CONCEPT_NAME = prevConcept;
         }
     });
 });

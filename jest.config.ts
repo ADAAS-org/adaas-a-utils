@@ -15,6 +15,7 @@ const config: Config.InitialOptions = {
         '^@adaas/a-utils/a-channel$': '<rootDir>/src/lib/A-Channel',
         '^@adaas/a-utils/a-command$': '<rootDir>/src/lib/A-Command',
         '^@adaas/a-utils/a-config$': '<rootDir>/src/lib/A-Config',
+        '^@adaas/a-utils/a-inspector$': '<rootDir>/src/lib/A-Inspector',
         '^@adaas/a-utils/a-execution$': '<rootDir>/src/lib/A-Execution',
         '^@adaas/a-utils/a-logger$': '<rootDir>/src/lib/A-Logger',
         '^@adaas/a-utils/a-manifest$': '<rootDir>/src/lib/A-Manifest',

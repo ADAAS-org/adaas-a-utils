@@ -13,12 +13,11 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    try {
-        fs.unlinkSync(`a-concept.conf.json`);
-
-    } catch (error) {
-
-    }
+    // NOTE: do NOT unlink shared filenames here. Jest worker files share
+    // process.cwd(); deleting a hardcoded path can race against another
+    // worker that just wrote it (caused intermittent A-Config flakes).
+    // Each test owns its own conf file with a unique name and cleans it
+    // up in a `finally` block.
     return Promise.resolve();
 });
 

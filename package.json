@@ -64,6 +64,22 @@
         "require": "./dist/node/lib/A-Config/index.js"
       }
     },
+    "./a-inspector": {
+      "browser": {
+        "types": "./dist/browser/a-inspector.d.ts",
+        "import": "./dist/browser/a-inspector.mjs"
+      },
+      "node": {
+        "types": "./dist/node/lib/A-Inspector/index.d.ts",
+        "import": "./dist/node/lib/A-Inspector/index.mjs",
+        "require": "./dist/node/lib/A-Inspector/index.js"
+      },
+      "default": {
+        "types": "./dist/node/lib/A-Inspector/index.d.ts",
+        "import": "./dist/node/lib/A-Inspector/index.mjs",
+        "require": "./dist/node/lib/A-Inspector/index.js"
+      }
+    },
     "./a-execution": {
       "browser": {
         "types": "./dist/browser/a-execution.d.ts",
@@ -300,6 +316,7 @@
     "example:A-Config": "nodemon ./examples/config.ts",
     "example:A-Logger": "nodemon ./examples/A-Logger-examples.ts",
     "example:A-Command": "nodemon ./examples/A-Command-examples.ts",
+    "inspector:server": "node -r ts-node/register/transpile-only -r tsconfig-paths/register ./scripts/inspector-server.ts",
     "release": "npm run test && npm run build && git add . && git commit -m \"new version created :: $(cat package.json | grep version | head -1  | awk -F: '{ print $2 }'  | sed 's/[\",]//g')\" && npm version patch && npm publish --access public",
     "preversion": "echo test",
     "version": "echo git add .",
@@ -308,11 +325,11 @@
     "build": "tsup --config tsup.config.ts"
   },
   "peerDependencies": {
-    "@adaas/a-concept": "^0.3.17",
+    "@adaas/a-concept": "^0.3.20",
     "@adaas/a-frame": "^0.1.2"
   },
   "devDependencies": {
-    "@adaas/a-concept": "^0.3.16",
+    "@adaas/a-concept": "^0.3.20",
     "@adaas/a-frame": "^0.1.2",
     "@types/chai": "^4.3.14",
     "@types/jest": "^29.5.12",

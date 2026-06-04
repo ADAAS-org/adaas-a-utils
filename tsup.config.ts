@@ -22,6 +22,7 @@ export default defineConfig([
       "a-channel": "src/lib/A-Channel/index.ts",
       "a-command": "src/lib/A-Command/index.ts",
       "a-config": "src/lib/A-Config/index.ts",
+      "a-inspector": "src/lib/A-Inspector/index.ts",
       "a-execution": "src/lib/A-Execution/index.ts",
       "a-logger": "src/lib/A-Logger/index.ts",
       "a-manifest": "src/lib/A-Manifest/index.ts",
