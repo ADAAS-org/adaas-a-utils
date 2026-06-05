@@ -536,56 +536,123 @@ ${scopePadding}|-------------------------------
 \x1B[0m` : ""));
   }
   /**
-   * Format A_Error instances for inline display within compiled messages
-   * 
-   * Provides detailed formatting for A_Error objects with:
-   * - Error code, message, and description
-   * - Original error information FIRST (better UX for debugging)
-   * - Stack traces with terminal width awareness
-   * - Documentation links (if available)
-   * - Consistent formatting with rest of logger
-   * 
+   * Format A_Error instances for inline display within compiled messages.
+   *
+   * Aligned with the structured error-handling strategy:
+   *  - Walks the FULL causal chain via `error.chain` so wrapper layers
+   *    (A_FeatureError → A_StageError → user error) are all visible.
+   *  - Surfaces structured A_FeatureError context (featureName, stageName,
+   *    handler, component) when present.
+   *  - Prints the outermost A_Error stack ONCE — it already includes a
+   *    `Caused by: ...` chain appended by `A_Error.appendCausedByStack()`,
+   *    so repeating per-link stacks would duplicate information.
+   *  - Shows documentation link only for the outermost error.
+   *
+   * Visual style mirrors the legacy `log_A_Error`:
+   *  - Whole block wrapped in red ANSI; section headers in bold red.
+   *  - File:line:col in stack traces highlighted cyan/yellow so they're
+   *    easy to spot and stay clickable in VS Code terminal.
+   *  - Documentation link underlined in cyan.
+   *
    * @param error - The A_Error instance to format
    * @returns Formatted string ready for display
    */
   compile_A_Error(error) {
-    const continuationIndent = `${" ".repeat(this.STANDARD_SCOPE_LENGTH + 3)}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`;
-    const separator = `${continuationIndent}-------------------------------`;
+    const RED = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}31${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
+    const RED_BOLD = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}1;31${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
+    const CYAN = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}36${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
+    const CYAN_UNDERLINE = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}4;36${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
+    const YELLOW = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}33${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
+    const DIM = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}2${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
+    const RESET = ALogger_constants.A_LOGGER_ANSI.RESET;
+    const scopePadding = " ".repeat(this.STANDARD_SCOPE_LENGTH + 3);
+    const continuationIndent = `${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`;
+    const separator = `${RED}${continuationIndent}${ALogger_constants.A_LOGGER_FORMAT.SEPARATOR}${RESET}`;
     const lines = [];
+    const pushRow = (text, color = RED) => {
+      const wrapped = this.wrapText(text, continuationIndent, false);
+      for (const line of wrapped) {
+        lines.push(`${color}${continuationIndent}${line}${RESET}`);
+      }
+    };
+    const pushSection = (title) => {
+      lines.push(separator);
+      lines.push(`${RED_BOLD}${continuationIndent}${title}${RESET}`);
+      lines.push(separator);
+    };
     lines.push("");
-    lines.push(separator);
-    lines.push(`${continuationIndent}A_ERROR: ${error.code}`);
-    lines.push(separator);
-    const errorMessage = this.wrapText(`Message: ${error.message}`, continuationIndent, false);
-    const errorDescription = this.wrapText(`Description: ${error.description}`, continuationIndent, false);
-    lines.push(...errorMessage.map((line) => `${continuationIndent}${line}`));
-    lines.push(...errorDescription.map((line) => `${continuationIndent}${line}`));
-    if (error.originalError) {
-      lines.push(separator);
-      lines.push(`${continuationIndent}ORIGINAL ERROR:`);
-      lines.push(separator);
-      const originalMessage = this.wrapText(`${error.originalError.name}: ${error.originalError.message}`, continuationIndent, false);
-      lines.push(...originalMessage.map((line) => `${continuationIndent}${line}`));
-      if (error.originalError.stack) {
-        lines.push(`${continuationIndent}Stack trace:`);
-        const stackLines = this.formatStackTrace(error.originalError.stack, continuationIndent);
-        lines.push(...stackLines);
+    pushSection(`A_ERROR: ${error.code}`);
+    pushRow(`Title       : ${error.title}`);
+    pushRow(`Message     : ${error.message}`);
+    pushRow(`Description : ${error.description}`);
+    this.appendFeatureContext(error, pushRow);
+    const chain = error.chain;
+    if (chain.length > 1) {
+      pushSection("CAUSED BY:");
+      for (let i = 1; i < chain.length; i++) {
+        const link = chain[i];
+        if (i > 1) lines.push(`${RED}${continuationIndent}${RESET}`);
+        if (link instanceof aConcept.A_Error) {
+          pushRow(`[${i}] ${link.constructor.name} (${link.code})`, RED_BOLD);
+          pushRow(`    Title   : ${link.title}`);
+          pushRow(`    Message : ${link.message}`);
+          if (link.description && link.description !== link.message) {
+            pushRow(`    Desc    : ${link.description}`);
+          }
+          this.appendFeatureContext(link, pushRow, "    ");
+        } else if (link instanceof Error) {
+          pushRow(`[${i}] ${link.name}: ${link.message}`, RED_BOLD);
+        } else {
+          pushRow(`[${i}] ${String(link)}`);
+        }
       }
     }
     if (error.stack) {
-      lines.push(separator);
-      lines.push(`${continuationIndent}A_ERROR STACK:`);
-      lines.push(separator);
+      pushSection("STACK TRACE:");
       const stackLines = this.formatStackTrace(error.stack, continuationIndent);
-      lines.push(...stackLines);
+      for (const line of stackLines) {
+        lines.push(this.colorizeStackLine(line, { RED, RED_BOLD, CYAN, YELLOW, DIM, RESET }));
+      }
     }
     if (error.link) {
       lines.push(separator);
-      const linkText = this.wrapText(`Documentation: ${error.link}`, continuationIndent, false);
-      lines.push(...linkText.map((line) => `${continuationIndent}${line}`));
+      lines.push(`${RED}${continuationIndent}Docs: ${CYAN_UNDERLINE}${error.link}${RESET}`);
     }
     lines.push(separator);
     return lines.join("\n");
+  }
+  /**
+   * Append structured A_FeatureError context (featureName, stageName,
+   * handler, component) when the link has those fields.  Silently no-ops
+   * for plain A_Error or any other subclass that doesn't expose them.
+   */
+  appendFeatureContext(error, pushRow, prefix = "") {
+    const e = error;
+    const hasContext = e.featureName || e.stageName || e.handler || e.component;
+    if (!hasContext) return;
+    if (e.featureName) pushRow(`${prefix}Feature   : ${e.featureName}`);
+    if (e.stageName) pushRow(`${prefix}Stage     : ${e.stageName}`);
+    if (e.component) pushRow(`${prefix}Component : ${e.component}`);
+    if (e.handler) pushRow(`${prefix}Handler   : ${e.handler}`);
+  }
+  /**
+   * Colorize one stack-trace line:
+   *  - "Caused by:" header lines in bold red (preserves the chain visual).
+   *  - File locations (path:line:col) in cyan/yellow so they pop out and
+   *    stay clickable in VS Code's terminal.
+   *  - Everything else in red.
+   *
+   * The input line is the already-padded/wrapped output of
+   * `formatStackTrace` (starts with the scope padding + PIPE).
+   */
+  colorizeStackLine(line, c) {
+    const locRegex = /(\(?)([^()\s:]+\.(?:ts|tsx|js|jsx|mjs|cjs)):(\d+):(\d+)(\)?)/g;
+    const colorized = line.replace(
+      locRegex,
+      (_, openP, file, ln, col, closeP) => `${openP}${c.CYAN}${file}${c.RESET}${c.RED}:${c.YELLOW}${ln}${c.RED}:${c.YELLOW}${col}${c.RED}${closeP}`
+    );
+    const baseColor = /caused by:/i.test(line) ? c.RED_BOLD : c.RED;
+    return `${baseColor}${colorized}${c.RESET}`;
   }
   /**
    * Format stack trace with proper terminal width wrapping and indentation

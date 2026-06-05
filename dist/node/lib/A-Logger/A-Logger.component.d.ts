@@ -332,19 +332,52 @@ declare class A_Logger extends A_Component {
      */
     protected log_A_Error(error: A_Error): void;
     /**
-     * Format A_Error instances for inline display within compiled messages
+     * Format A_Error instances for inline display within compiled messages.
      *
-     * Provides detailed formatting for A_Error objects with:
-     * - Error code, message, and description
-     * - Original error information FIRST (better UX for debugging)
-     * - Stack traces with terminal width awareness
-     * - Documentation links (if available)
-     * - Consistent formatting with rest of logger
+     * Aligned with the structured error-handling strategy:
+     *  - Walks the FULL causal chain via `error.chain` so wrapper layers
+     *    (A_FeatureError → A_StageError → user error) are all visible.
+     *  - Surfaces structured A_FeatureError context (featureName, stageName,
+     *    handler, component) when present.
+     *  - Prints the outermost A_Error stack ONCE — it already includes a
+     *    `Caused by: ...` chain appended by `A_Error.appendCausedByStack()`,
+     *    so repeating per-link stacks would duplicate information.
+     *  - Shows documentation link only for the outermost error.
+     *
+     * Visual style mirrors the legacy `log_A_Error`:
+     *  - Whole block wrapped in red ANSI; section headers in bold red.
+     *  - File:line:col in stack traces highlighted cyan/yellow so they're
+     *    easy to spot and stay clickable in VS Code terminal.
+     *  - Documentation link underlined in cyan.
      *
      * @param error - The A_Error instance to format
      * @returns Formatted string ready for display
      */
     protected compile_A_Error(error: A_Error): string;
+    /**
+     * Append structured A_FeatureError context (featureName, stageName,
+     * handler, component) when the link has those fields.  Silently no-ops
+     * for plain A_Error or any other subclass that doesn't expose them.
+     */
+    protected appendFeatureContext(error: A_Error, pushRow: (text: string, color?: string) => void, prefix?: string): void;
+    /**
+     * Colorize one stack-trace line:
+     *  - "Caused by:" header lines in bold red (preserves the chain visual).
+     *  - File locations (path:line:col) in cyan/yellow so they pop out and
+     *    stay clickable in VS Code's terminal.
+     *  - Everything else in red.
+     *
+     * The input line is the already-padded/wrapped output of
+     * `formatStackTrace` (starts with the scope padding + PIPE).
+     */
+    protected colorizeStackLine(line: string, c: {
+        RED: string;
+        RED_BOLD: string;
+        CYAN: string;
+        YELLOW: string;
+        DIM: string;
+        RESET: string;
+    }): string;
     /**
      * Format stack trace with proper terminal width wrapping and indentation
      *

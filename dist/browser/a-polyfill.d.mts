@@ -1,5 +1,5 @@
 import { A_Component } from '@adaas/a-concept';
-import { n as A_Logger } from './A-Logger.component-C7Tak6HK.mjs';
+import { n as A_Logger } from './A-Logger.component-NljdXg_n.mjs';
 import './a-execution.mjs';
 
 interface Ifspolyfill {

@@ -1,11 +1,270 @@
-import { A_Component, A_Scope, A_Error } from '@adaas/a-concept';
-import { A_LoggerColorName } from './A-Logger.types.mjs';
-import { A_LOGGER_COLOR_CODES } from './A-Logger.constants.mjs';
-import { A_LoggerEnvVariablesType } from './A-Logger.env.mjs';
-import { A_Config } from '../A-Config/A-Config.context.mjs';
-import '../A-Config/A-Config.types.mjs';
-import '../A-Execution/A-Execution.context.mjs';
-import '../A-Config/A-Config.constants.mjs';
+import { A_TYPES__ConceptENVVariables, A_TYPES__Fragment_Constructor, A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY, A_Component, A_Scope, A_Error } from '@adaas/a-concept';
+import { A_ExecutionContext } from './a-execution.mjs';
+
+declare enum A_TYPES__ConfigFeature {
+}
+type A_TYPES__ConfigContainerConstructor<T extends Array<string | A_TYPES__ConceptENVVariables[number]>> = {
+    /**
+     * If set to true, the SDK will throw an error if the variable is not defined OR not presented in the defaults
+     */
+    strict: boolean;
+    /**
+     * Allows to define the names of variable to be loaded
+     */
+    variables: T;
+    /**
+     * Allows to set the default values for the variables
+     */
+    defaults: {
+        [key in T[number]]?: any;
+    };
+} & A_TYPES__Fragment_Constructor;
+
+declare const A_CONSTANTS__CONFIG_ENV_VARIABLES: {};
+type A_TYPES__ConfigENVVariables = (typeof A_CONSTANTS__CONFIG_ENV_VARIABLES)[keyof typeof A_CONSTANTS__CONFIG_ENV_VARIABLES][];
+declare const A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY: readonly [];
+
+declare class A_Config<T extends Array<string | A_TYPES__ConceptENVVariables[number]> = any[]> extends A_ExecutionContext<{
+    [key in T[number]]: any;
+} & {
+    [key in typeof A_CONSTANTS__DEFAULT_ENV_VARIABLES_ARRAY[number]]: any;
+} & {
+    [key in typeof A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY[number]]: any;
+}> {
+    protected _strict: boolean;
+    protected _configProperties: T;
+    protected DEFAULT_ALLOWED_TO_READ_PROPERTIES: ("A_CONCEPT_NAME" | "A_CONCEPT_ROOT_SCOPE" | "A_CONCEPT_ENVIRONMENT" | "A_CONCEPT_RUNTIME_ENVIRONMENT" | "A_CONCEPT_ROOT_FOLDER" | "A_ERROR_DEFAULT_DESCRIPTION")[];
+    constructor(config: Partial<A_TYPES__ConfigContainerConstructor<T>>);
+    get strict(): boolean;
+    /**
+      * This method is used to get the configuration property by name
+      *
+      * @param property
+      * @returns
+      */
+    get<K extends T[number]>(property: K | typeof this.DEFAULT_ALLOWED_TO_READ_PROPERTIES[number]): {
+        [key in T[number]]: any;
+    }[K] | undefined;
+    /**
+     *
+     * This method is used to set the configuration property by name
+     * OR set multiple properties at once by passing an array of objects
+     *
+     * @param variables
+     */
+    set(variables: Array<{
+        property: T[number] | A_TYPES__ConceptENVVariables[number];
+        value: any;
+    }>): any;
+    set(variables: Partial<Record<T[number] | A_TYPES__ConceptENVVariables[number], any>>): any;
+    set(property: T[number] | A_TYPES__ConceptENVVariables[number], value: any): any;
+}
+
+declare const A_LoggerEnvVariables: {
+    /**
+     * Sets the log level for the logger
+     *
+     * @example 'debug', 'info', 'warn', 'error'
+     */
+    readonly A_LOGGER_LEVEL: "A_LOGGER_LEVEL";
+    /**
+     * Sets the default scope length for log messages
+     *
+     * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
+     */
+    readonly A_LOGGER_DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH";
+    /**
+     * Sets the default color for scope display in log messages
+     *
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    readonly A_LOGGER_DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR";
+    /**
+     * Sets the default color for log message content
+     *
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    readonly A_LOGGER_DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR";
+};
+declare const A_LoggerEnvVariablesArray: readonly ["A_LOGGER_LEVEL", "A_LOGGER_DEFAULT_SCOPE_LENGTH", "A_LOGGER_DEFAULT_SCOPE_COLOR", "A_LOGGER_DEFAULT_LOG_COLOR"];
+type A_LoggerEnvVariablesType = (typeof A_LoggerEnvVariables)[keyof typeof A_LoggerEnvVariables][];
+
+/**
+ * A-Logger Constants
+ *
+ * Configuration constants and default values for the A_Logger component
+ */
+/**
+ * Default scope length for consistent message alignment
+ */
+declare const A_LOGGER_DEFAULT_SCOPE_LENGTH = 20;
+/**
+ * Default log level when none is specified
+ */
+declare const A_LOGGER_DEFAULT_LEVEL = "all";
+/**
+ * Terminal color codes mapping
+ */
+declare const A_LOGGER_COLOR_CODES: {
+    readonly red: "31";
+    readonly yellow: "33";
+    readonly green: "32";
+    readonly blue: "34";
+    readonly cyan: "36";
+    readonly magenta: "35";
+    readonly gray: "90";
+    readonly brightBlue: "94";
+    readonly brightCyan: "96";
+    readonly brightMagenta: "95";
+    readonly darkGray: "30";
+    readonly lightGray: "37";
+    readonly indigo: "38;5;54";
+    readonly violet: "38;5;93";
+    readonly purple: "38;5;129";
+    readonly lavender: "38;5;183";
+    readonly skyBlue: "38;5;117";
+    readonly steelBlue: "38;5;67";
+    readonly slateBlue: "38;5;62";
+    readonly deepBlue: "38;5;18";
+    readonly lightBlue: "38;5;153";
+    readonly periwinkle: "38;5;111";
+    readonly cornflower: "38;5;69";
+    readonly powder: "38;5;152";
+    readonly charcoal: "38;5;236";
+    readonly silver: "38;5;250";
+    readonly smoke: "38;5;244";
+    readonly slate: "38;5;240";
+};
+declare const A_LOGGER_COLORS: {
+    readonly red: "red";
+    readonly yellow: "yellow";
+    readonly green: "green";
+    readonly blue: "blue";
+    readonly cyan: "cyan";
+    readonly magenta: "magenta";
+    readonly gray: "gray";
+    readonly brightBlue: "brightBlue";
+    readonly brightCyan: "brightCyan";
+    readonly brightMagenta: "brightMagenta";
+    readonly darkGray: "darkGray";
+    readonly lightGray: "lightGray";
+    readonly indigo: "indigo";
+    readonly violet: "violet";
+    readonly purple: "purple";
+    readonly lavender: "lavender";
+    readonly skyBlue: "skyBlue";
+    readonly steelBlue: "steelBlue";
+    readonly slateBlue: "slateBlue";
+    readonly deepBlue: "deepBlue";
+    readonly lightBlue: "lightBlue";
+    readonly periwinkle: "periwinkle";
+    readonly cornflower: "cornflower";
+    readonly powder: "powder";
+    readonly charcoal: "charcoal";
+    readonly silver: "silver";
+    readonly smoke: "smoke";
+    readonly slate: "slate";
+};
+/**
+ * Safe colors for random selection - grey-blue-violet palette
+ * Excludes system colors (red, yellow, green) to avoid confusion with warnings/errors
+ */
+declare const A_LOGGER_SAFE_RANDOM_COLORS: readonly ["blue", "cyan", "magenta", "gray", "brightBlue", "brightCyan", "brightMagenta", "darkGray", "lightGray", "indigo", "violet", "purple", "lavender", "skyBlue", "steelBlue", "slateBlue", "deepBlue", "lightBlue", "periwinkle", "cornflower", "powder", "charcoal", "silver", "smoke", "slate"];
+/**
+ * ANSI escape codes
+ */
+declare const A_LOGGER_ANSI: {
+    readonly RESET: "\u001B[0m";
+    readonly PREFIX: "\u001B[";
+    readonly SUFFIX: "m";
+};
+/**
+ * Timestamp format configuration
+ */
+declare const A_LOGGER_TIME_FORMAT: {
+    readonly MINUTES_PAD: 2;
+    readonly SECONDS_PAD: 2;
+    readonly MILLISECONDS_PAD: 3;
+    readonly SEPARATOR: ":";
+};
+/**
+ * Log message structure constants
+ */
+declare const A_LOGGER_FORMAT: {
+    readonly SCOPE_OPEN: "[";
+    readonly SCOPE_CLOSE: "]";
+    readonly TIME_OPEN: "|";
+    readonly TIME_CLOSE: "|";
+    readonly SEPARATOR: "-------------------------------";
+    readonly INDENT_BASE: 3;
+    readonly PIPE: "| ";
+};
+/**
+ * Environment variable keys
+ */
+/**
+ * Terminal width configuration
+ */
+declare const A_LOGGER_TERMINAL: {
+    readonly DEFAULT_WIDTH: 80;
+    readonly MIN_WIDTH: 40;
+    readonly MAX_LINE_LENGTH_RATIO: 0.8;
+    readonly BROWSER_DEFAULT_WIDTH: 120;
+};
+/**
+ * Environment variable keys
+ */
+declare const A_LOGGER_ENV_KEYS: {
+    readonly LOG_LEVEL: "A_LOGGER_LEVEL";
+    readonly DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH";
+    readonly DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR";
+    readonly DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR";
+};
+declare const A_LOGGER_LEVELS: {
+    debug: string;
+    info: string;
+    log: string;
+    warning: string;
+    error: string;
+    all: string;
+};
+declare const A_LOGGER_FEATURES: {
+    readonly onLog: "A_Logger_onLog";
+};
+declare const A_LOGGER_ENV_VARIABLES: {
+    /**
+     * Sets the log level for the logger
+     *
+     * @example 'debug', 'info', 'warn', 'error'
+     */
+    readonly A_LOGGER_LEVEL: "A_LOGGER_LEVEL";
+    /**
+     * Sets the default scope length for log messages
+     *
+     * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
+     */
+    readonly A_LOGGER_DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH";
+    /**
+     * Sets the default color for scope display in log messages
+     *
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    readonly A_LOGGER_DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR";
+    /**
+     * Sets the default color for log message content
+     *
+     * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+     */
+    readonly A_LOGGER_DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR";
+};
+
+type A_LoggerLevel = typeof A_LOGGER_LEVELS[keyof typeof A_LOGGER_LEVELS];
+/**
+ * Available color names for the logger
+ * Can be used as first parameter in logging methods to specify message color
+ */
+type A_LoggerColorName = typeof A_LOGGER_COLORS[keyof typeof A_LOGGER_COLORS];
+type A_LoggerFeatureName = typeof A_LOGGER_FEATURES[keyof typeof A_LOGGER_FEATURES];
 
 /**
  * A_Logger - Advanced Logging Component with Scope-based Output Formatting
@@ -412,4 +671,4 @@ declare class A_Logger extends A_Component {
     protected getTime(): string;
 }
 
-export { A_Logger };
+export { type A_LoggerLevel as A, A_LOGGER_ANSI as a, A_LOGGER_COLORS as b, A_LOGGER_COLOR_CODES as c, A_LOGGER_DEFAULT_LEVEL as d, A_LOGGER_DEFAULT_SCOPE_LENGTH as e, A_LOGGER_ENV_KEYS as f, A_LOGGER_ENV_VARIABLES as g, A_LOGGER_FEATURES as h, A_LOGGER_FORMAT as i, A_LOGGER_LEVELS as j, A_LOGGER_SAFE_RANDOM_COLORS as k, A_LOGGER_TERMINAL as l, A_LOGGER_TIME_FORMAT as m, A_Logger as n, type A_LoggerColorName as o, A_LoggerEnvVariables as p, A_LoggerEnvVariablesArray as q, type A_LoggerEnvVariablesType as r, type A_LoggerFeatureName as s, A_Config as t, A_CONSTANTS__CONFIG_ENV_VARIABLES as u, A_CONSTANTS__CONFIG_ENV_VARIABLES_ARRAY as v, type A_TYPES__ConfigContainerConstructor as w, type A_TYPES__ConfigENVVariables as x, A_TYPES__ConfigFeature as y };
