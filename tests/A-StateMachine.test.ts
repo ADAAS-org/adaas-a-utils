@@ -207,7 +207,10 @@ describe('A-StateMachine tests', () => {
             await stateMachine.transition('idle', 'active', { message: '' })
         } catch (error) {
             expect(error).toBeInstanceOf(A_Error);
-            expect((error as A_Error).originalError.message).toBe('Message is required');
+            // The thrown plain Error gets wrapped by the feature dispatcher
+            // (A_FeatureError → A_StageError → original). Walk the chain via
+            // `rootCause` to reach the user-thrown error.
+            expect((error as A_Error).rootCause.message).toBe('Message is required');
         }
 
 
@@ -277,7 +280,10 @@ describe('A-StateMachine tests', () => {
                 await machine.ready;
             } catch (error) {
                 expect(error).toBeInstanceOf(Error);
-                expect((error as A_Error).originalError.message).toBe('Initialization failed');
+                // The thrown plain Error gets wrapped by the feature dispatcher
+                // (A_FeatureError → A_StageError → original). Walk the chain via
+                // `rootCause` to reach the user-thrown error.
+                expect((error as A_Error).rootCause.message).toBe('Initialization failed');
             }
         });
     });
@@ -316,7 +322,10 @@ describe('A-StateMachine tests', () => {
                 await machine.transition('draft', 'published', { content: 'short' })
             } catch (error) {
                 expect(error).toBeInstanceOf(A_Error);
-                expect((error as A_Error).originalError.message).toBe('Content must be at least 10 characters to publish');
+                // The thrown plain Error gets wrapped by the feature dispatcher
+                // (A_FeatureError → A_StageError → original). Walk the chain via
+                // `rootCause` to reach the user-thrown error.
+                expect((error as A_Error).rootCause.message).toBe('Content must be at least 10 characters to publish');
             }
 
 
@@ -378,7 +387,11 @@ describe('A-StateMachine tests', () => {
                 })
             } catch (error) {
                 expect(error).toBeInstanceOf(A_Error);
-                expect((error as A_Error).originalError.title).toBe('Only approved orders can be completed');
+                // The thrown A_Error gets wrapped by the feature dispatcher
+                // (A_FeatureError → A_StageError → original A_Error). Walk the
+                // chain via `rootCause` to reach the user-thrown A_Error and
+                // assert on its `.title`.
+                expect(((error as A_Error).rootCause as A_Error).title).toBe('Only approved orders can be completed');
 
             }
 

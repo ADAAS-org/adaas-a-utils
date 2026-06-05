@@ -424,6 +424,11 @@ describe('A-Command tests', () => {
         }
 
         it('Should handle multi-service command routing', async () => {
+            // Register the shared memory ONCE at the concept level so both
+            // containers resolve the SAME A_MemoryContext via scope
+            // inheritance.  Passing the same instance to two containers'
+            // `fragments` would violate the strict one-scope-per-instance
+            // ownership invariant.
             const sharedMemory = new A_MemoryContext();
 
             const serviceA = new TestService({
@@ -435,7 +440,6 @@ describe('A-Command tests', () => {
                     A_StateMachine
                 ],
                 entities: [MultiServiceCommand],
-                fragments: [sharedMemory]
             });
 
             const serviceB = new TestService({
@@ -446,12 +450,12 @@ describe('A-Command tests', () => {
                     A_StateMachine
                 ],
                 entities: [MultiServiceCommand],
-                fragments: [sharedMemory]
             });
 
             const concept = new A_Concept({
                 containers: [serviceA, serviceB],
-                components: [A_Memory, TestChannel]
+                components: [A_Memory, TestChannel],
+                fragments: [sharedMemory],
             });
 
             await concept.load();
