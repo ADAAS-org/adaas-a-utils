@@ -661,20 +661,26 @@ export class A_Logger extends A_Component {
     debug(param1: any, ...args: any[]): void {
         if (!this.shouldLog('debug')) return;
 
+        // `param1` is either a color key (then it is consumed as color
+        // and the message starts at `args[0]`) or the first message
+        // argument itself. The `LogContext.args` MUST mirror the actual
+        // message arguments — otherwise downstream `onLog` handlers
+        // (e.g. structured-event bridges that inspect `args[0]`) silently
+        // see `undefined` for single-argument calls like
+        // `logger.debug(envelope)`. (Bug fix: previously `param1` was
+        // dropped from the context when it wasn't a color.)
+        const isColor = typeof param1 === 'string'
+            && !!this.COLORS[param1 as keyof typeof this.COLORS];
+        const messageArgs = isColor ? args : [param1, ...args];
+
         const callScope = new A_Scope({
             name: this.scope.name + ':debug',
-            fragments: [new A_LoggerLogContext('debug', ...args)]
+            fragments: [new A_LoggerLogContext('debug', ...messageArgs)]
         }).inherit(this.scope);
 
-        let compiled: any[] = [];
-
-        // Check if first parameter is a valid color key
-        if (typeof param1 === 'string' && this.COLORS[param1 as keyof typeof this.COLORS]) {
-            compiled = this.compile(param1 as keyof typeof this.COLORS, ...args)
-        } else {
-            // Use instance's default log color and treat param1 as first message argument
-            compiled = this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
-        }
+        const compiled: any[] = isColor
+            ? this.compile(param1 as keyof typeof this.COLORS, ...args)
+            : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
 
         try {
             console.log(...compiled);
@@ -710,20 +716,26 @@ export class A_Logger extends A_Component {
     info(param1: any, ...args: any[]): void {
         if (!this.shouldLog('info')) return;
 
+        // `param1` is either a color key (then it is consumed as color
+        // and the message starts at `args[0]`) or the first message
+        // argument itself. The `LogContext.args` MUST mirror the actual
+        // message arguments — otherwise downstream `onLog` handlers
+        // (e.g. structured-event bridges that inspect `args[0]`) silently
+        // see `undefined` for single-argument calls like
+        // `logger.info(envelope)`. (Bug fix: previously `param1` was
+        // dropped from the context when it wasn't a color.)
+        const isColor = typeof param1 === 'string'
+            && !!this.COLORS[param1 as keyof typeof this.COLORS];
+        const messageArgs = isColor ? args : [param1, ...args];
+
         const callScope = new A_Scope({
             name: this.scope.name + ':info',
-            fragments: [new A_LoggerLogContext('info', ...args)]
+            fragments: [new A_LoggerLogContext('info', ...messageArgs)]
         }).inherit(this.scope);
 
-        let compiled: any[] = [];
-
-        // Check if first parameter is a valid color key
-        if (typeof param1 === 'string' && this.COLORS[param1 as keyof typeof this.COLORS]) {
-            compiled = this.compile(param1 as keyof typeof this.COLORS, ...args)
-        } else {
-            // Use instance's default log color and treat param1 as first message argument
-            compiled = this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
-        }
+        const compiled: any[] = isColor
+            ? this.compile(param1 as keyof typeof this.COLORS, ...args)
+            : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
 
         try {
             console.log(...compiled);

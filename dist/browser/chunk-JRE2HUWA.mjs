@@ -1,21 +1,220 @@
-'use strict';
+import { A_Config } from './chunk-SJU7LRGF.mjs';
+import { __decorateClass, __decorateParam } from './chunk-EQQGB2QZ.mjs';
+import { A_Inject, A_Scope, A_Component, A_Feature, A_Context, A_Error, A_Fragment } from '@adaas/a-concept';
+import { A_Frame } from '@adaas/a-frame/core';
 
-var aConcept = require('@adaas/a-concept');
-var aConfig = require('@adaas/a-utils/a-config');
-var ALogger_constants = require('./A-Logger.constants');
-var core = require('@adaas/a-frame/core');
-var ALoggerLog_context = require('./A-LoggerLog.context');
-
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __decorateClass = (decorators, target, key, kind) => {
-  var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc(target, key) : target;
-  for (var i = decorators.length - 1, decorator; i >= 0; i--)
-    if (decorator = decorators[i])
-      result = (decorator(result)) || result;
-  return result;
+// src/lib/A-Logger/A-Logger.constants.ts
+var A_LOGGER_DEFAULT_SCOPE_LENGTH = 20;
+var A_LOGGER_DEFAULT_LEVEL = "all";
+var A_LOGGER_COLOR_CODES = {
+  // System colors (reserved for specific purposes)
+  red: "31",
+  // Errors, critical issues
+  yellow: "33",
+  // Warnings, caution messages
+  green: "32",
+  // Success, completion messages
+  // Safe palette for random selection (grey-blue-violet theme)
+  blue: "34",
+  // Info, general messages
+  cyan: "36",
+  // Headers, titles
+  magenta: "35",
+  // Special highlighting
+  gray: "90",
+  // Debug, less important info
+  brightBlue: "94",
+  // Bright blue variant
+  brightCyan: "96",
+  // Bright cyan variant
+  brightMagenta: "95",
+  // Bright magenta variant
+  darkGray: "30",
+  // Dark gray
+  lightGray: "37",
+  // Light gray (white)
+  // Extended blue-violet palette
+  indigo: "38;5;54",
+  // Deep indigo
+  violet: "38;5;93",
+  // Violet
+  purple: "38;5;129",
+  // Purple
+  lavender: "38;5;183",
+  // Lavender
+  skyBlue: "38;5;117",
+  // Sky blue
+  steelBlue: "38;5;67",
+  // Steel blue
+  slateBlue: "38;5;62",
+  // Slate blue
+  deepBlue: "38;5;18",
+  // Deep blue
+  lightBlue: "38;5;153",
+  // Light blue
+  periwinkle: "38;5;111",
+  // Periwinkle
+  cornflower: "38;5;69",
+  // Cornflower blue
+  powder: "38;5;152",
+  // Powder blue
+  // Additional grays for variety
+  charcoal: "38;5;236",
+  // Charcoal
+  silver: "38;5;250",
+  // Silver
+  smoke: "38;5;244",
+  // Smoke gray
+  slate: "38;5;240"
+  // Slate gray
 };
-var __decorateParam = (index, decorator) => (target, key) => decorator(target, key, index);
-exports.A_Logger = class A_Logger extends aConcept.A_Component {
+var A_LOGGER_COLORS = {
+  red: "red",
+  yellow: "yellow",
+  green: "green",
+  blue: "blue",
+  cyan: "cyan",
+  magenta: "magenta",
+  gray: "gray",
+  brightBlue: "brightBlue",
+  brightCyan: "brightCyan",
+  brightMagenta: "brightMagenta",
+  darkGray: "darkGray",
+  lightGray: "lightGray",
+  indigo: "indigo",
+  violet: "violet",
+  purple: "purple",
+  lavender: "lavender",
+  skyBlue: "skyBlue",
+  steelBlue: "steelBlue",
+  slateBlue: "slateBlue",
+  deepBlue: "deepBlue",
+  lightBlue: "lightBlue",
+  periwinkle: "periwinkle",
+  cornflower: "cornflower",
+  powder: "powder",
+  charcoal: "charcoal",
+  silver: "silver",
+  smoke: "smoke",
+  slate: "slate"
+};
+var A_LOGGER_SAFE_RANDOM_COLORS = [
+  "blue",
+  "cyan",
+  "magenta",
+  "gray",
+  "brightBlue",
+  "brightCyan",
+  "brightMagenta",
+  "darkGray",
+  "lightGray",
+  "indigo",
+  "violet",
+  "purple",
+  "lavender",
+  "skyBlue",
+  "steelBlue",
+  "slateBlue",
+  "deepBlue",
+  "lightBlue",
+  "periwinkle",
+  "cornflower",
+  "powder",
+  "charcoal",
+  "silver",
+  "smoke",
+  "slate"
+];
+var A_LOGGER_ANSI = {
+  RESET: "\x1B[0m",
+  PREFIX: "\x1B[",
+  SUFFIX: "m"
+};
+var A_LOGGER_TIME_FORMAT = {
+  MINUTES_PAD: 2,
+  SECONDS_PAD: 2,
+  MILLISECONDS_PAD: 3,
+  SEPARATOR: ":"
+};
+var A_LOGGER_FORMAT = {
+  SCOPE_OPEN: "[",
+  SCOPE_CLOSE: "]",
+  TIME_OPEN: "|",
+  TIME_CLOSE: "|",
+  SEPARATOR: "-------------------------------",
+  INDENT_BASE: 3,
+  PIPE: "| "
+};
+var A_LOGGER_TERMINAL = {
+  DEFAULT_WIDTH: 80,
+  // Default terminal width when can't be detected
+  MIN_WIDTH: 40,
+  // Minimum width for formatted output
+  MAX_LINE_LENGTH_RATIO: 0.8,
+  // Use 80% of terminal width for content
+  BROWSER_DEFAULT_WIDTH: 120
+  // Default width for browser console
+};
+var A_LOGGER_ENV_KEYS = {
+  LOG_LEVEL: "A_LOGGER_LEVEL",
+  DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH",
+  DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR",
+  DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR"
+};
+var A_LOGGER_LEVELS = {
+  debug: "debug",
+  info: "info",
+  log: "log",
+  warning: "warning",
+  error: "error",
+  all: "all"
+};
+var A_LOGGER_FEATURES = {
+  onLog: "A_Logger_onLog"
+};
+var A_LOGGER_ENV_VARIABLES = {
+  /**
+   * Sets the log level for the logger
+   * 
+   * @example 'debug', 'info', 'warn', 'error'
+   */
+  A_LOGGER_LEVEL: "A_LOGGER_LEVEL",
+  /**     
+   * Sets the default scope length for log messages
+   * 
+   * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
+   */
+  A_LOGGER_DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH",
+  /**
+   * Sets the default color for scope display in log messages
+   * 
+   * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+   */
+  A_LOGGER_DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR",
+  /**
+   * Sets the default color for log message content
+   * 
+   * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+   */
+  A_LOGGER_DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR"
+};
+var A_LoggerLogContext = class extends A_Fragment {
+  constructor(level, ...args) {
+    super();
+    this.level = level;
+    this.args = args;
+  }
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      level: this.level,
+      args: this.args
+    };
+  }
+};
+
+// src/lib/A-Logger/A-Logger.component.ts
+var A_Logger = class extends A_Component {
   // =============================================
   // Constructor and Initialization
   // =============================
@@ -30,10 +229,10 @@ exports.A_Logger = class A_Logger extends aConcept.A_Component {
     super();
     this.scope = scope;
     this.config = config;
-    this.COLORS = ALogger_constants.A_LOGGER_COLOR_CODES;
-    this.STANDARD_SCOPE_LENGTH = config?.get(ALogger_constants.A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_LENGTH) || ALogger_constants.A_LOGGER_DEFAULT_SCOPE_LENGTH;
-    const configScopeColor = config?.get(ALogger_constants.A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_COLOR);
-    const configLogColor = config?.get(ALogger_constants.A_LOGGER_ENV_KEYS.DEFAULT_LOG_COLOR);
+    this.COLORS = A_LOGGER_COLOR_CODES;
+    this.STANDARD_SCOPE_LENGTH = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_LENGTH) || A_LOGGER_DEFAULT_SCOPE_LENGTH;
+    const configScopeColor = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_SCOPE_COLOR);
+    const configLogColor = config?.get(A_LOGGER_ENV_KEYS.DEFAULT_LOG_COLOR);
     if (configScopeColor || configLogColor) {
       this.DEFAULT_SCOPE_COLOR = configScopeColor || this.generateColorFromScopeName(this.scope.name);
       this.DEFAULT_LOG_COLOR = configLogColor || this.generateColorFromScopeName(this.scope.name);
@@ -43,13 +242,13 @@ exports.A_Logger = class A_Logger extends aConcept.A_Component {
       this.DEFAULT_LOG_COLOR = complementaryColors.logColor;
     }
     this.TERMINAL_WIDTH = this.detectTerminalWidth();
-    this.MAX_CONTENT_WIDTH = Math.floor(this.TERMINAL_WIDTH * ALogger_constants.A_LOGGER_TERMINAL.MAX_LINE_LENGTH_RATIO);
+    this.MAX_CONTENT_WIDTH = Math.floor(this.TERMINAL_WIDTH * A_LOGGER_TERMINAL.MAX_LINE_LENGTH_RATIO);
   }
   static get onLog() {
     return (target, propertyKey, descriptor) => {
-      return aConcept.A_Feature.Extend({
-        name: ALogger_constants.A_LOGGER_FEATURES.onLog,
-        scope: [exports.A_Logger]
+      return A_Feature.Extend({
+        name: A_LOGGER_FEATURES.onLog,
+        scope: [A_Logger]
       })(target, propertyKey, descriptor);
     };
   }
@@ -80,7 +279,7 @@ exports.A_Logger = class A_Logger extends aConcept.A_Component {
    * @returns A color key from the safe colors palette
    */
   generateColorFromScopeName(scopeName) {
-    const safeColors = ALogger_constants.A_LOGGER_SAFE_RANDOM_COLORS;
+    const safeColors = A_LOGGER_SAFE_RANDOM_COLORS;
     const hash = this.simpleHash(scopeName);
     const colorIndex = hash % safeColors.length;
     return safeColors[colorIndex];
@@ -124,16 +323,16 @@ exports.A_Logger = class A_Logger extends aConcept.A_Component {
    */
   detectTerminalWidth() {
     try {
-      if (aConcept.A_Context.environment === "browser") {
-        return ALogger_constants.A_LOGGER_TERMINAL.BROWSER_DEFAULT_WIDTH;
+      if (A_Context.environment === "browser") {
+        return A_LOGGER_TERMINAL.BROWSER_DEFAULT_WIDTH;
       }
       if (typeof process !== "undefined" && process.stdout && process.stdout.columns) {
         const cols = process.stdout.columns;
-        return Math.max(cols, ALogger_constants.A_LOGGER_TERMINAL.MIN_WIDTH);
+        return Math.max(cols, A_LOGGER_TERMINAL.MIN_WIDTH);
       }
-      return ALogger_constants.A_LOGGER_TERMINAL.DEFAULT_WIDTH;
+      return A_LOGGER_TERMINAL.DEFAULT_WIDTH;
     } catch (error) {
-      return ALogger_constants.A_LOGGER_TERMINAL.DEFAULT_WIDTH;
+      return A_LOGGER_TERMINAL.DEFAULT_WIDTH;
     }
   }
   /**
@@ -145,11 +344,11 @@ exports.A_Logger = class A_Logger extends aConcept.A_Component {
    * @returns Array of wrapped lines with proper indentation
    */
   wrapText(text, scopePadding, isFirstLine = true) {
-    if (aConcept.A_Context.environment === "browser") {
+    if (A_Context.environment === "browser") {
       return [text];
     }
     const scopeHeaderLength = this.formattedScope.length + 4 + this.getTime().length + 4;
-    const continuationIndent = `${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`;
+    const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
     const firstLineMaxWidth = Math.max(this.TERMINAL_WIDTH - scopeHeaderLength - 1, 20);
     const continuationMaxWidth = Math.max(this.TERMINAL_WIDTH - continuationIndent.length, 20);
     if (isFirstLine && text.length <= firstLineMaxWidth) {
@@ -254,15 +453,15 @@ exports.A_Logger = class A_Logger extends aConcept.A_Component {
     const isMultiArg = args.length > 1;
     return [
       // Header with separate colors for scope and message content
-      `${ALogger_constants.A_LOGGER_ANSI.PREFIX}${this.COLORS[this.DEFAULT_SCOPE_COLOR]}${ALogger_constants.A_LOGGER_ANSI.SUFFIX}${ALogger_constants.A_LOGGER_FORMAT.SCOPE_OPEN}${this.formattedScope}${ALogger_constants.A_LOGGER_FORMAT.SCOPE_CLOSE}${ALogger_constants.A_LOGGER_ANSI.RESET} ${ALogger_constants.A_LOGGER_ANSI.PREFIX}${this.COLORS[messageColor]}${ALogger_constants.A_LOGGER_ANSI.SUFFIX}${ALogger_constants.A_LOGGER_FORMAT.TIME_OPEN}${timeString}${ALogger_constants.A_LOGGER_FORMAT.TIME_CLOSE}`,
+      `${A_LOGGER_ANSI.PREFIX}${this.COLORS[this.DEFAULT_SCOPE_COLOR]}${A_LOGGER_ANSI.SUFFIX}${A_LOGGER_FORMAT.SCOPE_OPEN}${this.formattedScope}${A_LOGGER_FORMAT.SCOPE_CLOSE}${A_LOGGER_ANSI.RESET} ${A_LOGGER_ANSI.PREFIX}${this.COLORS[messageColor]}${A_LOGGER_ANSI.SUFFIX}${A_LOGGER_FORMAT.TIME_OPEN}${timeString}${A_LOGGER_FORMAT.TIME_CLOSE}`,
       // Top separator for multi-argument messages
       isMultiArg ? `
-${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.TIME_OPEN}${ALogger_constants.A_LOGGER_FORMAT.SEPARATOR}` : "",
+${scopePadding}${A_LOGGER_FORMAT.TIME_OPEN}${A_LOGGER_FORMAT.SEPARATOR}` : "",
       // Process each argument with appropriate formatting
       ...args.map((arg, i) => {
         const shouldAddNewline = i > 0 || isMultiArg;
         switch (true) {
-          case arg instanceof aConcept.A_Error:
+          case arg instanceof A_Error:
             return this.compile_A_Error(arg);
           case arg instanceof Error:
             return this.compile_Error(arg);
@@ -274,7 +473,7 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.TIME_OPEN}${ALogger_constants
       }),
       // Bottom separator and color reset
       isMultiArg ? `
-${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.TIME_OPEN}${ALogger_constants.A_LOGGER_FORMAT.SEPARATOR}${ALogger_constants.A_LOGGER_ANSI.RESET}` : ALogger_constants.A_LOGGER_ANSI.RESET
+${scopePadding}${A_LOGGER_FORMAT.TIME_OPEN}${A_LOGGER_FORMAT.SEPARATOR}${A_LOGGER_ANSI.RESET}` : A_LOGGER_ANSI.RESET
     ];
   }
   /**
@@ -286,16 +485,16 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.TIME_OPEN}${ALogger_constants
    * @returns Formatted object string or the object itself for browser environments
    */
   formatObject(obj, shouldAddNewline, scopePadding) {
-    if (aConcept.A_Context.environment === "browser") {
+    if (A_Context.environment === "browser") {
       return obj;
     }
     if (obj === null) {
       return shouldAddNewline ? `
-${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}null` : "null";
+${scopePadding}${A_LOGGER_FORMAT.PIPE}null` : "null";
     }
     if (obj === void 0) {
       return shouldAddNewline ? `
-${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}undefined` : "undefined";
+${scopePadding}${A_LOGGER_FORMAT.PIPE}undefined` : "undefined";
     }
     let jsonString;
     try {
@@ -316,7 +515,7 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}undefined` : "undefined"
         jsonString = String(obj);
       }
     }
-    const continuationIndent = `${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`;
+    const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
     const maxJsonLineWidth = this.TERMINAL_WIDTH - continuationIndent.length - 4;
     const lines = jsonString.split("\n").map((line) => {
       const stringValueMatch = line.match(/^(\s*"[^"]+":\s*")([^"]+)(".*)?$/);
@@ -358,13 +557,13 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}undefined` : "undefined"
    * @returns Formatted string
    */
   formatString(str, shouldAddNewline, scopePadding) {
-    if (aConcept.A_Context.environment === "browser") {
+    if (A_Context.environment === "browser") {
       const prefix = shouldAddNewline ? "\n" : "";
       return (prefix + str).replace(/\n/g, `
-${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
+${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
     }
     const wrappedLines = this.wrapText(str, scopePadding, !shouldAddNewline);
-    const continuationIndent = `${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`;
+    const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
     const formattedLines = wrappedLines.map((line, index) => {
       if (index === 0 && !shouldAddNewline) {
         return line;
@@ -395,7 +594,7 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
    * @returns True if the message should be logged, false otherwise
    */
   shouldLog(logMethod) {
-    const shouldLog = this.config?.get(ALogger_constants.A_LOGGER_ENV_KEYS.LOG_LEVEL) || "info";
+    const shouldLog = this.config?.get(A_LOGGER_ENV_KEYS.LOG_LEVEL) || "info";
     switch (shouldLog) {
       case "debug":
         return true;
@@ -415,14 +614,14 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
     if (!this.shouldLog("debug")) return;
     const isColor = typeof param1 === "string" && !!this.COLORS[param1];
     const messageArgs = isColor ? args : [param1, ...args];
-    const callScope = new aConcept.A_Scope({
+    const callScope = new A_Scope({
       name: this.scope.name + ":debug",
-      fragments: [new ALoggerLog_context.A_LoggerLogContext("debug", ...messageArgs)]
+      fragments: [new A_LoggerLogContext("debug", ...messageArgs)]
     }).inherit(this.scope);
     const compiled = isColor ? this.compile(param1, ...args) : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
     try {
       console.log(...compiled);
-      this.call(ALogger_constants.A_LOGGER_FEATURES.onLog, callScope);
+      this.call(A_LOGGER_FEATURES.onLog, callScope);
     } finally {
       callScope.destroy();
     }
@@ -431,14 +630,14 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
     if (!this.shouldLog("info")) return;
     const isColor = typeof param1 === "string" && !!this.COLORS[param1];
     const messageArgs = isColor ? args : [param1, ...args];
-    const callScope = new aConcept.A_Scope({
+    const callScope = new A_Scope({
       name: this.scope.name + ":info",
-      fragments: [new ALoggerLog_context.A_LoggerLogContext("info", ...messageArgs)]
+      fragments: [new A_LoggerLogContext("info", ...messageArgs)]
     }).inherit(this.scope);
     const compiled = isColor ? this.compile(param1, ...args) : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
     try {
       console.log(...compiled);
-      this.call(ALogger_constants.A_LOGGER_FEATURES.onLog, callScope);
+      this.call(A_LOGGER_FEATURES.onLog, callScope);
     } finally {
       callScope.destroy();
     }
@@ -462,14 +661,14 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
    */
   warning(...args) {
     if (!this.shouldLog("warning")) return;
-    const callScope = new aConcept.A_Scope({
+    const callScope = new A_Scope({
       name: this.scope.name + ":warning",
-      fragments: [new ALoggerLog_context.A_LoggerLogContext("warning", ...args)]
+      fragments: [new A_LoggerLogContext("warning", ...args)]
     }).inherit(this.scope);
     let compiled = this.compile("yellow", ...args);
     try {
       console.log(...compiled);
-      this.call(ALogger_constants.A_LOGGER_FEATURES.onLog, callScope);
+      this.call(A_LOGGER_FEATURES.onLog, callScope);
     } finally {
       callScope.destroy();
     }
@@ -491,14 +690,14 @@ ${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`);
    */
   error(...args) {
     if (!this.shouldLog("error")) return;
-    const callScope = new aConcept.A_Scope({
+    const callScope = new A_Scope({
       name: this.scope.name + ":error",
-      fragments: [new ALoggerLog_context.A_LoggerLogContext("error", ...args)]
+      fragments: [new A_LoggerLogContext("error", ...args)]
     }).inherit(this.scope);
     let compiled = this.compile("red", ...args);
     try {
       console.log(...compiled);
-      this.call(ALogger_constants.A_LOGGER_FEATURES.onLog, callScope);
+      this.call(A_LOGGER_FEATURES.onLog, callScope);
     } finally {
       callScope.destroy();
     }
@@ -552,16 +751,16 @@ ${scopePadding}|-------------------------------
    * @returns Formatted string ready for display
    */
   compile_A_Error(error) {
-    const RED = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}31${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
-    const RED_BOLD = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}1;31${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
-    const CYAN = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}36${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
-    const CYAN_UNDERLINE = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}4;36${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
-    const YELLOW = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}33${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
-    const DIM = `${ALogger_constants.A_LOGGER_ANSI.PREFIX}2${ALogger_constants.A_LOGGER_ANSI.SUFFIX}`;
-    const RESET = ALogger_constants.A_LOGGER_ANSI.RESET;
+    const RED = `${A_LOGGER_ANSI.PREFIX}31${A_LOGGER_ANSI.SUFFIX}`;
+    const RED_BOLD = `${A_LOGGER_ANSI.PREFIX}1;31${A_LOGGER_ANSI.SUFFIX}`;
+    const CYAN = `${A_LOGGER_ANSI.PREFIX}36${A_LOGGER_ANSI.SUFFIX}`;
+    const CYAN_UNDERLINE = `${A_LOGGER_ANSI.PREFIX}4;36${A_LOGGER_ANSI.SUFFIX}`;
+    const YELLOW = `${A_LOGGER_ANSI.PREFIX}33${A_LOGGER_ANSI.SUFFIX}`;
+    const DIM = `${A_LOGGER_ANSI.PREFIX}2${A_LOGGER_ANSI.SUFFIX}`;
+    const RESET = A_LOGGER_ANSI.RESET;
     const scopePadding = " ".repeat(this.STANDARD_SCOPE_LENGTH + 3);
-    const continuationIndent = `${scopePadding}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`;
-    const separator = `${RED}${continuationIndent}${ALogger_constants.A_LOGGER_FORMAT.SEPARATOR}${RESET}`;
+    const continuationIndent = `${scopePadding}${A_LOGGER_FORMAT.PIPE}`;
+    const separator = `${RED}${continuationIndent}${A_LOGGER_FORMAT.SEPARATOR}${RESET}`;
     const lines = [];
     const pushRow = (text, color = RED) => {
       const wrapped = this.wrapText(text, continuationIndent, false);
@@ -586,7 +785,7 @@ ${scopePadding}|-------------------------------
       for (let i = 1; i < chain.length; i++) {
         const link = chain[i];
         if (i > 1) lines.push(`${RED}${continuationIndent}${RESET}`);
-        if (link instanceof aConcept.A_Error) {
+        if (link instanceof A_Error) {
           pushRow(`[${i}] ${link.constructor.name} (${link.code})`, RED_BOLD);
           pushRow(`    Title   : ${link.title}`);
           pushRow(`    Message : ${link.message}`);
@@ -681,7 +880,7 @@ ${scopePadding}|-------------------------------
    * @returns Formatted string ready for display
    */
   compile_Error(error) {
-    const continuationIndent = `${" ".repeat(this.STANDARD_SCOPE_LENGTH + 3)}${ALogger_constants.A_LOGGER_FORMAT.PIPE}`;
+    const continuationIndent = `${" ".repeat(this.STANDARD_SCOPE_LENGTH + 3)}${A_LOGGER_FORMAT.PIPE}`;
     const separator = `${continuationIndent}-------------------------------`;
     const lines = [];
     lines.push("");
@@ -716,19 +915,55 @@ ${scopePadding}|-------------------------------
    */
   getTime() {
     const now = /* @__PURE__ */ new Date();
-    const minutes = String(now.getMinutes()).padStart(ALogger_constants.A_LOGGER_TIME_FORMAT.MINUTES_PAD, "0");
-    const seconds = String(now.getSeconds()).padStart(ALogger_constants.A_LOGGER_TIME_FORMAT.SECONDS_PAD, "0");
-    const milliseconds = String(now.getMilliseconds()).padStart(ALogger_constants.A_LOGGER_TIME_FORMAT.MILLISECONDS_PAD, "0");
-    return `${minutes}${ALogger_constants.A_LOGGER_TIME_FORMAT.SEPARATOR}${seconds}${ALogger_constants.A_LOGGER_TIME_FORMAT.SEPARATOR}${milliseconds}`;
+    const minutes = String(now.getMinutes()).padStart(A_LOGGER_TIME_FORMAT.MINUTES_PAD, "0");
+    const seconds = String(now.getSeconds()).padStart(A_LOGGER_TIME_FORMAT.SECONDS_PAD, "0");
+    const milliseconds = String(now.getMilliseconds()).padStart(A_LOGGER_TIME_FORMAT.MILLISECONDS_PAD, "0");
+    return `${minutes}${A_LOGGER_TIME_FORMAT.SEPARATOR}${seconds}${A_LOGGER_TIME_FORMAT.SEPARATOR}${milliseconds}`;
   }
 };
-exports.A_Logger = __decorateClass([
-  core.A_Frame.Define({
+A_Logger = __decorateClass([
+  A_Frame.Define({
     namespace: "A-Utils",
     description: "Advanced Logging Component with Scope-based Output Formatting that provides color-coded console output, multi-type support, and configurable log levels for enhanced debugging and monitoring."
   }),
-  __decorateParam(0, aConcept.A_Inject(aConcept.A_Scope)),
-  __decorateParam(1, aConcept.A_Inject(aConfig.A_Config))
-], exports.A_Logger);
-//# sourceMappingURL=A-Logger.component.js.map
-//# sourceMappingURL=A-Logger.component.js.map
+  __decorateParam(0, A_Inject(A_Scope)),
+  __decorateParam(1, A_Inject(A_Config))
+], A_Logger);
+
+// src/lib/A-Logger/A-Logger.env.ts
+var A_LoggerEnvVariables = {
+  /**
+   * Sets the log level for the logger
+   * 
+   * @example 'debug', 'info', 'warn', 'error'
+   */
+  A_LOGGER_LEVEL: "A_LOGGER_LEVEL",
+  /**     
+   * Sets the default scope length for log messages
+   * 
+   * @example 'A_LOGGER_DEFAULT_SCOPE_LENGTH'
+   */
+  A_LOGGER_DEFAULT_SCOPE_LENGTH: "A_LOGGER_DEFAULT_SCOPE_LENGTH",
+  /**
+   * Sets the default color for scope display in log messages
+   * 
+   * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+   */
+  A_LOGGER_DEFAULT_SCOPE_COLOR: "A_LOGGER_DEFAULT_SCOPE_COLOR",
+  /**
+   * Sets the default color for log message content
+   * 
+   * @example 'green', 'blue', 'red', 'yellow', 'gray', 'magenta', 'cyan', 'white', 'pink'
+   */
+  A_LOGGER_DEFAULT_LOG_COLOR: "A_LOGGER_DEFAULT_LOG_COLOR"
+};
+var A_LoggerEnvVariablesArray = [
+  A_LoggerEnvVariables.A_LOGGER_LEVEL,
+  A_LoggerEnvVariables.A_LOGGER_DEFAULT_SCOPE_LENGTH,
+  A_LoggerEnvVariables.A_LOGGER_DEFAULT_SCOPE_COLOR,
+  A_LoggerEnvVariables.A_LOGGER_DEFAULT_LOG_COLOR
+];
+
+export { A_LOGGER_ANSI, A_LOGGER_COLORS, A_LOGGER_COLOR_CODES, A_LOGGER_DEFAULT_LEVEL, A_LOGGER_DEFAULT_SCOPE_LENGTH, A_LOGGER_ENV_KEYS, A_LOGGER_ENV_VARIABLES, A_LOGGER_FEATURES, A_LOGGER_FORMAT, A_LOGGER_LEVELS, A_LOGGER_SAFE_RANDOM_COLORS, A_LOGGER_TERMINAL, A_LOGGER_TIME_FORMAT, A_Logger, A_LoggerEnvVariables, A_LoggerEnvVariablesArray, A_LoggerLogContext };
+//# sourceMappingURL=chunk-JRE2HUWA.mjs.map
+//# sourceMappingURL=chunk-JRE2HUWA.mjs.map

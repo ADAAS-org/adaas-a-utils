@@ -403,16 +403,13 @@ ${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
   }
   debug(param1, ...args) {
     if (!this.shouldLog("debug")) return;
+    const isColor = typeof param1 === "string" && !!this.COLORS[param1];
+    const messageArgs = isColor ? args : [param1, ...args];
     const callScope = new A_Scope({
       name: this.scope.name + ":debug",
-      fragments: [new A_LoggerLogContext("debug", ...args)]
+      fragments: [new A_LoggerLogContext("debug", ...messageArgs)]
     }).inherit(this.scope);
-    let compiled = [];
-    if (typeof param1 === "string" && this.COLORS[param1]) {
-      compiled = this.compile(param1, ...args);
-    } else {
-      compiled = this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
-    }
+    const compiled = isColor ? this.compile(param1, ...args) : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
     try {
       console.log(...compiled);
       this.call(A_LOGGER_FEATURES.onLog, callScope);
@@ -422,16 +419,13 @@ ${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
   }
   info(param1, ...args) {
     if (!this.shouldLog("info")) return;
+    const isColor = typeof param1 === "string" && !!this.COLORS[param1];
+    const messageArgs = isColor ? args : [param1, ...args];
     const callScope = new A_Scope({
       name: this.scope.name + ":info",
-      fragments: [new A_LoggerLogContext("info", ...args)]
+      fragments: [new A_LoggerLogContext("info", ...messageArgs)]
     }).inherit(this.scope);
-    let compiled = [];
-    if (typeof param1 === "string" && this.COLORS[param1]) {
-      compiled = this.compile(param1, ...args);
-    } else {
-      compiled = this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
-    }
+    const compiled = isColor ? this.compile(param1, ...args) : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
     try {
       console.log(...compiled);
       this.call(A_LOGGER_FEATURES.onLog, callScope);
