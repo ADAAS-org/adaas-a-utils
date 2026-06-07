@@ -240,7 +240,7 @@ exports.A_ConceptInspector = class A_ConceptInspector extends aConcept.A_Contain
   }
 };
 __decorateClass([
-  aConcept.A_Concept.Start(),
+  aConcept.A_Concept.Debug(),
   __decorateParam(0, aConcept.A_Inject(aConfig.A_Config)),
   __decorateParam(1, aConcept.A_Inject(aLogger.A_Logger))
 ], exports.A_ConceptInspector.prototype, "autoStart", 1);

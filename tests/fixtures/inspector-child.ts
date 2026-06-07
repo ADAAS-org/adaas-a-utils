@@ -54,7 +54,7 @@ async function main() {
     });
 
     await concept.load();
-    await concept.start();
+    await concept.debug();
 
     const addr = A_ConceptInspectorContainer.address;
     if (!addr) {

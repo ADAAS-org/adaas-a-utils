@@ -326,11 +326,11 @@
     "build": "tsup --config tsup.config.ts"
   },
   "peerDependencies": {
-    "@adaas/a-concept": "^0.3.25",
+    "@adaas/a-concept": "^0.3.26",
     "@adaas/a-frame": "^0.1.8"
   },
   "devDependencies": {
-    "@adaas/a-concept": "^0.3.25",
+    "@adaas/a-concept": "^0.3.26",
     "@adaas/a-frame": "^0.1.8",
     "@types/chai": "^4.3.14",
     "@types/jest": "^29.5.12",

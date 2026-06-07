@@ -566,7 +566,7 @@ var A_ConceptInspector = class extends A_Container {
   }
 };
 __decorateClass([
-  A_Concept.Start(),
+  A_Concept.Debug(),
   __decorateParam(0, A_Inject(A_Config)),
   __decorateParam(1, A_Inject(A_Logger))
 ], A_ConceptInspector.prototype, "autoStart", 1);

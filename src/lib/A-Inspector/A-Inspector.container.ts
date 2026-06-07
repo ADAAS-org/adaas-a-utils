@@ -118,7 +118,7 @@ export class A_ConceptInspector extends A_Container {
      * `A_CONCEPT_DEBUG_SECRET` variable MUST be set as well — without it
      * we refuse to expose the introspection surface even on loopback.
      */
-    @A_Concept.Start()
+    @A_Concept.Debug()
     async autoStart(
         @A_Inject(A_Config) config: A_Config<InspectorConfigVars>,
         @A_Inject(A_Logger) logger?: A_Logger,
