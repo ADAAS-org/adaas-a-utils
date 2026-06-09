@@ -21,6 +21,7 @@
          "@adaas/a-utils/a-service": ["src/lib/A-Service"],
          "@adaas/a-utils/a-signal": ["src/lib/A-Signal"],
          "@adaas/a-utils/a-state-machine": ["src/lib/A-StateMachine"],
+         "@adaas/a-utils/a-workflows": ["src/lib/A-Workflows"],
 
 
          "@adaas/a-utils/helpers": ["src/helpers"]

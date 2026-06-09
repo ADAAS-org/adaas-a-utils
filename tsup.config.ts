@@ -33,6 +33,7 @@ export default defineConfig([
       "a-service": "src/lib/A-Service/index.ts",
       "a-signal": "src/lib/A-Signal/index.ts",
       "a-state-machine": "src/lib/A-StateMachine/index.ts",
+      "a-workflows": "src/lib/A-Workflows/index.ts",
 
       "helpers": "src/helpers/index.ts",
     },
