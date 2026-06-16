@@ -673,17 +673,25 @@ export class A_Logger extends A_Component {
             && !!this.COLORS[param1 as keyof typeof this.COLORS];
         const messageArgs = isColor ? args : [param1, ...args];
 
+        const compiled: any[] = isColor
+            ? this.compile(param1 as keyof typeof this.COLORS, ...args)
+            : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
+
+        console.log(...compiled);
+
+        // Only allocate the payload scope + run the onLog dispatch when there is
+        // actually a subscriber. The `new A_Scope().inherit().destroy()` cycle is
+        // the single most expensive part of emitting a log (it bumps scope
+        // versions and invalidates fingerprint caches), so skipping it when nobody
+        // listens makes logging dramatically cheaper on hot paths.
+        if (!A_Context.hasFeature(A_LOGGER_FEATURES.onLog, this)) return;
+
         const callScope = new A_Scope({
             name: this.scope.name + ':debug',
             fragments: [new A_LoggerLogContext('debug', ...messageArgs)]
         }).inherit(this.scope);
 
-        const compiled: any[] = isColor
-            ? this.compile(param1 as keyof typeof this.COLORS, ...args)
-            : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
-
         try {
-            console.log(...compiled);
             this.call(A_LOGGER_FEATURES.onLog, callScope)
         } finally {
             callScope.destroy();
@@ -728,17 +736,22 @@ export class A_Logger extends A_Component {
             && !!this.COLORS[param1 as keyof typeof this.COLORS];
         const messageArgs = isColor ? args : [param1, ...args];
 
+        const compiled: any[] = isColor
+            ? this.compile(param1 as keyof typeof this.COLORS, ...args)
+            : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
+
+        console.log(...compiled);
+
+        // Only allocate the payload scope + run the onLog dispatch when there is
+        // actually a subscriber. See `debug()` for the full rationale.
+        if (!A_Context.hasFeature(A_LOGGER_FEATURES.onLog, this)) return;
+
         const callScope = new A_Scope({
             name: this.scope.name + ':info',
             fragments: [new A_LoggerLogContext('info', ...messageArgs)]
         }).inherit(this.scope);
 
-        const compiled: any[] = isColor
-            ? this.compile(param1 as keyof typeof this.COLORS, ...args)
-            : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
-
         try {
-            console.log(...compiled);
             this.call(A_LOGGER_FEATURES.onLog, callScope)
         } finally {
             callScope.destroy();
@@ -776,15 +789,20 @@ export class A_Logger extends A_Component {
     warning(...args: any[]): void {
         if (!this.shouldLog('warning')) return;
 
+        let compiled: any[] = this.compile('yellow', ...args);
+
+        console.log(...compiled);
+
+        // Only allocate the payload scope + run the onLog dispatch when there is
+        // actually a subscriber. See `debug()` for the full rationale.
+        if (!A_Context.hasFeature(A_LOGGER_FEATURES.onLog, this)) return;
+
         const callScope = new A_Scope({
             name: this.scope.name + ':warning',
             fragments: [new A_LoggerLogContext('warning', ...args)]
         }).inherit(this.scope);
 
-        let compiled: any[] = this.compile('yellow', ...args);
-
         try {
-            console.log(...compiled);
             this.call(A_LOGGER_FEATURES.onLog, callScope)
         } finally {
             callScope.destroy();
@@ -809,15 +827,20 @@ export class A_Logger extends A_Component {
     error(...args: any[]): void {
         if (!this.shouldLog('error')) return;
 
+        let compiled: any[] = this.compile('red', ...args);
+
+        console.log(...compiled);
+
+        // Only allocate the payload scope + run the onLog dispatch when there is
+        // actually a subscriber. See `debug()` for the full rationale.
+        if (!A_Context.hasFeature(A_LOGGER_FEATURES.onLog, this)) return;
+
         const callScope = new A_Scope({
             name: this.scope.name + ':error',
             fragments: [new A_LoggerLogContext('error', ...args)]
         }).inherit(this.scope);
 
-        let compiled: any[] = this.compile('red', ...args);
-
         try {
-            console.log(...compiled);
             this.call(A_LOGGER_FEATURES.onLog, callScope)
         } finally {
             callScope.destroy();

@@ -405,13 +405,14 @@ ${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
     if (!this.shouldLog("debug")) return;
     const isColor = typeof param1 === "string" && !!this.COLORS[param1];
     const messageArgs = isColor ? args : [param1, ...args];
+    const compiled = isColor ? this.compile(param1, ...args) : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
+    console.log(...compiled);
+    if (!A_Context.hasFeature(A_LOGGER_FEATURES.onLog, this)) return;
     const callScope = new A_Scope({
       name: this.scope.name + ":debug",
       fragments: [new A_LoggerLogContext("debug", ...messageArgs)]
     }).inherit(this.scope);
-    const compiled = isColor ? this.compile(param1, ...args) : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
     try {
-      console.log(...compiled);
       this.call(A_LOGGER_FEATURES.onLog, callScope);
     } finally {
       callScope.destroy();
@@ -421,13 +422,14 @@ ${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
     if (!this.shouldLog("info")) return;
     const isColor = typeof param1 === "string" && !!this.COLORS[param1];
     const messageArgs = isColor ? args : [param1, ...args];
+    const compiled = isColor ? this.compile(param1, ...args) : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
+    console.log(...compiled);
+    if (!A_Context.hasFeature(A_LOGGER_FEATURES.onLog, this)) return;
     const callScope = new A_Scope({
       name: this.scope.name + ":info",
       fragments: [new A_LoggerLogContext("info", ...messageArgs)]
     }).inherit(this.scope);
-    const compiled = isColor ? this.compile(param1, ...args) : this.compile(this.DEFAULT_LOG_COLOR, param1, ...args);
     try {
-      console.log(...compiled);
       this.call(A_LOGGER_FEATURES.onLog, callScope);
     } finally {
       callScope.destroy();
@@ -452,13 +454,14 @@ ${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
    */
   warning(...args) {
     if (!this.shouldLog("warning")) return;
+    let compiled = this.compile("yellow", ...args);
+    console.log(...compiled);
+    if (!A_Context.hasFeature(A_LOGGER_FEATURES.onLog, this)) return;
     const callScope = new A_Scope({
       name: this.scope.name + ":warning",
       fragments: [new A_LoggerLogContext("warning", ...args)]
     }).inherit(this.scope);
-    let compiled = this.compile("yellow", ...args);
     try {
-      console.log(...compiled);
       this.call(A_LOGGER_FEATURES.onLog, callScope);
     } finally {
       callScope.destroy();
@@ -481,13 +484,14 @@ ${scopePadding}${A_LOGGER_FORMAT.PIPE}`);
    */
   error(...args) {
     if (!this.shouldLog("error")) return;
+    let compiled = this.compile("red", ...args);
+    console.log(...compiled);
+    if (!A_Context.hasFeature(A_LOGGER_FEATURES.onLog, this)) return;
     const callScope = new A_Scope({
       name: this.scope.name + ":error",
       fragments: [new A_LoggerLogContext("error", ...args)]
     }).inherit(this.scope);
-    let compiled = this.compile("red", ...args);
     try {
-      console.log(...compiled);
       this.call(A_LOGGER_FEATURES.onLog, callScope);
     } finally {
       callScope.destroy();
